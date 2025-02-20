@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.cglib.core.Local;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stati;
 
@@ -77,11 +76,11 @@ public class Postazioni {
         this.stato = stato;
     }
 
-    public LocalDate getCreatoIl(){
-        return creatoIl;       
+    public LocalDate getCreatoIl() {
+        return creatoIl;
     }
 
-    public LocalDate getAggiornatoIl(){
+    public LocalDate getAggiornatoIl() {
         return aggiornatoIl;
     }
 }
