@@ -1,6 +1,12 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
-//import enum
+//import LocalDate
+import java.time.LocalDate;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.cglib.core.Local;
+
 import com.prenotazioni.exprivia.exprv.enumerati.stati;
 
 import jakarta.persistence.GeneratedValue;
@@ -13,22 +19,32 @@ public class Postazioni {
     @Id
     private String id_postazione;
 
-    private String id_stanza; //Relazione con la tabella Stanze
+    private String id_stanza; // Relazione con la tabella Stanze
 
     private String nome;
-
+//enum
     private stati stato;
 
-//Time Stamp "CREATO IL","AGGIORNATO IL"
-//Costruttore
-    public Postazioni(String id_postazione, String id_stanza, String nome, stati stato) {
+    // TimeStamp Per vedere la creazione
+    @CreationTimestamp
+    private LocalDate creatoIl;
+
+    // TimeStamp Per vedere l'aggiornamento
+    @UpdateTimestamp
+    private LocalDate aggiornatoIl;
+
+    // Costruttore
+    public Postazioni(String id_postazione, String id_stanza, String nome, stati stato, LocalDate creatoIl,
+            LocalDate aggiornatoIl) {
         this.id_postazione = id_postazione;
         this.id_stanza = id_stanza;
         this.nome = nome;
         this.stato = stato;
+        this.creatoIl = creatoIl;
+        this.aggiornatoIl = aggiornatoIl;
     }
 
-//Setters And Getters
+    // Setters And Getters
     public String getId_postazione() {
         return id_postazione;
     }
@@ -61,4 +77,11 @@ public class Postazioni {
         this.stato = stato;
     }
 
+    public LocalDate getCreatoIl(){
+        return creatoIl;       
+    }
+
+    public LocalDate getAggiornatoIl(){
+        return aggiornatoIl;
+    }
 }

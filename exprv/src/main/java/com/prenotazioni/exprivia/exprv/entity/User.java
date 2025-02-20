@@ -1,5 +1,11 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
+import java.time.LocalDate;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+
 import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
 
 import jakarta.persistence.Entity;
@@ -17,16 +23,24 @@ public class User {
     private String nome;
     private String cognome;
     private String email;
-
+//enum ruoli
     private ruoli ruolo;
 
+    @CreationTimestamp
+    private LocalDate creatoIl;
+
+    @UpdateTimestamp
+    private LocalDate agggiornatoIl;
+
 //Costruttore
-    public User(Long id_user, String nome, String cognome, String email, ruoli ruolo) {
+    public User(Long id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl) {
 
         this.id_user = id_user;
         this.cognome = cognome;
         this.email = email;
         this.ruolo = ruolo;
+        this.creatoIl = creatoIl;
+        this.agggiornatoIl = aggiornatoIl;
 
     }
 //Setters And Getters
@@ -70,5 +84,14 @@ public class User {
     public void setRuolo(ruoli ruolo) {
         this.ruolo = ruolo;
     }
+
+    public LocalDate getCreatoIl(){
+        return creatoIl;
+    }
+
+    public LocalDate getAggiornatoIl(){
+        return agggiornatoIl;
+    }
+
 
 }

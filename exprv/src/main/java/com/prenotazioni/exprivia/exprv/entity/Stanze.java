@@ -1,5 +1,10 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
+import java.time.LocalDate;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.cglib.core.Local;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,13 +17,21 @@ public class Stanze {
 
     private String nome;
     private String descrizione;
+
+    @CreationTimestamp
+    private LocalDate creatoIl;
+
+    @CreationTimestamp
+    private LocalDate aggiornatoIl;
 //Creato Il, Aggioranto il (TIMESTAMP)
 
 //Costruttore
-    public Stanze(String descrizione, Long id_stanza, String nome) {
+    public Stanze(Long id_stanza, String descrizione, String nome, LocalDate creatoIl, LocalDate aggiorantoIl) {
         this.descrizione = descrizione;
         this.id_stanza = id_stanza;
         this.nome = nome;
+        this.creatoIl = creatoIl;
+        this.aggiornatoIl = aggiorantoIl;
     }
 
 //Setters And Getters
@@ -46,4 +59,11 @@ public class Stanze {
         this.descrizione = descrizione;
     }
 
+    public LocalDate getCreatoIl(){
+        return creatoIl;
+    }
+
+    public LocalDate getAggiornatoIl(){
+        return aggiornatoIl;
+    }
 }
