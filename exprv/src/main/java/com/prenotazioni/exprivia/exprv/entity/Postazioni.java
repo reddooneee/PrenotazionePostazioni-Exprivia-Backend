@@ -18,7 +18,7 @@ public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private String id_postazione;
+    private Integer id_postazione;
 
     private String id_stanza; // Relazione con la tabella Stanze
 
@@ -40,7 +40,7 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(String id_postazione, String id_stanza, String nome, stati stato, LocalDate creatoIl,
+    public Postazioni(Integer id_postazione, String id_stanza, String nome, stati stato, LocalDate creatoIl,
             LocalDate aggiornatoIl) {
         this.id_postazione = id_postazione;
         this.id_stanza = id_stanza;
@@ -51,11 +51,11 @@ public class Postazioni {
     }
 
     // Setters And Getters
-    public String getId_postazione() {
+    public Integer getId_postazione() {
         return id_postazione;
     }
 
-    public void setId_postazione(String id_postazione) {
+    public void setId_postazione(Integer id_postazione) {
         this.id_postazione = id_postazione;
     }
 

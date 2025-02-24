@@ -13,46 +13,46 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class User {
+public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id_user; //Primary Key
+    private Integer id_user; //Primary Key
     private String nome;
     private String cognome;
     private String email;
-//enum ruoli
+    // enum ruoli
     private ruoli ruolo;
 
     @CreationTimestamp
     private LocalDate creatoIl;
 
     @UpdateTimestamp
-    private LocalDate agggiornatoIl;
+    private LocalDate aggiornatoIl;
 
-//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
-//Costruttore Vuoto - Per Jpa
-    public User() {
+    // JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
+    // Costruttore Vuoto - Per Jpa
+    public Users() {
     }
 
-//Costruttore
-    public User(Long id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl) {
-
+    // Costruttore
+    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl) {
         this.id_user = id_user;
+        this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.ruolo = ruolo;
         this.creatoIl = creatoIl;
-        this.agggiornatoIl = aggiornatoIl;
-
+        this.aggiornatoIl = aggiornatoIl;
     }
-//Setters And Getters
 
-    public Long getId_user() {
+    // Setters And Getters
+
+    public Integer getId_user() {
         return id_user;
     }
 
-    public void setId_user(Long id_user) {
+    public void setId_user(Integer id_user) {
         this.id_user = id_user;
     }
 
@@ -93,7 +93,6 @@ public class User {
     }
 
     public LocalDate getAggiornatoIl() {
-        return agggiornatoIl;
+        return aggiornatoIl;
     }
-
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.prenotazioni.exprivia.exprv.entity.User;
+import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException; // Correct import
@@ -34,7 +34,7 @@ public class UserService {
     }
 
     //findall Tutte gli utenti
-    public List<User> cercaTutti() {
+    public List<Users> cercaTutti() {
         return userRepository.findAll();
     }
 
@@ -45,7 +45,7 @@ public class UserService {
 	
      */
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    public User cercaSingolo(Long id) {
+    public Users cercaSingolo(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
     }
@@ -56,11 +56,11 @@ public class UserService {
 	    return userRepository.findByEmail(email)
 	            .orElseThrow(() -> new RuntimeException("Utente con email " + email + " non trovato"));
 	}*/
-    public User aggiungiUser(User user) {
+    public Users aggiungiUser(Users user) {
         return userRepository.save(user);
     }
 
-    public User aggiornaUser(Long id, User user) {
+    public Users aggiornaUser(Integer id, Users user) {
         if (userRepository.existsById(id)) {
             user.setId_user(id);
             return userRepository.save(user);
@@ -69,7 +69,7 @@ public class UserService {
         }
     }
 
-    public void eliminaUser(Long id) {
+    public void eliminaUser(Integer id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {

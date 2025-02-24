@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.prenotazioni.exprivia.exprv.entity.User;
+import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 @RestController // Indica che questa classe è un controller REST
-@RequestMapping("/User") // Mappa le richieste HTTP che iniziano con "/User" a questo controller
+@RequestMapping("/Users") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
 public class UserController {
 
     private final UserService userService;
@@ -30,33 +30,33 @@ public class UserController {
 
     // Gestisce le richieste GET per ottenere tutti gli utenti
     @GetMapping
-    public List<User> getUtentiTotali() {
+    public List<Users> getUtentiTotali() {
         return userService.cercaTutti(); // Chiama il servizio per ottenere tutti gli utenti
     }
 
     // Gestisce le richieste GET per ottenere un singolo utente tramite ID
     @GetMapping("/utente")
-    public User getUtente(@RequestParam Long id) {
+    public Users getUtente(@RequestParam Integer id) {
         return userService.cercaSingolo(id); // Chiama il servizio per ottenere un utente specifico
     }
 
     // Gestisce le richieste POST per aggiungere un nuovo utente
     @PostMapping
-    public ResponseEntity<User> aggiungiUtente(@RequestBody User user) {
-        User nuovoUser = userService.aggiungiUser(user); // Chiama il servizio per aggiungere un nuovo utente
+    public ResponseEntity<Users> aggiungiUtente(@RequestBody Users user) {
+        Users nuovoUser = userService.aggiungiUser(user); // Chiama il servizio per aggiungere un nuovo utente
         return ResponseEntity.status(HttpStatus.CREATED).body(nuovoUser); // Restituisce una risposta con stato 201 (CREATED) e il nuovo utente
     }
 
     // Gestisce le richieste PUT per aggiornare un utente esistente tramite ID
     @PutMapping("/{id}")
-    public ResponseEntity<User> aggiornaUser(@PathVariable Long id, @RequestBody User user) {
-        User userAggiornato = userService.aggiornaUser(id, user); // Chiama il servizio per aggiornare l'utente
+    public ResponseEntity<Users> aggiornaUser(@PathVariable Integer id, @RequestBody Users user) {
+        Users userAggiornato = userService.aggiornaUser(id, user); // Chiama il servizio per aggiornare l'utente
         return ResponseEntity.ok(userAggiornato); // Restituisce una risposta con stato 200 (OK) e l'utente aggiornato
     }
 
     // Gestisce le richieste DELETE per eliminare un utente tramite ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminaUser(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminaUser(@PathVariable Integer id) {
         userService.eliminaUser(id); // Chiama il servizio per eliminare l'utente
         return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)
     }
