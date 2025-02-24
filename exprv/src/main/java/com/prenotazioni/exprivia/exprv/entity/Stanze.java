@@ -3,12 +3,13 @@ package com.prenotazioni.exprivia.exprv.entity;
 import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.cglib.core.Local;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Entity
 public class Stanze {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +26,12 @@ public class Stanze {
     private LocalDate aggiornatoIl;
 //Creato Il, Aggioranto il (TIMESTAMP)
 
-//Costruttore
+//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
+//Costruttore Vuoto - Per Jpa
+    public Stanze() {
+    }
+
+//Costruttore Con Argomenti
     public Stanze(Long id_stanza, String descrizione, String nome, LocalDate creatoIl, LocalDate aggiorantoIl) {
         this.descrizione = descrizione;
         this.id_stanza = id_stanza;
@@ -59,11 +65,11 @@ public class Stanze {
         this.descrizione = descrizione;
     }
 
-    public LocalDate getCreatoIl(){
+    public LocalDate getCreatoIl() {
         return creatoIl;
     }
 
-    public LocalDate getAggiornatoIl(){
+    public LocalDate getAggiornatoIl() {
         return aggiornatoIl;
     }
 }

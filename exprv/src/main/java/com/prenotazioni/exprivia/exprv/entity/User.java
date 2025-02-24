@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
 
@@ -13,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-//import jakarta.persistence.Entity;
 @Entity
 public class User {
 
@@ -31,6 +29,11 @@ public class User {
 
     @UpdateTimestamp
     private LocalDate agggiornatoIl;
+
+//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
+//Costruttore Vuoto - Per Jpa
+    public User() {
+    }
 
 //Costruttore
     public User(Long id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl) {
@@ -85,13 +88,12 @@ public class User {
         this.ruolo = ruolo;
     }
 
-    public LocalDate getCreatoIl(){
+    public LocalDate getCreatoIl() {
         return creatoIl;
     }
 
-    public LocalDate getAggiornatoIl(){
+    public LocalDate getAggiornatoIl() {
         return agggiornatoIl;
     }
-
 
 }

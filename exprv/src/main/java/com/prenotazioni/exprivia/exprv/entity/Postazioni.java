@@ -8,10 +8,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stati;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Entity
 public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,13 +26,18 @@ public class Postazioni {
 //enum
     private stati stato;
 
-    // TimeStamp Per vedere la creazione
+// TimeStamp Per vedere la creazione
     @CreationTimestamp
     private LocalDate creatoIl;
 
-    // TimeStamp Per vedere l'aggiornamento
+// TimeStamp Per vedere l'aggiornamento
     @UpdateTimestamp
     private LocalDate aggiornatoIl;
+
+//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
+//Costruttore Vuoto JPA
+    public Postazioni() {
+    }
 
     // Costruttore
     public Postazioni(String id_postazione, String id_stanza, String nome, stati stato, LocalDate creatoIl,
