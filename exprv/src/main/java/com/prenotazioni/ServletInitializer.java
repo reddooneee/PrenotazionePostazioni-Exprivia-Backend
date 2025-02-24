@@ -1,4 +1,4 @@
-package com.prenotazioni.exprivia.exprv.starters;
+package com.prenotazioni;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
