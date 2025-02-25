@@ -90,4 +90,5 @@ public class Postazioni {
     public LocalDate getAggiornatoIl() {
         return aggiornatoIl;
     }
+
 }

@@ -21,6 +21,8 @@ public class Prenotazioni {
 
     private Long id_postazione; //FK Chiave esterna che collega la prenotazione alla postazione prenotata.
 
+    private Long id_stanza;
+
     private stati_prenotazioni stato_prenotazioni;
 
     private LocalDate dataInizio;
@@ -34,13 +36,14 @@ public class Prenotazioni {
     }
 
 //Costruttore
-    public Prenotazioni(Long id_prenotazioni, Long id_postazione, Long id_user, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
+    public Prenotazioni(Long id_prenotazioni, Long id_postazione, Long id_user, Long id_stanza, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
         this.id_prenotazioni = id_prenotazioni;
         this.id_postazione = id_postazione;
         this.id_user = id_user;
         this.stato_prenotazioni = stato_prenotazioni;
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;
+        this.id_stanza = id_stanza;
 
     }
 
@@ -77,11 +80,28 @@ public class Prenotazioni {
         this.stato_prenotazioni = stato_prenotazioni;
     }
 
-    public void setDataIniziale(LocalDate dataInizio) {
+    public Long getId_stanza() {
+        return id_stanza;
+    }
+
+    public void setId_stanza(Long id_stanza) {
+        this.id_stanza = id_stanza;
+    }
+
+    public LocalDate getDataInizio() {
+        return dataInizio;
+    }
+
+    public void setDataInizio(LocalDate dataInizio) {
         this.dataInizio = dataInizio;
     }
 
-    public LocalDate getDataFinale() {
+    public LocalDate getDataFine() {
         return dataFine;
     }
+
+    public void setDataFine(LocalDate dataFine) {
+        this.dataFine = dataFine;
+    }
+
 }
