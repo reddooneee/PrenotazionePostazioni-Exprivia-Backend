@@ -18,9 +18,9 @@ public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Integer id_postazione;
+    private Long id_postazione;
 
-    private String id_stanza; // Relazione con la tabella Stanze
+    private Long id_stanza; // Relazione con la tabella Stanze
 
     private String nome;
 //enum
@@ -40,7 +40,7 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Integer id_postazione, String id_stanza, String nome, stati stato, LocalDate creatoIl,
+    public Postazioni(Long id_postazione, Long id_stanza, String nome, stati stato, LocalDate creatoIl,
             LocalDate aggiornatoIl) {
         this.id_postazione = id_postazione;
         this.id_stanza = id_stanza;
@@ -51,19 +51,19 @@ public class Postazioni {
     }
 
     // Setters And Getters
-    public Integer getId_postazione() {
+    public Long getId_postazione() {
         return id_postazione;
     }
 
-    public void setId_postazione(Integer id_postazione) {
+    public void setId_postazione(Long id_postazione) {
         this.id_postazione = id_postazione;
     }
 
-    public String getId_stanza() {
+    public Long getId_stanza() {
         return id_stanza;
     }
 
-    public void setId_stanza(String id_stanza) {
+    public void setId_stanza(Long id_stanza) {
         this.id_stanza = id_stanza;
     }
 

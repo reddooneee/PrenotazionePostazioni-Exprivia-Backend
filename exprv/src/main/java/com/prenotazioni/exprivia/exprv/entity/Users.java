@@ -21,6 +21,8 @@ public class Users {
     private String nome;
     private String cognome;
     private String email;
+    private String password;
+
     // enum ruoli
     private ruoli ruolo;
 
@@ -36,7 +38,8 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl) {
+    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl, String password
+    ) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
@@ -44,10 +47,10 @@ public class Users {
         this.ruolo = ruolo;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
+        this.password = password;
     }
 
     // Setters And Getters
-
     public Integer getId_user() {
         return id_user;
     }
@@ -95,4 +98,5 @@ public class Users {
     public LocalDate getAggiornatoIl() {
         return aggiornatoIl;
     }
+
 }
