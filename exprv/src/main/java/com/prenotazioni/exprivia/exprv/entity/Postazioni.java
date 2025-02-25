@@ -22,7 +22,7 @@ public class Postazioni {
 
     private Long id_stanza; // Relazione con la tabella Stanze
 
-    private String nome;
+    private String identificativo;
 //enum
     private stati stato;
 
@@ -40,11 +40,11 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Long id_postazione, Long id_stanza, String nome, stati stato, LocalDate creatoIl,
+    public Postazioni(Long id_postazione, Long id_stanza, String identificativo, stati stato, LocalDate creatoIl,
             LocalDate aggiornatoIl) {
         this.id_postazione = id_postazione;
         this.id_stanza = id_stanza;
-        this.nome = nome;
+        this.identificativo = identificativo;
         this.stato = stato;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
@@ -67,12 +67,12 @@ public class Postazioni {
         this.id_stanza = id_stanza;
     }
 
-    public String getNome() {
-        return nome;
+    public String identificativo() {
+        return identificativo;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setIdentificativo(String identificativo) {
+        this.identificativo = identificativo;
     }
 
     public stati getStato() {
