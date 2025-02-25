@@ -15,7 +15,7 @@ public class Prenotazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id;
+    private Long id_prenotazioni;
 
     private Long id_user; //FK Chiave esterna che collega la prenotazione all'utente che l'ha effettuata.
 
@@ -34,8 +34,8 @@ public class Prenotazioni {
     }
 
 //Costruttore
-    public Prenotazioni(Long id, Long id_postazione, Long id_user, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
-        this.id = id;
+    public Prenotazioni(Long id_prenotazioni, Long id_postazione, Long id_user, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
+        this.id_prenotazioni = id_prenotazioni;
         this.id_postazione = id_postazione;
         this.id_user = id_user;
         this.stato_prenotazioni = stato_prenotazioni;
@@ -45,12 +45,12 @@ public class Prenotazioni {
     }
 
 //Setters And Getters
-    public Long getId() {
-        return id;
+    public Long getId_prenotazioni() {
+        return id_prenotazioni;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setId_prenotazioni(Long id_prenotazioni) {
+        this.id_prenotazioni = id_prenotazioni;
     }
 
     public Long getId_user() {

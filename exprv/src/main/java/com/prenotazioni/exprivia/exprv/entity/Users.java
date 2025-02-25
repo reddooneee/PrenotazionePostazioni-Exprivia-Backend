@@ -99,4 +99,12 @@ public class Users {
         return aggiornatoIl;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }
