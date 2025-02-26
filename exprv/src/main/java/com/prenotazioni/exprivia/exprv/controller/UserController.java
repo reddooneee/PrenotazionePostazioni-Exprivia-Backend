@@ -36,7 +36,7 @@ public class UserController {
 
     // Gestisce le richieste GET per ottenere un singolo utente tramite ID
     @GetMapping("/utente")
-    public Users getUtente(@RequestParam Integer id) {
+    public Users getUtente(@RequestParam Long id) {
         return userService.cercaSingolo(id); // Chiama il servizio per ottenere un utente specifico
     }
 
@@ -49,14 +49,14 @@ public class UserController {
 
     // Gestisce le richieste PUT per aggiornare un utente esistente tramite ID
     @PutMapping("/{id}")
-    public ResponseEntity<Users> aggiornaUser(@PathVariable Integer id, @RequestBody Users user) {
+    public ResponseEntity<Users> aggiornaUser(@PathVariable Long id, @RequestBody Users user) {
         Users userAggiornato = userService.aggiornaUser(id, user); // Chiama il servizio per aggiornare l'utente
         return ResponseEntity.ok(userAggiornato); // Restituisce una risposta con stato 200 (OK) e l'utente aggiornato
     }
 
     // Gestisce le richieste DELETE per eliminare un utente tramite ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminaUser(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminaUser(@PathVariable Long id) {
         userService.eliminaUser(id); // Chiama il servizio per eliminare l'utente
         return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)
     }

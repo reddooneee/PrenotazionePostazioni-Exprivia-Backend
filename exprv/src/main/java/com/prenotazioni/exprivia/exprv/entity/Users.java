@@ -17,7 +17,7 @@ public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Integer id_user; //Primary Key
+    private Long id_user; //Primary Key
     private String nome;
     private String cognome;
     private String email;
@@ -38,7 +38,7 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl, String password
+    public Users(Long id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl, String password
     ) {
         this.id_user = id_user;
         this.nome = nome;
@@ -51,11 +51,11 @@ public class Users {
     }
 
     // Setters And Getters
-    public Integer getId_user() {
+    public Long getId_user() {
         return id_user;
     }
 
-    public void setId_user(Integer id_user) {
+    public void setId_user(Long id_user) {
         this.id_user = id_user;
     }
 
