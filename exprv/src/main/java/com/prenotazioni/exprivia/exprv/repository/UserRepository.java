@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, Long> {
+public interface UserRepository extends JpaRepository<Users, Integer> {
     boolean existsByEmail(String email);
 }

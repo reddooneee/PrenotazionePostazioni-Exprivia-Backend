@@ -24,7 +24,7 @@ public class UserService {
     }
 
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    public Users cercaSingolo(Long id) {
+    public Users cercaSingolo(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
     }
@@ -61,7 +61,7 @@ public class UserService {
         return userRepository.save(user);
     }
     
-    public Users aggiornaUser(Long id, Users user) {
+    public Users aggiornaUser(Integer id, Users user) {
         if (userRepository.existsById(id)) {
             user.setId_user(id);
             return userRepository.save(user);
@@ -70,7 +70,7 @@ public class UserService {
         }
     }
 
-    public void eliminaUser(Long id) {
+    public void eliminaUser(Integer id) {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {

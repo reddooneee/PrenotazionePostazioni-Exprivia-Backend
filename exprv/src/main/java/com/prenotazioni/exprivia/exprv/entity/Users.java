@@ -19,7 +19,7 @@ public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id_user; //Primary Key
+    private Integer id_user; //Primary Key
     private String nome;
     private String cognome;
     private String email;
@@ -28,7 +28,6 @@ public class Users {
     // enum ruoli
     @Enumerated(EnumType.STRING)
     private ruoli ruolo;
-    //Da cambiare DB. Cancellare vista, modificare colonna enum affinché sia String, ricreare vista.
 
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.
     //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
@@ -44,7 +43,7 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Long id_user, String nome, String cognome, String email, ruoli ruolo, String password) {
+    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, String password) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
@@ -54,11 +53,11 @@ public class Users {
     }
 
     // Setters And Getters
-    public Long getId_user() {
+    public Integer getId_user() {
         return id_user;
     }
 
-    public void setId_user(Long id_user) {
+    public void setId_user(Integer id_user) {
         this.id_user = id_user;
     }
 
