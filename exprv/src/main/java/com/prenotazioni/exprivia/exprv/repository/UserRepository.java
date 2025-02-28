@@ -7,5 +7,5 @@ import com.prenotazioni.exprivia.exprv.entity.Users;
 
 @Repository
 public interface UserRepository extends JpaRepository<Users, Long> {
-
+    boolean existsByEmail(String email);
 }

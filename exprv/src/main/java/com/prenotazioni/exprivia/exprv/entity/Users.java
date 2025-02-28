@@ -1,6 +1,6 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,13 +26,17 @@ public class Users {
     private String password;
 
     // enum ruoli
+    @Enumerated(EnumType.STRING)
     private ruoli ruolo;
+    //Da cambiare DB. Cancellare vista, modificare colonna enum affinché sia String, ricreare vista.
 
+    //Usare LocalDateTime cosi si tiene traccia anche del tempo.
+    //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
-    private LocalDate creatoIl;
+    private LocalDateTime creatoIl;
 
     @UpdateTimestamp
-    private LocalDate aggiornatoIl;
+    private LocalDateTime aggiornatoIl;
 
     // JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
     // Costruttore Vuoto - Per Jpa
@@ -38,15 +44,12 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Long id_user, String nome, String cognome, String email, ruoli ruolo, LocalDate creatoIl, LocalDate aggiornatoIl, String password
-    ) {
+    public Users(Long id_user, String nome, String cognome, String email, ruoli ruolo, String password) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.ruolo = ruolo;
-        this.creatoIl = creatoIl;
-        this.aggiornatoIl = aggiornatoIl;
         this.password = password;
     }
 
@@ -91,11 +94,11 @@ public class Users {
         this.ruolo = ruolo;
     }
 
-    public LocalDate getCreatoIl() {
+    public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
 
-    public LocalDate getAggiornatoIl() {
+    public LocalDateTime getAggiornatoIl() {
         return aggiornatoIl;
     }
 
