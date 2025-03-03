@@ -27,32 +27,33 @@ public class PrenotazioneService {
     }
 
     //Creazione nuova prenotazione con enum -> stringa -> enum 
-    public Prenotazione creaUtente(Prenotazione prenotazione) {
+    public Prenotazione creaPrenotazione(Prenotazione prenotazione) {
         //Condizioni per i NOT NULL 
+
         if (prenotazione.getId_prenotazioni() == null) {
             throw new IllegalArgumentException("L'ID non può essere nullo!");
-        }
-
-        if(prenotazione.getUser() == null){
-            throw new IllegalArgumentException("L'User non può essere nullo!");
-        }
-
-        if(prenotazione.getPostazione() == null){
-            throw new IllegalArgumentException("La postazione non può essere nullo!");
         }
 
         if(prenotazione.getStanza() == null){
             throw new IllegalArgumentException("La stanza non può essere nulla!");
         }
+        
+        if(prenotazione.getUser() == null){
+            throw new IllegalArgumentException("L'User non può essere nullo!");
+        }
 
         if(prenotazione.getStato_prenotazioni() == null) {
-            throw new IllegalArgumentException("Lo stato della stanza non può essere nullo!");
+            throw new IllegalArgumentException("Lo stato della prenotazione non può essere nullo!");
         }
+
+        if (prenotazione.getId_prenotazioni() != null && prenotazioneRepository.existsById(prenotazione.getId_prenotazioni())) {
+            throw new IllegalArgumentException("La prenotazione con ID " + prenotazione.getId_prenotazioni() + " esiste già.");
+        }        
 
         return prenotazioneRepository.save(prenotazione);
     }
-    
-    public Prenotazione aggiornaUser(Long id, Prenotazione prenotazione) {
+
+    public Prenotazione aggiornaPrenotazione(Long id, Prenotazione prenotazione) {
         if (prenotazioneRepository.existsById(id)) {
             prenotazione.setId_prenotazioni(id);
             return prenotazioneRepository.save(prenotazione);
@@ -61,7 +62,7 @@ public class PrenotazioneService {
         }
     }
 
-    public void eliminaUser(Long id) {
+    public void eliminaPrenotazione(Long id) {
         if (prenotazioneRepository.existsById(id)) {
             prenotazioneRepository.deleteById(id);
         } else {
