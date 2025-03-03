@@ -82,7 +82,7 @@ public class Stanze {
         return capienza_stanza_persone;
     }
 
-    public void setCapienza_stanza_persone(int capienza_stanza) {
+    public void setCapienza_stanza_persone(int capienza_stanza_persone) {
         this.capienza_stanza_persone = capienza_stanza_persone;
     }
 

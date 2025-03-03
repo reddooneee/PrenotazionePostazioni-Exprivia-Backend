@@ -8,8 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,7 +24,6 @@ public class Users {
     private String password;
 
     // enum ruoli
-    @Enumerated(EnumType.STRING)
     private ruoli ruolo;
 
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.

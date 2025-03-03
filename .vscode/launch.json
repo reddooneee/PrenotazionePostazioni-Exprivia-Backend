@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ExprvApplication<exprv>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.prenotazioni.ExprvApplication",
+            "projectName": "exprv",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
