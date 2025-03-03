@@ -11,14 +11,14 @@ import com.prenotazioni.exprivia.exprv.enumerati.stati_prenotazioni;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue; //LocalDate Per Data Inizio E Data Fine
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Prenotazioni {
+public class Prenotazione {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -49,11 +49,11 @@ public class Prenotazioni {
 //data_inizio, data_fine Da Aggiungere!!; 
 //JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
 //Costruttore Per JPa
-    public Prenotazioni() {
+    public Prenotazione() {
     }
 
 //Costruttore
-public Prenotazioni(Long id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
+public Prenotazione(Long id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
     this.id_prenotazioni = id_prenotazioni;
     this.users = users;
     this.postazione = postazione;

@@ -1,5 +1,9 @@
 package com.prenotazioni.exprivia.exprv.repository;
 
-public interface PrenotazioneRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.prenotazioni.exprivia.exprv.entity.Prenotazione;
+
+public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Long>{
     
 }
