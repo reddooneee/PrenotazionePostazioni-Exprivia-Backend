@@ -1,7 +1,7 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
 //import Enum Prenotazioni
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,7 +22,7 @@ public class Prenotazione {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id_prenotazioni;
+    private Integer id_prenotazioni;
 
     @ManyToOne  //Si passano gli oggetti interi, non solo delle variabili 
     @JoinColumn(name = "id_user", referencedColumnName = "id_user")
@@ -40,10 +40,10 @@ public class Prenotazione {
     private stati_prenotazioni stato_prenotazioni;
 
     @CreationTimestamp
-    private LocalDate dataInizio;
+    private LocalDateTime dataInizio;
 
     @UpdateTimestamp
-    private LocalDate dataFine;
+    private LocalDateTime dataFine;
 
 //Creato il e Aggiornato il;
 //data_inizio, data_fine Da Aggiungere!!; 
@@ -53,7 +53,7 @@ public class Prenotazione {
     }
 
 //Costruttore
-public Prenotazione(Long id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stati_prenotazioni stato_prenotazioni, LocalDate dataInizio, LocalDate dataFine) {
+public Prenotazione(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stati_prenotazioni stato_prenotazioni, LocalDateTime dataInizio, LocalDateTime dataFine) {
     this.id_prenotazioni = id_prenotazioni;
     this.users = users;
     this.postazione = postazione;
@@ -64,11 +64,11 @@ public Prenotazione(Long id_prenotazioni, Users users, Postazioni postazione, St
 }
 
 // Getters and Setters
-    public Long getId_prenotazioni() {
+    public Integer getId_prenotazioni() {
         return id_prenotazioni;
     }
 
-    public void setId_prenotazioni(Long id_prenotazioni) {
+    public void setId_prenotazioni(Integer id_prenotazioni) {
         this.id_prenotazioni = id_prenotazioni;
     }
 
@@ -104,19 +104,19 @@ public Prenotazione(Long id_prenotazioni, Users users, Postazioni postazione, St
         this.stato_prenotazioni = stato_prenotazioni;
     }
 
-    public LocalDate getDataInizio() {
+    public LocalDateTime getDataInizio() {
         return dataInizio;
     }
 
-    public void setDataInizio(LocalDate dataInizio) {
+    public void setDataInizio(LocalDateTime dataInizio) {
         this.dataInizio = dataInizio;
     }
 
-    public LocalDate getDataFine() {
+    public LocalDateTime getDataFine() {
         return dataFine;
     }
 
-    public void setDataFine(LocalDate dataFine) {
+    public void setDataFine(LocalDateTime dataFine) {
         this.dataFine = dataFine;
     }
 

@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.prenotazioni.exprivia.exprv.entity.Prenotazione;
 
-public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Long>{
+public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Integer>{
     
 }

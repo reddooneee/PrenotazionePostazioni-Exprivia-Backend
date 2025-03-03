@@ -21,7 +21,7 @@ public class PrenotazioneService {
     }
 
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    public Prenotazione cercaSingolo(Long id) {
+    public Prenotazione cercaSingolo(Integer id) {
         return prenotazioneRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazione con id " + id + " non trovata."));
     }
@@ -53,7 +53,7 @@ public class PrenotazioneService {
         return prenotazioneRepository.save(prenotazione);
     }
 
-    public Prenotazione aggiornaPrenotazione(Long id, Prenotazione prenotazione) {
+    public Prenotazione aggiornaPrenotazione(Integer id, Prenotazione prenotazione) {
         if (prenotazioneRepository.existsById(id)) {
             prenotazione.setId_prenotazioni(id);
             return prenotazioneRepository.save(prenotazione);
@@ -62,7 +62,7 @@ public class PrenotazioneService {
         }
     }
 
-    public void eliminaPrenotazione(Long id) {
+    public void eliminaPrenotazione(Integer id) {
         if (prenotazioneRepository.existsById(id)) {
             prenotazioneRepository.deleteById(id);
         } else {

@@ -33,7 +33,7 @@ public class PrenotazioniController {
     }
 
     @GetMapping("/prenotazione/{id_prenotazioni}")
-    public ResponseEntity<Prenotazione> getPrenotazioneByID(@PathVariable Long id_prenotazioni) {
+    public ResponseEntity<Prenotazione> getPrenotazioneByID(@PathVariable Integer id_prenotazioni) {
         try {
             Prenotazione prenotazione = prenotazioneService.cercaSingolo(id_prenotazioni);
             return ResponseEntity.ok(prenotazione);
@@ -53,7 +53,7 @@ public class PrenotazioniController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> aggiornaPrenotazione(@PathVariable Long id, @RequestBody Prenotazione prenotazione) {
+    public ResponseEntity<?> aggiornaPrenotazione(@PathVariable Integer id, @RequestBody Prenotazione prenotazione) {
         try{
             Prenotazione prenotazioneAggiornata = prenotazioneService.aggiornaPrenotazione(id, prenotazione);
             return ResponseEntity.ok(prenotazioneAggiornata);
@@ -63,7 +63,7 @@ public class PrenotazioniController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminaPrenotazione(@PathVariable Long id){
+    public ResponseEntity<String> eliminaPrenotazione(@PathVariable Integer id){
         try{
             prenotazioneService.eliminaPrenotazione(id);
             return ResponseEntity.noContent().build();
