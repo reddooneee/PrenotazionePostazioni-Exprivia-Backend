@@ -3,6 +3,8 @@ package com.prenotazioni.exprivia.exprv.entity;
 //import Enum Prenotazioni
 import java.time.LocalDate;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.prenotazioni.exprivia.exprv.enumerati.stati_prenotazioni;
 
 import jakarta.persistence.Entity;
@@ -25,7 +27,10 @@ public class Prenotazioni {
 
     private stati_prenotazioni stato_prenotazioni;
 
+    @CreationTimestamp
     private LocalDate dataInizio;
+
+    @CreationTimestamp
     private LocalDate dataFine;
 
 //Creato il e Aggiornato il;
