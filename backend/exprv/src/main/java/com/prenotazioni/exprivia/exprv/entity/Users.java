@@ -7,7 +7,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,12 +21,21 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Integer id_user; //Primary Key
+
+    @Column(length = 50)    //Forza Hibernate a stare con varchar(50) invece che dimensione predefinita
     private String nome;
+
+    @Column(length = 50)
     private String cognome;
+
+    @Column(length = 100)
     private String email;
+
+    @Column(length = 50)
     private String password;
 
     // enum ruoli
+    @Enumerated(EnumType.STRING)
     private ruoli ruolo;
 
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.
