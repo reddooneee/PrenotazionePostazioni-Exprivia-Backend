@@ -1,6 +1,6 @@
 package com.prenotazioni.exprivia.exprv.enumerati;
 
-public enum stati_prenotazioni {
+public enum stato_prenotazione {
 
     Confermata,
     Sospesa,

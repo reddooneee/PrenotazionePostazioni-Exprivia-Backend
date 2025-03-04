@@ -31,36 +31,35 @@ public class UserService {
 
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
     //Come sopra ma per email, metodo findByEmail da creare nel repository
-
     //Creazione nuovo utente con enum -> stringa -> enum 
     public Users creaUtente(Users user) {
         //Condizioni per i NOT NULL 
-        if (user.getRuolo() == null) {
+        if (user.getRuolo_utente() == null) {
             throw new IllegalArgumentException("Il ruolo non può essere nullo!");
         }
 
-        if(user.getNome() == null){
+        if (user.getNome() == null) {
             throw new IllegalArgumentException("Il nome non può essere nullo!");
         }
 
-        if(user.getCognome() == null){
+        if (user.getCognome() == null) {
             throw new IllegalArgumentException("Il cognome non può essere nullo!");
         }
 
-        if(user.getEmail() == null){
+        if (user.getEmail() == null) {
             throw new IllegalArgumentException("La mail non può essere nulla!");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Esiste già un utente con questa email!");
         }
 
-        if(user.getPassword() == null){
+        if (user.getPassword() == null) {
             throw new IllegalArgumentException("La password non può essere nulla!");
         }
-    
+
         return userRepository.save(user);
     }
-    
+
     public Users aggiornaUser(Integer id, Users user) {
         if (userRepository.existsById(id)) {
             user.setId_user(id);

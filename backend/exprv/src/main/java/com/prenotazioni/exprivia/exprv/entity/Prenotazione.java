@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.prenotazioni.exprivia.exprv.enumerati.stati_prenotazioni;
+import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -33,11 +33,11 @@ public class Prenotazione {
     private Postazioni postazione; //FK Chiave esterna che collega la prenotazione alla postazione prenotata.
 
     @ManyToOne
-    @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")    
+    @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     private Stanze stanze;   //FK Chiave esterna che collega la prenotazione alla stanza prenotata.
 
     @Enumerated(EnumType.STRING)
-    private stati_prenotazioni stato_prenotazioni;
+    private stato_prenotazione stato_prenotazione;
 
     @CreationTimestamp
     private LocalDateTime dataInizio;
@@ -53,15 +53,15 @@ public class Prenotazione {
     }
 
 //Costruttore
-public Prenotazione(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stati_prenotazioni stato_prenotazioni, LocalDateTime dataInizio, LocalDateTime dataFine) {
-    this.id_prenotazioni = id_prenotazioni;
-    this.users = users;
-    this.postazione = postazione;
-    this.stanze = stanze;
-    this.stato_prenotazioni = stato_prenotazioni;
-    this.dataInizio = dataInizio;
-    this.dataFine = dataFine;
-}
+    public Prenotazione(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stato_prenotazione stato_prenotazione, LocalDateTime dataInizio, LocalDateTime dataFine) {
+        this.id_prenotazioni = id_prenotazioni;
+        this.users = users;
+        this.postazione = postazione;
+        this.stanze = stanze;
+        this.stato_prenotazione = stato_prenotazione;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
+    }
 
 // Getters and Setters
     public Integer getId_prenotazioni() {
@@ -96,12 +96,12 @@ public Prenotazione(Integer id_prenotazioni, Users users, Postazioni postazione,
         this.stanze = stanza;
     }
 
-    public stati_prenotazioni getStato_prenotazioni() {
-        return stato_prenotazioni;
+    public stato_prenotazione getStato_prenotazione() {
+        return stato_prenotazione;
     }
 
-    public void setStato_prenotazioni(stati_prenotazioni stato_prenotazioni) {
-        this.stato_prenotazioni = stato_prenotazioni;
+    public void setStato_prenotazione(stato_prenotazione stato_prenotazione) {
+        this.stato_prenotazione = stato_prenotazione;
     }
 
     public LocalDateTime getDataInizio() {

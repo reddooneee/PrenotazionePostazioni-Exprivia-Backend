@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.prenotazioni.exprivia.exprv.enumerati.ruoli;
+import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,9 +34,9 @@ public class Users {
     @Column(length = 50)
     private String password;
 
-    // enum ruoli
+    // enum ruolo_utente_utente
     @Enumerated(EnumType.STRING)
-    private ruoli ruolo;
+    private ruolo_utente ruolo_utente;
 
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.
     //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
@@ -52,12 +52,12 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruoli ruolo, String password) {
+    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
-        this.ruolo = ruolo;
+        this.ruolo_utente = ruolo_utente;
         this.password = password;
     }
 
@@ -94,12 +94,12 @@ public class Users {
         this.email = email;
     }
 
-    public ruoli getRuolo() {
-        return ruolo;
+    public ruolo_utente getRuolo_utente() {
+        return ruolo_utente;
     }
 
-    public void setRuolo(ruoli ruolo) {
-        this.ruolo = ruolo;
+    public void setRuolo_utente(ruolo_utente ruolo_utente) {
+        this.ruolo_utente = ruolo_utente;
     }
 
     public LocalDateTime getCreatoIl() {

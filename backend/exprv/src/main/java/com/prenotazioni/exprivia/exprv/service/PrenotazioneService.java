@@ -8,10 +8,10 @@ import com.prenotazioni.exprivia.exprv.repository.PrenotazioneRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 public class PrenotazioneService {
-    
+
     private PrenotazioneRepository prenotazioneRepository;
 
-    public PrenotazioneService(PrenotazioneRepository prenotazioneRepository){
+    public PrenotazioneService(PrenotazioneRepository prenotazioneRepository) {
         this.prenotazioneRepository = prenotazioneRepository;
     }
 
@@ -34,21 +34,21 @@ public class PrenotazioneService {
             throw new IllegalArgumentException("L'ID non può essere nullo!");
         }
 
-        if(prenotazione.getStanza() == null){
+        if (prenotazione.getStanza() == null) {
             throw new IllegalArgumentException("La stanza non può essere nulla!");
         }
-        
-        if(prenotazione.getUser() == null){
+
+        if (prenotazione.getUser() == null) {
             throw new IllegalArgumentException("L'User non può essere nullo!");
         }
 
-        if(prenotazione.getStato_prenotazioni() == null) {
+        if (prenotazione.getStato_prenotazione() == null) {
             throw new IllegalArgumentException("Lo stato della prenotazione non può essere nullo!");
         }
 
         if (prenotazione.getId_prenotazioni() != null && prenotazioneRepository.existsById(prenotazione.getId_prenotazioni())) {
             throw new IllegalArgumentException("La prenotazione con ID " + prenotazione.getId_prenotazioni() + " esiste già.");
-        }        
+        }
 
         return prenotazioneRepository.save(prenotazione);
     }

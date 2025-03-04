@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.prenotazioni.exprivia.exprv.enumerati.stati;
+import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -24,10 +24,9 @@ public class Postazioni {
 
     private Integer id_stanza; // Relazione con la tabella Stanze
 
-    
     // enum
     @Enumerated(EnumType.STRING)
-    private stati stato;
+    private stato_postazione stato_postazione;
 
     // TimeStamp Per vedere la creazione
     @CreationTimestamp
@@ -44,16 +43,14 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Integer id_postazione, Integer id_stanza, stati stato, LocalDateTime creatoIl,
-            LocalDateTime aggiornatoIl) {
+    public Postazioni(Integer id_postazione, Integer id_stanza, stato_postazione stato_postazione, LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
         this.id_postazione = id_postazione;
         this.id_stanza = id_stanza;
-        this.stato = stato;
+        this.stato_postazione = stato_postazione;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
     }
 
-    // Setters And Getters
     public Integer getId_postazione() {
         return id_postazione;
     }
@@ -70,20 +67,28 @@ public class Postazioni {
         this.id_stanza = id_stanza;
     }
 
-    public stati getStato() {
-        return stato;
+    public stato_postazione getStato_postazione() {
+        return stato_postazione;
     }
 
-    public void setStato(stati stato) {
-        this.stato = stato;
+    public void setStato_postazione(stato_postazione stato_postazione) {
+        this.stato_postazione = stato_postazione;
     }
 
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
 
+    public void setCreatoIl(LocalDateTime creatoIl) {
+        this.creatoIl = creatoIl;
+    }
+
     public LocalDateTime getAggiornatoIl() {
         return aggiornatoIl;
+    }
+
+    public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
+        this.aggiornatoIl = aggiornatoIl;
     }
 
 }
