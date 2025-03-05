@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,12 +17,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
-public class Prenotazione {
+@Table(name = "prenotazioni")
+public class Prenotazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    @Column(name = "id_prenotazione")
     private Integer id_prenotazioni;
 
     @ManyToOne  //Si passano gli oggetti interi, non solo delle variabili 
@@ -49,11 +53,11 @@ public class Prenotazione {
 //data_inizio, data_fine Da Aggiungere!!; 
 //JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
 //Costruttore Per JPa
-    public Prenotazione() {
+    public Prenotazioni() {
     }
 
 //Costruttore
-    public Prenotazione(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stato_prenotazione stato_prenotazione, LocalDateTime dataInizio, LocalDateTime dataFine) {
+    public Prenotazioni(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stato_prenotazione stato_prenotazione, LocalDateTime dataInizio, LocalDateTime dataFine) {
         this.id_prenotazioni = id_prenotazioni;
         this.users = users;
         this.postazione = postazione;
@@ -96,7 +100,7 @@ public class Prenotazione {
         this.stanze = stanza;
     }
 
-    public stato_prenotazione getStato_prenotazione() {
+    public stato_prenotazione getStato_prenotazioni() {
         return stato_prenotazione;
     }
 

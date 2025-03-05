@@ -41,9 +41,11 @@ public class Users {
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.
     //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
+    @Column(name = "creatoil")
     private LocalDateTime creatoIl;
 
     @UpdateTimestamp
+    @Column(name = "aggiornatoil")
     private LocalDateTime aggiornatoIl;
 
     // JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection

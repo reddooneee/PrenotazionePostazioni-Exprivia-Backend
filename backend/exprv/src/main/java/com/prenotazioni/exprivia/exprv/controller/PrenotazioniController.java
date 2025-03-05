@@ -1,10 +1,6 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
-import com.prenotazioni.exprivia.exprv.entity.Prenotazione;
-import com.prenotazioni.exprivia.exprv.service.PrenotazioneService;
-
 import java.util.List;
-import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,60 +10,65 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
+import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/Prenotazioni")
 public class PrenotazioniController {
-    
-    private PrenotazioneService prenotazioneService;
 
-    public PrenotazioniController(PrenotazioneService prenotazioneService){
-        this.prenotazioneService = prenotazioneService;
+    private PrenotazioniService PrenotazioniService;
+
+    public PrenotazioniController(PrenotazioniService PrenotazioniService) {
+        this.PrenotazioniService = PrenotazioniService;
     }
 
     @GetMapping()
-    public List<Prenotazione> getPrenotazioni() {
-        return prenotazioneService.cercaTutti();
+    public List<Prenotazioni> getPrenotazioni() {
+        return PrenotazioniService.cercaTutti();
     }
 
-    @GetMapping("/prenotazione/{id_prenotazioni}")
-    public ResponseEntity<Prenotazione> getPrenotazioneByID(@PathVariable Integer id_prenotazioni) {
+    @GetMapping("/Prenotazioni/{id_prenotazioni}")
+    public ResponseEntity<Prenotazioni> getPrenotazioniByID(@PathVariable Integer id_prenotazioni) {
         try {
-            Prenotazione prenotazione = prenotazioneService.cercaSingolo(id_prenotazioni);
-            return ResponseEntity.ok(prenotazione);
+            Prenotazioni Prenotazioni = PrenotazioniService.cercaSingolo(id_prenotazioni);
+            return ResponseEntity.ok(Prenotazioni);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-        @PostMapping("/crea_prenotazione")
-    public ResponseEntity<?> creaPrenotazione(@RequestBody Prenotazione prenotazione) {        
+    @PostMapping("/crea_Prenotazioni")
+    public ResponseEntity<?> creaPrenotazioni(@RequestBody Prenotazioni Prenotazioni) {
         try {
-            Prenotazione newPrenotazione = prenotazioneService.creaPrenotazione(prenotazione);
-            return ResponseEntity.ok(newPrenotazione);
+            Prenotazioni newPrenotazioni = PrenotazioniService.creaPrenotazioni(Prenotazioni);
+            return ResponseEntity.ok(newPrenotazioni);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> aggiornaPrenotazione(@PathVariable Integer id, @RequestBody Prenotazione prenotazione) {
-        try{
-            Prenotazione prenotazioneAggiornata = prenotazioneService.aggiornaPrenotazione(id, prenotazione);
-            return ResponseEntity.ok(prenotazioneAggiornata);
+    public ResponseEntity<?> aggiornaPrenotazioni(@PathVariable Integer id, @RequestBody Prenotazioni Prenotazioni) {
+        try {
+            Prenotazioni PrenotazioniAggiornata = PrenotazioniService.aggiornaPrenotazioni(id, Prenotazioni);
+            return ResponseEntity.ok(PrenotazioniAggiornata);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminaPrenotazione(@PathVariable Integer id){
-        try{
-            prenotazioneService.eliminaPrenotazione(id);
+    public ResponseEntity<String> eliminaPrenotazioni(@PathVariable Integer id) {
+        try {
+            PrenotazioniService.eliminaPrenotazioni(id);
             return ResponseEntity.noContent().build();
-        } catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
