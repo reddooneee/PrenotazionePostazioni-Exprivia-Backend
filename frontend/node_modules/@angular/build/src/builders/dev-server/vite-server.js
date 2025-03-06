@@ -86,6 +86,13 @@ async function* serveWithVite(serverOptions, builderName, builderAction, context
     browserOptions.security = {
         autoCsp: false,
     };
+    // Disable JSON build stats.
+    // These are not accessible with the dev server and can cause HMR fallbacks.
+    if (browserOptions.statsJson === true) {
+        context.logger.warn('Build JSON statistics output (`statsJson` option) has been disabled.' +
+            ' The development server does not support this option.');
+    }
+    browserOptions.statsJson = false;
     // Set all packages as external to support Vite's prebundle caching
     browserOptions.externalPackages = serverOptions.prebundle;
     // Disable generating a full manifest with routes.

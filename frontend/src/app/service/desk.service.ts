@@ -1,5 +1,5 @@
 import { Observable, of } from "rxjs";
-import { Desk } from "../../model/desk.model";
+import { Desk } from "../model/desk.model";
 
 export class DeskService {
     // Mock data for available desks
