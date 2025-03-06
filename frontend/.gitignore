@@ -1,4 +1,4 @@
-echo "node_modules/" >> .gitignore
+echo "node_modules" >> .gitignore
 echo "dist/" >> .gitignore
 git rm -r --cached node_modules dist
 git commit -m "Ignorati node_modules e dist"
