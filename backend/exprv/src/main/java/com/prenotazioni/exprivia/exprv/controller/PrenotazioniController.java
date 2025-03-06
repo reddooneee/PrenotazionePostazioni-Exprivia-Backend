@@ -22,7 +22,7 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/Prenotazioni")
 public class PrenotazioniController {
 
-    private PrenotazioniService PrenotazioniService;
+    private final PrenotazioniService PrenotazioniService;
 
     public PrenotazioniController(PrenotazioniService PrenotazioniService) {
         this.PrenotazioniService = PrenotazioniService;
