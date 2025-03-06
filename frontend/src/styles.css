@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@source "../node_modules/flowbite-datepicker";
+
+
+@theme {
+
+    --color-expriviaBlue: #004C6A;
+    --color-expriviaOrange: #E9500E;
+    --color-expriviaOrange400: #F09151;
+    --color-expriviaOrange600: #D1430A;
+}

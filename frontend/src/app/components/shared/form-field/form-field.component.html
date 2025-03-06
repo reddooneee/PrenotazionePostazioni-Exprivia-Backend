@@ -1,0 +1,14 @@
+<!-- src/app/components/shared/form-field/form-field.component.html -->
+<div>
+    <label [for]="controlName" class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
+    <input [id]="controlName" [type]="type" [formControl]="control"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        [placeholder]="placeholder">
+    <div *ngIf="isInvalid" class="text-red-500 text-sm mt-1">
+        <div *ngIf="hasError('required')">{{ label }} is required</div>
+        <div *ngIf="hasError('minlength') && minLength">{{ label }} must be at least {{ minLength }} characters</div>
+        <div *ngIf="hasError('email')">Please enter a valid email</div>
+        <div *ngIf="hasError('passwordMismatch')">Passwords do not match</div>
+        <!-- Add other error types as needed -->
+    </div>
+</div>
