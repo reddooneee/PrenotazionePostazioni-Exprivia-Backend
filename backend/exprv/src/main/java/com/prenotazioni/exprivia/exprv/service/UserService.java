@@ -1,10 +1,17 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.nio.CharBuffer;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
+import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.entity.Users;
+import com.prenotazioni.exprivia.exprv.exceptions.AppException;
+import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -13,27 +20,42 @@ import jakarta.persistence.EntityNotFoundException;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
-    //findall Tutte gli utenti
+    public UserDTO login(CredentialsDto credentialsDto) {
+        Users user = userRepository.findByLogin(credentialsDto.login())
+                .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
+
+        if (passwordEncoder.matches(CharBuffer.wrap(credentialsDto.password()), user.getPassword())) {
+            return userMapper.toUserDto(user);
+        }
+
+        throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
+    }
+
+    // findall Tutte gli utenti
     public List<Users> cercaTutti() {
         return userRepository.findAll();
     }
 
-    //Ricerca singola tramite id ma con messaggino personalizzato invece che null
+    // Ricerca singola tramite id ma con messaggino personalizzato invece che null
     public Users cercaSingolo(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
     }
 
-    //Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    //Come sopra ma per email, metodo findByEmail da creare nel repository
-    //Creazione nuovo utente con enum -> stringa -> enum 
+    // Ricerca singola tramite id ma con messaggino personalizzato invece che null
+    // Come sopra ma per email, metodo findByEmail da creare nel repository
+    // Creazione nuovo utente con enum -> stringa -> enum
     public Users creaUtente(Users user) {
-        //Condizioni per i NOT NULL 
+        // Condizioni per i NOT NULL
         if (user.getRuolo_utente() == null) {
             throw new IllegalArgumentException("Il ruolo non può essere nullo!");
         }

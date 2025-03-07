@@ -9,12 +9,12 @@ import { FormsModule } from '@angular/forms';
 })
 export class LoginComponent {
 
-  @Output() onSubmitLoginEvent: EventEmitter<{ email: string, password: string }> = new EventEmitter();
+  @Output() onSubmitLoginEvent: EventEmitter<{ login: string, password: string }> = new EventEmitter();
 
-  email: string = '';
+  login: string = '';
   password: string = '';
 
   onSubmitLogin(): void {
-    this.onSubmitLoginEvent.emit({ email: this.email, password: this.password });
+    this.onSubmitLoginEvent.emit({ login: this.login, password: this.password });
   }
 }
