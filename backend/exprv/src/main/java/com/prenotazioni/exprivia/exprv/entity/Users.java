@@ -31,12 +31,12 @@ public class Users {
     @Column(length = 100)
     private String email;
 
-    @Column(length = 50)
+    @Column(length = 50, nullable =false)
     private String password;
 
-    private String login; 
 
-    private String token;
+    @Column(nullable =false)
+    private String login; 
 
     // enum ruolo_utente_utente
     @Enumerated(EnumType.STRING)
@@ -58,13 +58,14 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
+    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password, String login) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.ruolo_utente = ruolo_utente;
         this.password = password;
+        this.login = login;
     }
 
     // Setters And Getters
@@ -122,6 +123,35 @@ public class Users {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+
+    /**
+     * @return String return the login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * @param login the login to set
+     */
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    /**
+     * @param creatoIl the creatoIl to set
+     */
+    public void setCreatoIl(LocalDateTime creatoIl) {
+        this.creatoIl = creatoIl;
+    }
+
+    /**
+     * @param aggiornatoIl the aggiornatoIl to set
+     */
+    public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
+        this.aggiornatoIl = aggiornatoIl;
     }
 
 }
