@@ -20,6 +20,7 @@
     "@angular/router": "^19.1.0",
     "@tailwindcss/postcss": "^4.0.7",
     "axios": "^1.8.1",
+    "exprivia": "file:",
     "flowbite": "^3.1.2",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",
