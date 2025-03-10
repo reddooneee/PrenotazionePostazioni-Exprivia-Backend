@@ -16,6 +16,17 @@ public class UserDTO {
     public UserDTO() {
     }
 
+    // Costruttore con parametri
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String login, String token, ruolo_utente ruolo_utente) {
+        this.id_user = id_user;
+        this.nome = nome;
+        this.cognome = cognome;
+        this.email = email;
+        this.login = login;
+        this.token = token;
+        this.ruolo_utente = ruolo_utente;
+    }
+
     // Getters e Setters
     public Integer getId_user() {
         return id_user;
@@ -57,33 +68,19 @@ public class UserDTO {
         this.ruolo_utente = ruolo_utente;
     }
 
-    /**
-     * @return String return the token
-     */
     public String getToken() {
         return token;
     }
 
-    /**
-     * @param token the token to set
-     */
     public void setToken(String token) {
         this.token = token;
     }
 
-
-    /**
-     * @return String return the login
-     */
     public String getLogin() {
         return login;
     }
 
-    /**
-     * @param login the login to set
-     */
     public void setLogin(String login) {
         this.login = login;
     }
-
 }

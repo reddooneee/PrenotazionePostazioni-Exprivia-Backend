@@ -21,23 +21,20 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
     }
 
     public UserDTO login(CredentialsDto credentialsDto) {
+
         Users user = userRepository.findByLogin(credentialsDto.login())
                 .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
-
         if (passwordEncoder.matches(CharBuffer.wrap(credentialsDto.password()), user.getPassword())) {
-            return userMapper.toUserDto(user);
+            return UserMapper.INSTANCE.toUserDTO(user);
         }
-
-        throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
+        throw new AppException("Password invalida", HttpStatus.BAD_REQUEST);
     }
 
     // findall Tutte gli utenti

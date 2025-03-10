@@ -13,15 +13,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    public SecurityConfig() {
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(customizer -> 
-                customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> 
-                auth.requestMatchers(HttpMethod.POST, "/login").permitAll()
-                    .requestMatchers("/public/**").permitAll() // Aggiungi altre route pubbliche qui
-                    .anyRequest().authenticated());
+            .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // 👈 Permette tutto
     
         return http.build();
     }
