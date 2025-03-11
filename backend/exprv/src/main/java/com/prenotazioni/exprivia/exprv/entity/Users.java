@@ -34,8 +34,8 @@ public class Users {
     @Column(length = 50, nullable =false)
     private String password;
 
-    @Column(nullable =false)
-    private String login; 
+    @Column(nullable = false)
+    private String login;
 
     // enum ruolo_utente_utente
     @Enumerated(EnumType.STRING)

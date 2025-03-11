@@ -1,6 +1,7 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import com.prenotazioni.exprivia.exprv.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController // Indica che questa classe è un controller REST
-@RequestMapping("/users") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
+@RequestMapping("/Users") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
 public class UserController {
 
     private final UserService userService;
@@ -36,7 +37,7 @@ public class UserController {
     }
 
     // Gestisce le richieste GET per ottenere un singolo utente tramite ID
-    @GetMapping("/utente")
+    @GetMapping("/utente/{id}")
     public Users getUtente(@PathVariable Integer id) {
         return userService.cercaSingolo(id); // Chiama il servizio per ottenere un utente specifico
     }
@@ -53,18 +54,14 @@ public class UserController {
     }
 
     // Gestisce le richieste PUT per aggiornare un utente esistente tramite ID
-    @PutMapping("/{id}")
-    public ResponseEntity<?> aggiornaUser(@PathVariable Integer id, @RequestBody Users user) {
-        try {
-            Users userAggiornato = userService.aggiornaUser(id, user);// Chiama il servizio per aggiornare l'utente
-            return ResponseEntity.ok(userAggiornato);// Restituisce una risposta con stato 200 (OK) e l'utente aggiornato
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());//Lancia un messaggio se non è stato aggiornato l'utente
-        }
+    @PutMapping("/aggiornaUtente/{id}")
+    public Users aggiornaUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+        return userService.aggiornaUser(id, updates);
     }
-
+    
+    
     // Gestisce le richieste DELETE per eliminare un utente tramite ID
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/eliminaUtente/{id}")
     public ResponseEntity<String> eliminaUser(@PathVariable Integer id) {
         try {
             userService.eliminaUser(id);// Chiama il servizio per eliminare l'utente
