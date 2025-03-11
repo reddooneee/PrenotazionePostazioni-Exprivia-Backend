@@ -1,0 +1,29 @@
+<header class="border-b text-black">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a routerLink="/" class="cursor-pointer">
+            <img class="w-[200px]" src="LogoExprivia.svg" alt="">
+        </a>
+        <nav *ngIf="isLoggedIn" class="hidden md:flex items-center gap-6">
+            <a routerLink="/dashboard" routerLinkActive="text-expriviaOrange"
+                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
+                Dashboard
+            </a>
+            <a routerLink="/prenota" routerLinkActive="text-expriviaOrange"
+                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
+                Prenota
+            </a>
+            <a routerLink="/le-mie-prenotazioni" routerLinkActive="text-expriviaOrange"
+                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
+                Le Mie Prenotazioni
+            </a>
+        </nav>
+        <div class="px-6 py-3 bg-expriviaOrange rounded-xl text-white">
+            <button mat-raised-button color="accent" *ngIf="!isLoggedIn" (click)="toggleLogin()">
+                Accedi
+            </button>
+            <button mat-button color="accent" *ngIf="isLoggedIn" (click)="toggleLogin()">
+                Logout
+            </button>
+        </div>
+    </div>
+</header>

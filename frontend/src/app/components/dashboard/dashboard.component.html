@@ -1,0 +1,36 @@
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-white text-center">Seleziona una località</h2>
+
+    <div class="relative mb-6">
+        <lucide-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"></lucide-icon>
+        <input type="text" placeholder="Cerca per nome o indirizzo..."
+            class="pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-expriviaBlue focus:border-transparent bg-white">
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+        <mat-card *ngFor="let location of filteredLocations" class="overflow-hidden">
+            <img [src]="location.image" [alt]="location.name" class="h-32 w-full object-cover">
+            <mat-card-content class="p-4">
+                <h3 class="font-semibold text-lg">{{ location.name }}</h3>
+                <div class="flex items-center gap-1 text-gray-600 mb-3">
+                    <lucide-icon name="map-pin" class="h-4 w-4"></lucide-icon>
+                    <span class="text-sm">{{ location.address }}</span>
+                </div>
+
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-900">{{ location.desks }}</span> postazioni
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <span class="font-medium text-gray-900">{{ location.meetingRooms }}</span> sale riunioni
+                    </div>
+                </div>
+
+                <button mat-raised-button color="primary" (click)="onSelect(location)"
+                    class="w-full bg-expriviaOrange hover:bg-expriviaOrange/90 px-6 py-3 rounded-xl text-white">
+                    Seleziona
+                </button>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

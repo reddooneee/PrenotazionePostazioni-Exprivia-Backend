@@ -8,3 +8,5 @@
     --color-expriviaOrange400: #F09151;
     --color-expriviaOrange600: #D1430A;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
