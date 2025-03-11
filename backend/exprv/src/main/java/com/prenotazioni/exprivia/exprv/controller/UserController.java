@@ -20,7 +20,7 @@ import com.prenotazioni.exprivia.exprv.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController // Indica che questa classe è un controller REST
-@RequestMapping("/Users") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
+@RequestMapping("/Utenti") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
 public class UserController {
 
     private final UserService userService;
