@@ -2,7 +2,9 @@ package com.prenotazioni.exprivia.exprv.service;
 
 import java.nio.CharBuffer;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,17 +12,22 @@ import org.springframework.stereotype.Service;
 import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.entity.Users;
+import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -51,6 +58,7 @@ public class UserService {
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
     // Come sopra ma per email, metodo findByEmail da creare nel repository
     // Creazione nuovo utente con enum -> stringa -> enum
+    @Transactional
     public Users creaUtente(Users user) {
         // Condizioni per i NOT NULL
         if (user.getRuolo_utente() == null) {
@@ -78,15 +86,24 @@ public class UserService {
 
         return userRepository.save(user);
     }
-
-    public Users aggiornaUser(Integer id, Users user) {
-        if (userRepository.existsById(id)) {
-            user.setId_user(id);
-            return userRepository.save(user);
-        } else {
-            throw new EntityNotFoundException("Utente con ID " + id + " non trovato");
-        }
-    }
+    
+    public Users aggiornaUser(Integer id, Map<String, Object> updates) {
+        Users existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
+    
+        updates.forEach((key, value) -> {
+                switch (key) {
+                case "nome": existingUser.setNome((String) value); break;
+                case "cognome": existingUser.setCognome((String) value); break;
+                case "email": existingUser.setEmail((String) value); break;
+                case "login": existingUser.setLogin((String) value); break;
+                case "password": existingUser.setPassword((String) value); break;
+                case "ruolo_utente": existingUser.setRuolo_utente(ruolo_utente.valueOf((String) value)); break;
+            }
+        });
+    
+        return userRepository.save(existingUser);
+    } 
 
     public void eliminaUser(Integer id) {
         if (userRepository.existsById(id)) {
