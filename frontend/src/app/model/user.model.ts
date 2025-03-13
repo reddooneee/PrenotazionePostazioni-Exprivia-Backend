@@ -1,7 +1,8 @@
 export interface User {
-    id_user?: number; // opzionale perché viene generato dal backend
-    name: string;
-    surname: string;
+    nome: string;
+    cognome: string;
     email: string;
-    role: 'Amministratore' | 'BuildingManager' | 'Dipendente';
+    password: string;
+    login: string;
+    ruolo_utente: string;
 }

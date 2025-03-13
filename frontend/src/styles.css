@@ -1,12 +1,18 @@
 @import "tailwindcss";
+@source "../node_modules/flowbite";
+
 
 
 @theme {
-
     --color-expriviaBlue: #004C6A;
     --color-expriviaOrange: #E9500E;
     --color-expriviaOrange400: #F09151;
     --color-expriviaOrange600: #D1430A;
 }
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+

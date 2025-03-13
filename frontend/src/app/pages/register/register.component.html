@@ -1,0 +1,59 @@
+<main class="flex min-h-screen items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
+        <header class="space-y-2.5 mb-8">
+            <h1 class="text-2xl font-bold">Crea un account</h1>
+            <p class="text-gray-400">Inserisci i tuoi dati per registrarti al sistema di prenotazione
+            </p>
+        </header>
+        <div>
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+                <!-- Nome -->
+                <mat-form-field class="example-full-width">
+                    <mat-label>Nome</mat-label>
+                    <input matInput formControlName="nome">
+                </mat-form-field>
+                <!-- Cognome -->
+                <mat-form-field class="example-full-width">
+                    <mat-label>Cognome</mat-label>
+                    <input matInput formControlName="cognome">
+                </mat-form-field>
+                <!-- Email -->
+                <mat-form-field class="example-full-width">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email">
+                </mat-form-field>
+                <!-- Password -->
+                <mat-form-field class="example-full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput formControlName="password">
+                </mat-form-field>
+
+                <mat-form-field class="example-full-width">
+                    <mat-label>Login</mat-label>
+                    <input matInput formControlName="login" />
+                </mat-form-field>
+
+                <mat-form-field class="example-full-width">
+                    <mat-label>Ruolo Utente</mat-label>
+                    <mat-select formControlName="ruolo_utente">
+                        <mat-option *ngFor="let ruolo of ruoliUtente" [value]="ruolo">
+                            {{ ruolo }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <!-- Pulsante Registrati -->
+                <button
+                    class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
+                    type="submit">
+                    Registrati
+                </button>
+                <div class="text-center text-sm">
+                    Hai già un account?
+                    <a [routerLink]="['/accedi']" class="text-expriviaOrange underline-offset-4 hover:underline">
+                        Accedi
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>

@@ -1,17 +1,15 @@
-import { CommonModule } from "@angular/common";
-import { Component } from "@angular/core";
-import { LucideAngularModule } from "lucide-angular";
+import { Component } from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import { RouterLink } from '@angular/router';
+
+
 
 @Component({
-  selector: "app-header",
-  standalone: true,
-  imports: [CommonModule, LucideAngularModule], // 🔥 Qui non serve .pick() di nuovo!
-  templateUrl: "./header.component.html",
+  selector: 'app-header',
+  imports: [MatButtonModule,RouterLink],
+  templateUrl: './header.component.html',
+  styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  isLoggedIn = false;
 
-  toggleLogin() {
-    this.isLoggedIn = !this.isLoggedIn;
-  }
 }

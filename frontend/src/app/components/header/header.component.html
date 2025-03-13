@@ -1,29 +1,11 @@
-<header class="border-b text-black">
-    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <a routerLink="/" class="cursor-pointer">
-            <img class="w-[200px]" src="LogoExprivia.svg" alt="">
-        </a>
-        <nav *ngIf="isLoggedIn" class="hidden md:flex items-center gap-6">
-            <a routerLink="/dashboard" routerLinkActive="text-expriviaOrange"
-                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
-                Dashboard
-            </a>
-            <a routerLink="/prenota" routerLinkActive="text-expriviaOrange"
-                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
-                Prenota
-            </a>
-            <a routerLink="/le-mie-prenotazioni" routerLinkActive="text-expriviaOrange"
-                class="text-sm font-medium hover:text-expriviaOrange cursor-pointer">
-                Le Mie Prenotazioni
-            </a>
-        </nav>
-        <div class="px-6 py-3 bg-expriviaOrange rounded-xl text-white">
-            <button mat-raised-button color="accent" *ngIf="!isLoggedIn" (click)="toggleLogin()">
-                Accedi
-            </button>
-            <button mat-button color="accent" *ngIf="isLoggedIn" (click)="toggleLogin()">
-                Logout
-            </button>
+<header class="w-full bg-white sticky top-0 z-50 shadow-md">
+    <div class="mx-auto container flex h-24 items-center justify-between">
+        <div class="cursor-pointer" [routerLink]="['']">
+            <img class="max-w-[100px] md:max-w-[150px]" src="LogoExprivia.svg" alt="">
+        </div>
+        <div class="flex gap-4">
+            <button [routerLink]="['/accedi']" type="button" class="text-white bg-expriviaOrange hover:bg-expriviaOrange400 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Accedi</button>
+            <button [routerLink]="['/registrazione']" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-expriviaBlue focus:z-10 focus:ring-4 focus:ring-gray-100">Registrati</button>
         </div>
     </div>
 </header>

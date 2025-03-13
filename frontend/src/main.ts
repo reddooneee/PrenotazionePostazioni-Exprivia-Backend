@@ -13,20 +13,26 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatNativeDateModule } from "@angular/material/core";
-import { LucideAngularModule, Calendar, MapPin, Clock, Search } from "lucide-angular";
+import {
+  LucideAngularModule,
+  Calendar,
+  MapPin,
+  Clock,
+  Search,
+  ArrowRight,
+} from "lucide-angular";
+import { routes } from "./app/app.routes";
+import { provideHttpClient } from "@angular/common/http";
+import { AxiosService } from "./app/service/axios.service";
+import { UserService } from "./app/service/user.service";
 
-import { LoginComponent } from "./app/components/login/login.component";
-import { DashboardComponent } from "./app/components/dashboard/dashboard.component";
+// Importa la configurazione delle rotte
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter([
-      { path: "", component: LoginComponent },
-      { path: "dashboard", component: DashboardComponent },
-      // { path: "prenota", component: BookingInterfaceComponent },
-      // { path: "le-mie-prenotazioni", component: MyBookingsComponent },
-    ]),
+    provideRouter(routes), // Usa la configurazione delle rotte
     provideAnimations(),
+    provideHttpClient(),
     importProvidersFrom(
       FormsModule,
       ReactiveFormsModule,
@@ -38,7 +44,9 @@ bootstrapApplication(AppComponent, {
       MatSelectModule,
       MatTabsModule,
       MatNativeDateModule,
-      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search })
+      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search, ArrowRight })
     ),
+    AxiosService,
+    UserService,
   ],
 }).catch((err) => console.error(err));

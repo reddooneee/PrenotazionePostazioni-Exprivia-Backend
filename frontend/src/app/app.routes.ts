@@ -1,17 +1,11 @@
-import { NgModule } from "@angular/core";
-import { RouterModule, type Routes } from "@angular/router";
-import { LoginComponent } from "./components/login/login.component";
-import { DashboardComponent } from "./components/dashboard/dashboard.component";
+import { Routes } from "@angular/router";
+import { HomeComponent } from "./pages/home/home.component";
+import { RegisterComponent } from "./pages/register/register.component";
+import { LoginComponent } from "./pages/login/login.component";
 
-const routes: Routes = [
-  { path: "", component: LoginComponent },
-  { path: "/dashboard", component: DashboardComponent },
-
-  { path: "**", redirectTo: "" },
+// Definisci le rotte
+export const routes: Routes = [
+    { path: "", component: HomeComponent }, // La home sarà il componente di default
+    { path: "registrazione", component: RegisterComponent }, // Rotta per la registrazione
+    { path: "accedi", component: LoginComponent },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

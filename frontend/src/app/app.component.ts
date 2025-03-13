@@ -1,27 +1,24 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AxiosService } from './service/axios.service';
+import { Component } from "@angular/core"
+import { CommonModule } from "@angular/common"
+import { OnInit } from '@angular/core';
+import { initFlowbite } from 'flowbite';
+import { RouterOutlet } from "@angular/router"
 import { HeaderComponent } from "./components/header/header.component";
+import { FooterComponent } from "./components/footer/footer.component";
+
+
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, HeaderComponent],
-  templateUrl: './app.component.html',
+  selector: "app-root",
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent],
+  templateUrl: "./app.component.html",
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
-  constructor(private axiosService: AxiosService){}
 
-  onLogin(input: any): void {
-    this.axiosService.request(
-      "POST",
-      "/login",
-      {
-        login: input.login,
-        password: input.password
-      },
-    )
-
+  ngOnInit(): void {
+    initFlowbite();
   }
 }
+
