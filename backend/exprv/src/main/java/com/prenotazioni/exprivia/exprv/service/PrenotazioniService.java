@@ -56,6 +56,7 @@ public class PrenotazioniService {
         return PrenotazioniRepository.save(Prenotazioni);
     }
 
+    //Metodo Per Aggiornare Le Prenotazioni
     public Prenotazioni aggiornaPrenotazioni(Integer id, Prenotazioni Prenotazioni) {
         if (PrenotazioniRepository.existsById(id)) {
             Prenotazioni.setId_prenotazioni(id);
@@ -65,6 +66,7 @@ public class PrenotazioniService {
         }
     }
 
+    //Metodo Per Eliminare le prenotazioni
     public void eliminaPrenotazioni(Integer id) {
         if (PrenotazioniRepository.existsById(id)) {
             PrenotazioniRepository.deleteById(id);
