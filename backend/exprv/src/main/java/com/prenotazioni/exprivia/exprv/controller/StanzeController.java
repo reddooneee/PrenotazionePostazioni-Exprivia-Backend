@@ -1,6 +1,4 @@
 //STANZE CONTROLLER
-
-
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
@@ -60,7 +58,7 @@ public class StanzeController {
 
     // Gestisce Le Richieste PUT per aggiornare una Stanza tramite ID
     @PutMapping("/aggiornastanza/{id}")
-    public ResponseEntity<?> aggiornaStanza(@PathVariable("id_stanza") Integer id_stanza, @RequestBody Stanze updates) {
+    public ResponseEntity<?> aggiornaStanza(@PathVariable Integer id_stanza, @RequestBody Stanze updates) {
         try {
             Stanze updatedStanza = StanzeService.aggiornaStanze(id_stanza, updates);
             return ResponseEntity.ok(updatedStanza);
