@@ -40,9 +40,14 @@ public class StanzeController {
     }
 
     //Richiesta GET per ricevere una stanza in abse all'ID
-    @GetMapping("/stanze/{id}")
-    public Stanze getStanza(@PathVariable Integer id_stanza) {
-        return StanzeService.cercaStanzaSingola(id_stanza);
+    @GetMapping("/stanze/{id_stanza}")
+    public ResponseEntity<?> getStanza(@PathVariable("id_stanza") Integer id_stanza) {
+        try {
+            Stanze stanza = StanzeService.cercaStanzaSingola(id_stanza);
+            return ResponseEntity.ok(stanza);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Stanza con ID " + id_stanza + " non trovata.");
+        }
     }
 
     //Richiesta POST per creare una stanza
