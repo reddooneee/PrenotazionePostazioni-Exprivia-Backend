@@ -17,7 +17,9 @@ public class Stanze {
     @Id
     private Integer id_stanza;
 
+    //@Column(length = 50)
     private String nome;
+
     private String descrizione;
 
     private Integer capacita_stanza;

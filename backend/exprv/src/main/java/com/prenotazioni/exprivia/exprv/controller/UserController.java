@@ -44,7 +44,7 @@ public class UserController {
 
     // Gestisce le richieste POST per aggiungere un nuovo utente
     @PostMapping("/creaUtente")
-    public ResponseEntity<?> createUser(@RequestBody Users user) {        
+    public ResponseEntity<?> createUser(@RequestBody Users user) {
         try {
             Users newUser = userService.creaUtente(user);
             return ResponseEntity.ok(newUser);
@@ -58,8 +58,7 @@ public class UserController {
     public Users aggiornaUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         return userService.aggiornaUser(id, updates);
     }
-    
-    
+
     // Gestisce le richieste DELETE per eliminare un utente tramite ID
     @DeleteMapping("/eliminaUtente/{id}")
     public ResponseEntity<String> eliminaUser(@PathVariable Integer id) {

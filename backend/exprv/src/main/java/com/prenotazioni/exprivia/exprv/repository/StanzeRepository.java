@@ -1,6 +1,4 @@
 //STANZE REPOSITORY
-
-
 package com.prenotazioni.exprivia.exprv.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
