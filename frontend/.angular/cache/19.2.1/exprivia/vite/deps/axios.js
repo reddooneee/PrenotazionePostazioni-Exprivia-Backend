@@ -1380,7 +1380,7 @@ function combineURLs(baseURL, relativeURL) {
 // node_modules/axios/lib/core/buildFullPath.js
 function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
   let isRelativeUrl = !isAbsoluteURL(requestedURL);
-  if (baseURL && isRelativeUrl || allowAbsoluteUrls == false) {
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
     return combineURLs(baseURL, requestedURL);
   }
   return requestedURL;
@@ -1480,7 +1480,7 @@ var resolveConfig_default = (config) => {
     auth
   } = newConfig;
   newConfig.headers = headers = AxiosHeaders_default.from(headers);
-  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
   if (auth) {
     headers.set("Authorization", "Basic " + btoa((auth.username || "") + ":" + (auth.password ? unescape(encodeURIComponent(auth.password)) : "")));
   }
@@ -2013,7 +2013,7 @@ function dispatchRequest(config) {
 }
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.8.1";
+var VERSION = "1.8.4";
 
 // node_modules/axios/lib/helpers/validator.js
 var validators = {};

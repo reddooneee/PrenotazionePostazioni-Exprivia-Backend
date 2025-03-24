@@ -2,7 +2,6 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
-//import com.prenotazioni.exprivia.exprv.repository.StanzeRepository;
 import com.prenotazioni.exprivia.exprv.service.StanzeService;
-
 import jakarta.persistence.EntityNotFoundException;
-
-import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
-import com.prenotazioni.exprivia.exprv.entity.Users;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -56,17 +49,6 @@ public class StanzeController {
         }
     }
 
-    /* // Richiesta GET per ricevere stanze filtrate per classe
-    @GetMapping("/stanze/classe/{classe}")
-    public ResponseEntity<List<Stanze>> getStanzeByClasse(@PathVariable("classe") String classe) {
-        try {
-            List<Stanze> stanze = StanzeService.cercaStanzePerClasse(classe);
-            return ResponseEntity.ok(stanze);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
-     */
     //Richiesta POST per creare una stanza
     @PostMapping("/creaStanza")
     public ResponseEntity<?> creaStanza(@RequestBody Stanze stanze) {

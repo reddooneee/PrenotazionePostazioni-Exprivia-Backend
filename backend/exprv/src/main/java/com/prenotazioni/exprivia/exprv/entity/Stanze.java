@@ -4,8 +4,12 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +24,9 @@ public class Stanze {
     //@Column(length = 50)
     private String nome;
 
-    private String descrizione;
+    //Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
+    @Enumerated(EnumType.STRING)
+    private tipo_stanza tipo_stanza;
 
     private Integer capacita_stanza;
 
@@ -41,11 +47,11 @@ public class Stanze {
     }
 
     //Costruttore Con Argomenti
-    public Stanze(Integer id_stanza, String nome, String descrizione, Integer capacita_stanza, LocalDateTime creatoIl,
+    public Stanze(Integer id_stanza, String nome, tipo_stanza tipo_stanza, Integer capacita_stanza, LocalDateTime creatoIl,
             LocalDateTime aggiornatoIl) {
         this.id_stanza = id_stanza;
         this.nome = nome;
-        this.descrizione = descrizione;
+        this.tipo_stanza = tipo_stanza;
         this.capacita_stanza = capacita_stanza;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
@@ -67,12 +73,12 @@ public class Stanze {
         this.nome = nome;
     }
 
-    public String getDescrizione() {
-        return descrizione;
+    public void setTipo_stanza(tipo_stanza tipo_stanza) {
+        this.tipo_stanza = tipo_stanza;
     }
 
-    public void setDescrizione(String descrizione) {
-        this.descrizione = descrizione;
+    public tipo_stanza getTipo_stanza() {
+        return tipo_stanza;
     }
 
     public Integer getCapacita_stanza() {
