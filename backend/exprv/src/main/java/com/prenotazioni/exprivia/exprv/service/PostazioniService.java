@@ -3,6 +3,7 @@ package com.prenotazioni.exprivia.exprv.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
 import com.prenotazioni.exprivia.exprv.controller.AuthController;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
@@ -30,16 +31,16 @@ public class PostazioniService {
 
 //Creazione Nuova Postazioni
     public Postazioni creaPostazione(Postazioni Postazioni) {
-        if (Postazioni.getId_postazione() == null) {
-            throw new IllegalArgumentException("L'id non può essere nullo!");
-        }
+        /*if (Postazioni.getId_postazione() == null) {
+            throw new IllegalArgumentException("L'id della postazione non puo essere nullo!");
+        }*/
 
         if (Postazioni.getStato_postazione() == null) {
-            throw new IllegalArgumentException("Lo stato della postazione non può essere nullo!");
+            throw new IllegalArgumentException("Lo stato della postazione non puo essere nullo!");
         }
 
         if (Postazioni.getId_stanza() == null) {
-            throw new IllegalArgumentException("L'id della stanza non può essere nullo");
+            throw new IllegalArgumentException("L'id della stanza non puo essere nullo");
         }
 
         return PostazioniRepository.save(Postazioni);
