@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -30,10 +31,12 @@ public class Postazioni {
 
     // TimeStamp Per vedere la creazione
     @CreationTimestamp
+    @Column(name = "creatoil")
     private LocalDateTime creatoIl;
 
     // TimeStamp Per vedere l'aggiornamento
     @UpdateTimestamp
+    @Column(name = "aggiornatoil")
     private LocalDateTime aggiornatoIl;
 
     // JPA richiede un costruttore senza argomenti affinché possa creare istanze
