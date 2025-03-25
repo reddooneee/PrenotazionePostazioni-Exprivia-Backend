@@ -24,7 +24,7 @@ public class Postazioni {
 
     private Integer id_stanza; // Relazione con la tabella Stanze
 
-    // enum
+    // enum (Disponibile,Occupato, Manutenzione)
     @Enumerated(EnumType.STRING)
     private stato_postazione stato_postazione;
 

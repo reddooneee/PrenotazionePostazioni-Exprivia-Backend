@@ -63,7 +63,7 @@ public class PrenotazioniController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/elimina/{id}")
     public ResponseEntity<String> eliminaPrenotazioni(@PathVariable Integer id) {
         try {
             PrenotazioniService.eliminaPrenotazioni(id);
