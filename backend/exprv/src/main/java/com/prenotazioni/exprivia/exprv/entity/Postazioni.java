@@ -15,18 +15,26 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
+    //@JsonProperty("id_postazione")
+    //per specificare i nomi esatti che Jackson deve utilizzare durante la deserializzazione:
     private Integer id_postazione;
 
-    private Integer id_stanza; // Relazione con la tabella Stanze
+    //@JsonProperty("stanze")
+    @ManyToOne
+    @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
+    private Stanze stanze; // Relazione con la tabella Stanze
 
     // enum (Disponibile,Occupato, Manutenzione)
     @Enumerated(EnumType.STRING)
+    //@JsonProperty("stato_postazione")
     private stato_postazione stato_postazione;
 
     // TimeStamp Per vedere la creazione
@@ -46,9 +54,9 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Integer id_postazione, Integer id_stanza, stato_postazione stato_postazione, LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
+    public Postazioni(Integer id_postazione, Stanze stanze, stato_postazione stato_postazione, LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
         this.id_postazione = id_postazione;
-        this.id_stanza = id_stanza;
+        this.stanze = stanze;
         this.stato_postazione = stato_postazione;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
@@ -62,12 +70,12 @@ public class Postazioni {
         this.id_postazione = id_postazione;
     }
 
-    public Integer getId_stanza() {
-        return id_stanza;
+    public Stanze getstanze() {
+        return stanze;
     }
 
-    public void setId_stanza(Integer id_stanza) {
-        this.id_stanza = id_stanza;
+    public void setstanze(Stanze stanze) {
+        this.stanze = stanze;
     }
 
     public stato_postazione getStato_postazione() {
@@ -78,6 +86,7 @@ public class Postazioni {
         this.stato_postazione = stato_postazione;
     }
 
+//TIMESTAMP
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
