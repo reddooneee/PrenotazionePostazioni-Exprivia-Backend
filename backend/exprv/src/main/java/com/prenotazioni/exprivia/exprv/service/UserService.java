@@ -84,6 +84,9 @@ public class UserService {
             throw new IllegalArgumentException("La password non può essere nulla!");
         }
 
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(hashedPassword);
+
         return userRepository.save(user);
     }
     
