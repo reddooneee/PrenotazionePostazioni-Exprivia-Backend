@@ -31,7 +31,7 @@ public class Users {
     @Column(length = 100)
     private String email;
 
-    @Column(length = 50, nullable =false)
+    @Column(length = 60, nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -123,7 +123,6 @@ public class Users {
     public void setPassword(String password) {
         this.password = password;
     }
-
 
     /**
      * @return String return the login
