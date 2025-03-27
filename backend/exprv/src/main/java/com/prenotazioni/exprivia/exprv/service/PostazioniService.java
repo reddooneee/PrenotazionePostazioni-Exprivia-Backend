@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.prenotazioni.exprivia.exprv.controller.AuthController;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
-import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+
+
 
 @Service
 public class PostazioniService {
@@ -20,7 +20,7 @@ public class PostazioniService {
 
     public PostazioniService(){}
 
-    public PostazioniService(PostazioniRepository postazioniRepository, AuthController authController) {
+    public PostazioniService(PostazioniRepository postazioniRepository/*, AuthController authController*/) {
         this.postazioniRepository = postazioniRepository;
     }
 
@@ -36,9 +36,9 @@ public class PostazioniService {
 
 //Creazione Nuova Postazioni
     public Postazioni creaPostazione(Postazioni postazioni) {
-        if (postazioni.getId_postazione() == null) {
+        /*if (postazioni.getId_postazione() == null) {
             throw new IllegalArgumentException("L'id della postazione non puo essere nullo!");
-        }
+        }*/
 
         if (postazioni.getStato_postazione() == null) {
             throw new IllegalArgumentException("Lo stato della postazione non puo essere nullo!");
@@ -58,9 +58,23 @@ public class PostazioniService {
             postazioni.setId_postazione(id);
             return postazioniRepository.save(postazioni);
         } else {
-            throw new EntityNotFoundException("Postazione con id" + id + "Non Trovata");
+            throw new EntityNotFoundException("Postazione con id" + id + " non Trovata");
         }
     }
+               
+    /*public Postazioni aggiornaPostazioni(Integer id, Map<String, Object> updates){
+        Postazioni existingPostazioni = postazioniRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
+    
+        updates.forEach((key, value) -> {
+                switch (key) {
+                case "Stanza": existingPostazioni.setstanze((Stanze) value); break;
+                case "Stato Postazione": existingPostazioni.setStato_postazione(stato_postazione.valueOf((String) value)); break;
+            }
+        });
+
+        return postazioniRepository.save(existingPostazioni);
+    }*/
 
     //Metodo Per Eliminare la Posstazione
     public void eliminaPostazioni(Integer id) {
