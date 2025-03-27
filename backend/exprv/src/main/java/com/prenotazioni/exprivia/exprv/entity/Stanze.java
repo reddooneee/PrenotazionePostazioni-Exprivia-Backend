@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
 
 import jakarta.persistence.CascadeType;
@@ -29,6 +30,7 @@ public class Stanze {
     private String nome;
 
     @OneToMany(mappedBy = "stanze", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Postazioni> postazioni = new ArrayList<>();
 
     //Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)

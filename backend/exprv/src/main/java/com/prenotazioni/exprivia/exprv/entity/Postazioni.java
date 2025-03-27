@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
 
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ public class Postazioni {
     //@JsonProperty("stanze")
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
+    @JsonBackReference
     private Stanze stanze; // Relazione con la tabella Stanze
 
     // enum (Disponibile,Occupato, Manutenzione)
