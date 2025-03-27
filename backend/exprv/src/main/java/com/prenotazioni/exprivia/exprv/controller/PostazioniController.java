@@ -40,7 +40,6 @@ public class PostazioniController {
     //GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
     @GetMapping("/Postazioni/{id_postazione}")
     public ResponseEntity<Postazioni> getPostazioneByID(@PathVariable Integer id_postazione) {
-
         try {
             Postazioni Postazioni = PostazioniService.cercaSingolo(id_postazione);
             return ResponseEntity.ok(Postazioni);
@@ -51,11 +50,11 @@ public class PostazioniController {
 
     //POST (CREA POSTAZIONE)
     @PostMapping("/crea_Postazione")
-    public ResponseEntity<?> creaPostazione(@RequestBody Postazioni Postazioni) {
+    public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
+        System.out.println("Ricevuto: " + postazioni.getstanze() + ", " + postazioni.getStato_postazione());
         try {
-            Postazioni newPostazioni = PostazioniService.creaPostazione(Postazioni);
+            Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
             return ResponseEntity.ok(newPostazioni);
-
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

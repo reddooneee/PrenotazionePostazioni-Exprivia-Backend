@@ -1,11 +1,14 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +16,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Stanze {
@@ -23,6 +27,9 @@ public class Stanze {
 
     //@Column(length = 50)
     private String nome;
+
+    @OneToMany(mappedBy = "stanze", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Postazioni> postazioni = new ArrayList<>();
 
     //Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
     @Enumerated(EnumType.STRING)
@@ -87,6 +94,15 @@ public class Stanze {
 
     public void setCapacita_stanza(Integer capacita_stanza) {
         this.capacita_stanza = capacita_stanza;
+    }
+
+    // Getters e Setters
+    public List<Postazioni> getPostazioni() {
+        return postazioni;
+    }
+
+    public void setPostazioni(List<Postazioni> postazioni) {
+        this.postazioni = postazioni;
     }
 
     public LocalDateTime getCreatoIl() {

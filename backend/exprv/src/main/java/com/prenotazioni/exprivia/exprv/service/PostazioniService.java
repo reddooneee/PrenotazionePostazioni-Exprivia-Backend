@@ -35,22 +35,23 @@ public class PostazioniService {
 
 //Creazione Nuova Postazioni
     public Postazioni creaPostazione(Postazioni postazioni) {
-        
-        /*if (postazioni.getId_postazione() == null) {
+        if (postazioni.getId_postazione() == null) {
             throw new IllegalArgumentException("L'id della postazione non puo essere nullo!");
-        }*/
+        }
 
         if (postazioni.getStato_postazione() == null) {
             throw new IllegalArgumentException("Lo stato della postazione non puo essere nullo!");
         }
 
+
         if (postazioni.getId_stanza() == null) {
-            throw new IllegalArgumentException("L'id della stanza non puo essere nullo");
-        }
+
+
+        /*Stanze = id_Stanze */
+        if (postazioni.getstanze() == null) {
 
         return postazioniRepository.save(postazioni);
     }
-
     //Metodo per aggiornare le postazioni
     public Postazioni aggiornaPostazioni(Integer id, Postazioni postazioni) {
         if (postazioniRepository.existsById(id)) {

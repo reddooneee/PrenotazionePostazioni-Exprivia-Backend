@@ -1,9 +1,10 @@
 //STANZE SERVICE 
-
 package com.prenotazioni.exprivia.exprv.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.repository.StanzeRepository;
 
@@ -33,11 +34,8 @@ public class StanzeService {
 
     //Creazione nuove Stanze 
     public Stanze creaStanze(Stanze Stanze) {
+        System.out.println("Creazione stanza: " + Stanze);
         //Condizioni Per i NotNull
-
-        if (Stanze.getId_stanza() == null) {
-            throw new IllegalArgumentException("L'id non puó essere nullo!");
-        }
 
         if (Stanze.getNome() == null) {
             throw new IllegalArgumentException("Il nome non puó essere nullo!");
@@ -47,7 +45,9 @@ public class StanzeService {
             throw new IllegalArgumentException("La capacitá della stanza non puó essere nulla");
         }
 
-        return StanzeRepository.save(Stanze);
+        Stanze salvata = StanzeRepository.save(Stanze);
+        System.out.println("Stanza salvata: " + salvata);
+        return salvata;
     }
 
     //Metodo Per aggiornare le stanze
