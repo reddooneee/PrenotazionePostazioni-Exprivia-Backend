@@ -51,7 +51,7 @@ public class PostazioniController {
     //POST (CREA POSTAZIONE)
     @PostMapping("/crea_Postazione")
     public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
-        System.out.println("Ricevuto: " + postazioni.getstanze() + ", " + postazioni.getStato_postazione());
+        System.out.println("Ricevuto: " + postazioni.getStanze() + ", " + postazioni.getStato_postazione());
         try {
             Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
             return ResponseEntity.ok(newPostazioni);

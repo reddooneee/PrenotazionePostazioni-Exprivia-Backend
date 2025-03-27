@@ -70,7 +70,7 @@ public class Postazioni {
         this.id_postazione = id_postazione;
     }
 
-    public Stanze getstanze() {
+    public Stanze getStanze() {
         return stanze;
     }
 

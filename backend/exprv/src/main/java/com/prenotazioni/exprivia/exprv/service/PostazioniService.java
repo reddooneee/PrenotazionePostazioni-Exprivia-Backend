@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.controller.AuthController;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
+import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -43,15 +44,14 @@ public class PostazioniService {
             throw new IllegalArgumentException("Lo stato della postazione non puo essere nullo!");
         }
 
-
-        if (postazioni.getId_stanza() == null) {
-
-
         /*Stanze = id_Stanze */
-        if (postazioni.getstanze() == null) {
+        if (postazioni.getStanze() == null) {
+            throw new IllegalArgumentException("L'id della stanza non puo essere nullo!");
+        }
 
         return postazioniRepository.save(postazioni);
     }
+
     //Metodo per aggiornare le postazioni
     public Postazioni aggiornaPostazioni(Integer id, Postazioni postazioni) {
         if (postazioniRepository.existsById(id)) {
