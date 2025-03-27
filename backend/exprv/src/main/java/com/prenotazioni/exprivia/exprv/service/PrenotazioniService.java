@@ -2,6 +2,7 @@ package com.prenotazioni.exprivia.exprv.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
@@ -12,55 +13,58 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class PrenotazioniService {
 
-    private final PrenotazioniRepository PrenotazioniRepository;
+    @Autowired
+    private PrenotazioniRepository prenotazioniRepository;
+    
+    public PrenotazioniService(){};
 
-    public PrenotazioniService(PrenotazioniRepository PrenotazioniRepository) {
-        this.PrenotazioniRepository = PrenotazioniRepository;
+    public PrenotazioniService(PrenotazioniRepository prenotazioniRepository) {
+            this.prenotazioniRepository = prenotazioniRepository;
     }
 
     //findall Tutte le prenotazioni
     public List<Prenotazioni> cercaTutti() {
-        return PrenotazioniRepository.findAll();
+        return prenotazioniRepository.findAll();
     }
 
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
     public Prenotazioni cercaSingolo(Integer id) {
-        return PrenotazioniRepository.findById(id)
+        return prenotazioniRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazioni con id " + id + " non trovata."));
     }
 
     //Creazione nuova Prenotazioni con enum -> stringa -> enum 
-    public Prenotazioni creaPrenotazioni(Prenotazioni Prenotazioni) {
+    public Prenotazioni creaPrenotazioni(Prenotazioni prenotazioni) {
         //Condizioni per i NOT NULL 
 
-        if (Prenotazioni.getId_prenotazioni() == null) {
-            throw new IllegalArgumentException("L'ID non può essere nullo!");
-        }
+        /*if (prenotazioni.getId_prenotazioni() == null) {
+            throw new IllegalArgumentException("L'ID prenotazione non può essere nullo!");
+        }*/
 
-        if (Prenotazioni.getStanza() == null) {
+        if (prenotazioni.getStanza() == null) {
             throw new IllegalArgumentException("La stanza non può essere nulla!");
         }
 
-        if (Prenotazioni.getUser() == null) {
+        if (prenotazioni.getUser() == null) {
             throw new IllegalArgumentException("L'User non può essere nullo!");
         }
 
-        if (Prenotazioni.getStato_prenotazioni() == null) {
+        if (prenotazioni.getStato_prenotazioni() == null) {
             throw new IllegalArgumentException("Lo stato della Prenotazioni non può essere nullo!");
         }
 
-        if (Prenotazioni.getId_prenotazioni() != null && PrenotazioniRepository.existsById(Prenotazioni.getId_prenotazioni())) {
-            throw new IllegalArgumentException("La Prenotazioni con ID " + Prenotazioni.getId_prenotazioni() + " esiste già.");
-        }
+        /*if (prenotazioni.getId_prenotazioni() != null && prenotazioniRepository.existsById(prenotazioni.getId_prenotazioni())) {
+            throw new IllegalArgumentException("La Prenotazioni con ID " + prenotazioni.getId_prenotazioni() + " esiste già.");
+        }*/
 
-        return PrenotazioniRepository.save(Prenotazioni);
+        return prenotazioniRepository.save(prenotazioni);
     }
 
     //Metodo Per Aggiornare Le Prenotazioni
-    public Prenotazioni aggiornaPrenotazioni(Integer id, Prenotazioni Prenotazioni) {
-        if (PrenotazioniRepository.existsById(id)) {
-            Prenotazioni.setId_prenotazioni(id);
-            return PrenotazioniRepository.save(Prenotazioni);
+    public Prenotazioni aggiornaPrenotazioni(Integer id, Prenotazioni prenotazioni) {
+        if (prenotazioniRepository.existsById(id)) {
+            prenotazioni.setId_prenotazioni(id);
+            return prenotazioniRepository.save(prenotazioni);
         } else {
             throw new EntityNotFoundException("Prenotazioni con ID " + id + " non trovata.");
         }
@@ -68,8 +72,8 @@ public class PrenotazioniService {
 
     //Metodo Per Eliminare le prenotazioni
     public void eliminaPrenotazioni(Integer id) {
-        if (PrenotazioniRepository.existsById(id)) {
-            PrenotazioniRepository.deleteById(id);
+        if (prenotazioniRepository.existsById(id)) {
+            prenotazioniRepository.deleteById(id);
         } else {
             throw new EntityNotFoundException("Prenotazioni con ID " + id + " non trovata.");
         }

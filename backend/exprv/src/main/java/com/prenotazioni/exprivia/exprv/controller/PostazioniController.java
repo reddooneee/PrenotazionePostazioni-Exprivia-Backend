@@ -2,6 +2,7 @@ package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +23,11 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/Postazioni")
 public class PostazioniController {
 
-    private final PostazioniService PostazioniService;
+    @Autowired
+    private PostazioniService PostazioniService;
 
+    public PostazioniController(){}
+    
     public PostazioniController(PostazioniService PostazioniService) {
         this.PostazioniService = PostazioniService;
     }
