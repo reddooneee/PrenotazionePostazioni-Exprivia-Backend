@@ -3,6 +3,7 @@ package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,10 @@ import jakarta.persistence.EntityNotFoundException;
 public class StanzeController {
 
     // private StanzeRepository stanzeRepository;
-    private final StanzeService StanzeService;
+    @Autowired
+    private StanzeService StanzeService;
+
+    public StanzeController(){}
 
     //Costruttore Per Iniettare Il Servizio
     public StanzeController(StanzeService StanzeService) {
@@ -62,6 +66,17 @@ public class StanzeController {
         }
     }
 
+       /*@PostMapping("/crea_Postazione")
+    public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
+        System.out.println("Ricevuto: " + postazioni.getStanze() + ", " + postazioni.getStato_postazione());
+        try {
+            Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
+            return ResponseEntity.ok(newPostazioni);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }*/
+
     // Gestisce Le Richieste PUT per aggiornare una Stanza tramite ID
     @PutMapping("/aggiornastanza/{id}")
     public ResponseEntity<?> aggiornaStanza(@PathVariable("id") Integer id_stanza, @RequestBody Stanze updates) {
@@ -74,8 +89,7 @@ public class StanzeController {
     }
 
     @DeleteMapping("/eliminastanza/{id}")
-    public ResponseEntity<String> eliminaStanza(@PathVariable Integer id
-    ) {
+    public ResponseEntity<String> eliminaStanza(@PathVariable Integer id) {
         try {
             StanzeService.eliminaStanze(id); //Chiama Il Servizio Per eliminare l'utente
             return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)

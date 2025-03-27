@@ -31,7 +31,7 @@ public class PostazioniController {
     }
 
     //GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
-    @GetMapping("/Postazioni/{id_postazione}")
+    @GetMapping("/postazioni/{id_postazione}")
     public ResponseEntity<Postazioni> getPostazioneByID(@PathVariable Integer id_postazione) {
         try {
             Postazioni Postazioni = PostazioniService.cercaSingolo(id_postazione);
@@ -69,7 +69,7 @@ public class PostazioniController {
     }
 
     //PUT (AGGIORNA LA STANZA IN BASE ALL'ID)
-    @PutMapping("/{id}")
+    @PutMapping("/aggiornaStanza/{id}")
     public ResponseEntity<?> aggiornaPostazioni(@PathVariable Integer id, @RequestBody Postazioni Postazioni) {
         try {
             Postazioni PostazioneAggioranta = PostazioniService.aggiornaPostazioni(id, Postazioni);
