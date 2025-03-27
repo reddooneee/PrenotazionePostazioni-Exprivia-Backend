@@ -5,19 +5,20 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.prenotazioni.exprivia.exprv.service.StanzeService;
-import jakarta.persistence.EntityNotFoundException;
-import com.prenotazioni.exprivia.exprv.entity.Stanze;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.prenotazioni.exprivia.exprv.entity.Stanze;
+import com.prenotazioni.exprivia.exprv.service.StanzeService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/Stanze")
@@ -50,6 +51,7 @@ public class StanzeController {
     }
 
     //Richiesta POST per creare una stanza
+    @Transactional
     @PostMapping("/creaStanza")
     public ResponseEntity<?> creaStanza(@RequestBody Stanze stanze) {
         try {
