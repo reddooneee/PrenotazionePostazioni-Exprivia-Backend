@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
 
 import jakarta.persistence.Column;
@@ -53,6 +55,12 @@ public class Postazioni {
     // delle entità tramite reflection
     // Costruttore Vuoto JPA
     public Postazioni() {
+    }
+
+    // Costruttore che accetta solo id
+    @JsonCreator
+    public Postazioni(@JsonProperty("id_postazione") Integer id_postazione) {
+        this.id_postazione = id_postazione;
     }
 
     // Costruttore

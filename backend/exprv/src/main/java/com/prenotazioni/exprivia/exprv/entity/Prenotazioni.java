@@ -3,6 +3,7 @@ package com.prenotazioni.exprivia.exprv.entity;
 //import Enum Prenotazioni
 import java.time.LocalDateTime;
 
+import org.apache.catalina.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -67,7 +68,6 @@ public class Prenotazioni {
         this.dataFine = dataFine;
     }
 
-// Getters and Setters
     public Integer getId_prenotazioni() {
         return id_prenotazioni;
     }
@@ -76,11 +76,11 @@ public class Prenotazioni {
         this.id_prenotazioni = id_prenotazioni;
     }
 
-    public Users getUser() {
+    public Users getUsers() {
         return users;
     }
 
-    public void setUser(Users users) {
+    public void setUsers(Users users) {
         this.users = users;
     }
 
@@ -92,15 +92,15 @@ public class Prenotazioni {
         this.postazione = postazione;
     }
 
-    public Stanze getStanza() {
+    public Stanze getStanze() {
         return stanze;
     }
 
-    public void setStanza(Stanze stanza) {
-        this.stanze = stanza;
+    public void setStanze(Stanze stanze) {
+        this.stanze = stanze;
     }
 
-    public stato_prenotazione getStato_prenotazioni() {
+    public stato_prenotazione getStato_prenotazione() {
         return stato_prenotazione;
     }
 
@@ -123,5 +123,8 @@ public class Prenotazioni {
     public void setDataFine(LocalDateTime dataFine) {
         this.dataFine = dataFine;
     }
+
+// Getters and Setters
+    
 
 }

@@ -1,6 +1,7 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,10 +59,10 @@ public class PrenotazioniController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> aggiornaPrenotazioni(@PathVariable Integer id, @RequestBody Prenotazioni Prenotazioni) {
+    public ResponseEntity<?> aggiornaPrenotazioni(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
-            Prenotazioni PrenotazioniAggiornata = PrenotazioniService.aggiornaPrenotazioni(id, Prenotazioni);
-            return ResponseEntity.ok(PrenotazioniAggiornata);
+            Prenotazioni prenotazioniAggiornata = PrenotazioniService.updatePrenotazioni(id, updates);
+            return ResponseEntity.ok(prenotazioniAggiornata);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
