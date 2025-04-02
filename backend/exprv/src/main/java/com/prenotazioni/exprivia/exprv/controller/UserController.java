@@ -3,6 +3,7 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +24,11 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/Utenti") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
+    public UserController(){}
+    
     // Costruttore per iniettare il servizio UserService
     public UserController(UserService userService) {
         this.userService = userService;
