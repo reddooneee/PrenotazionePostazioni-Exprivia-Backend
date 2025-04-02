@@ -138,10 +138,8 @@ public class UserService {
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(hashedPassword); // Setta la password sull'entità
 
-        // Salva l'utente
         Users savedUser = userRepository.save(user);
 
-        // Converte l'entità salvata in DTO e lo restituisce
         return userMapper.toUserDTO(savedUser);
     }
 

@@ -1,53 +1,60 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
+import java.util.Map;
+
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.prenotazioni.exprivia.exprv.dto.PostazioniDTO;
+import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.service.PostazioniService;
+import com.prenotazioni.exprivia.exprv.service.StanzeService;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/Postazioni")
 public class PostazioniController {
 
     @Autowired
-    private PostazioniService PostazioniService;
+    private PostazioniService postazioniService;
 
     public PostazioniController(){}
     
     public PostazioniController(PostazioniService PostazioniService) {
-        this.PostazioniService = PostazioniService;
+        this.postazioniService = PostazioniService;
     }
 
     @GetMapping()
-    public List<Postazioni> getPostazioni() {
-        return PostazioniService.cercaTuttePostazioni();
+    public List<PostazioniDTO> getPostazioni() {
+        return postazioniService.cercaTuttePostazioni();
     }
 
     //GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
     @GetMapping("/postazioni/{id_postazione}")
-    public ResponseEntity<Postazioni> getPostazioneByID(@PathVariable Integer id_postazione) {
+    public ResponseEntity<PostazioniDTO> getPostazioneByID(@PathVariable("id_postazione") Integer id_postazione) {
         try {
-            Postazioni Postazioni = PostazioniService.cercaSingolo(id_postazione);
-            return ResponseEntity.ok(Postazioni);
-        } catch (RuntimeException e) {
+            PostazioniDTO newPostazioniDTO = postazioniService.cercaSingolo(id_postazione);
+            return ResponseEntity.ok(newPostazioniDTO);
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    
 
     //POST (CREA POSTAZIONE)
     @PostMapping("/crea_Postazione")
-    public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
-        System.out.println("Ricevuto: " + postazioni.getStanze() + ", " + postazioni.getStato_postazione());
+    public ResponseEntity<?> creaPostazione(@RequestBody PostazioniDTO postazioniDTO) {
         try {
-            Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
-            return ResponseEntity.ok(newPostazioni);
+            PostazioniDTO newPostazioniDTO = postazioniService.creaPostazione(postazioniDTO);
+            return ResponseEntity.ok(newPostazioniDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -59,7 +66,7 @@ public class PostazioniController {
     ) {
         {
             try {
-                PostazioniService.eliminaPostazioni(id);
+                postazioniService.eliminaPostazioni(id);
                 return ResponseEntity.noContent().build();
             } catch (EntityNotFoundException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -68,12 +75,11 @@ public class PostazioniController {
 
     }
 
-    //PUT (AGGIORNA LA STANZA IN BASE ALL'ID)
     @PutMapping("/aggiornaStanza/{id}")
-    public ResponseEntity<?> aggiornaPostazioni(@PathVariable Integer id, @RequestBody Postazioni Postazioni) {
+    public ResponseEntity<?> aggiornaPostazioni(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
-            Postazioni PostazioneAggioranta = PostazioniService.aggiornaPostazioni(id, Postazioni);
-            return ResponseEntity.ok(PostazioneAggioranta);
+            PostazioniDTO postazioneAggiornata = postazioniService.aggiornaPostazioni(id, updates);
+            return ResponseEntity.ok(postazioneAggiornata);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

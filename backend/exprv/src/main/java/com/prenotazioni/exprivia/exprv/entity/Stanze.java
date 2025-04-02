@@ -55,6 +55,10 @@ public class Stanze {
     public Stanze() {
     }
 
+    public Stanze(Integer id_stanza) {
+        this.id_stanza = id_stanza;
+    }
+
     //Costruttore Con Argomenti
     public Stanze(Integer id_stanza, String nome, tipo_stanza tipo_stanza, Integer capacita_stanza, LocalDateTime creatoIl,
             LocalDateTime aggiornatoIl) {
