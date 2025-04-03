@@ -7,18 +7,23 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
+import com.prenotazioni.exprivia.exprv.mapper.PrenotazioniMapper;
+import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.PrenotazioniRepository;
 import com.prenotazioni.exprivia.exprv.repository.StanzeRepository;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PrenotazioniService {
@@ -35,6 +40,9 @@ public class PrenotazioniService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PrenotazioniMapper prenotazioniMapper;
+
     public PrenotazioniService(){};
 
     public PrenotazioniService(PrenotazioniRepository prenotazioniRepository) {
@@ -42,18 +50,34 @@ public class PrenotazioniService {
     }
 
     //findall Tutte le prenotazioni
-    public List<Prenotazioni> cercaTutti() {
+    /*public List<Prenotazioni> cercaTutti() {
         return prenotazioniRepository.findAll();
+    }*/
+
+    public List<PrenotazioniDTO> cercaTutti() {
+        List<Prenotazioni> prenotazioniList = prenotazioniRepository.findAll();
+        return prenotazioniList.stream()
+            .map(PrenotazioniMapper.INSTANCE::toPrenotazioniDTO)
+            .toList();
     }
 
     //Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    public Prenotazioni cercaSingolo(Integer id) {
+    /*public Prenotazioni cercaSingolo(Integer id) {
         return prenotazioniRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prenotazioni con id " + id + " non trovata."));
+    }*/
+
+    public PrenotazioniDTO cercaSingolo(Integer id) {
+        Prenotazioni prenotazioni = prenotazioniRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
+        return PrenotazioniMapper.INSTANCE.toPrenotazioniDTO(prenotazioni);
     }
 
     //Creazione nuova Prenotazioni con enum -> stringa -> enum 
-    public Prenotazioni creaPrenotazioni(Prenotazioni prenotazioni) {
+    @Transactional
+    public PrenotazioniDTO creaPrenotazioni(PrenotazioniDTO prenotazioniDTO) {
+        Prenotazioni prenotazioni = prenotazioniMapper.toPrenotazioni(prenotazioniDTO);
+        
         //Condizioni per i NOT NULL 
 
         /*if (prenotazioni.getId_prenotazioni() == null) {
@@ -76,7 +100,8 @@ public class PrenotazioniService {
             throw new IllegalArgumentException("La Prenotazioni con ID " + prenotazioni.getId_prenotazioni() + " esiste già.");
         }*/
 
-        return prenotazioniRepository.save(prenotazioni);
+        Prenotazioni savedPrenotazioni = prenotazioniRepository.save(prenotazioni);
+        return prenotazioniMapper.toPrenotazioniDTO(savedPrenotazioni);
     }
 
     //Metodo Per Aggiornare Le Prenotazioni
@@ -89,43 +114,38 @@ public class PrenotazioniService {
         }
     }*/
 
-    public Prenotazioni updatePrenotazioni(Integer id, Map<String, Object> updates) {
+    public PrenotazioniDTO updatePrenotazioni(Integer id, Map<String, Object> updates) {
         Prenotazioni existingPrenotazioni = prenotazioniRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Prenotazione con ID " + id + " non trovata"));
     
         updates.forEach((key, value) -> {
             switch (key) {
                 case "stato_prenotazione":
-                    existingPrenotazioni.setStato_prenotazione(stato_prenotazione.valueOf(value.toString()));
-                    break;
+                    existingPrenotazioni.setStato_prenotazione(stato_prenotazione.valueOf(value.toString())); break;
                 case "dataInizio":
-                    existingPrenotazioni.setDataInizio(LocalDateTime.parse(value.toString()));
-                    break;
+                    existingPrenotazioni.setDataInizio(LocalDateTime.parse(value.toString())); break;
                 case "dataFine":
-                    existingPrenotazioni.setDataFine(LocalDateTime.parse(value.toString()));
-                    break;
+                    existingPrenotazioni.setDataFine(LocalDateTime.parse(value.toString())); break;
                 case "postazione":
                     Integer idPostazione = (Integer) value;
                     Postazioni postazione = postazioniRepository.findById(idPostazione)
                         .orElseThrow(() -> new EntityNotFoundException("Postazione con ID " + idPostazione + " non trovata"));
-                    existingPrenotazioni.setPostazione(postazione);
-                    break;
+                    existingPrenotazioni.setPostazione(postazione); break;
                 case "user":
                     Integer idUser = (Integer) value;
                     Users user = userRepository.findById(idUser)
                         .orElseThrow(() -> new EntityNotFoundException("User con ID " + idUser + " non trovato"));
-                    existingPrenotazioni.setUsers(user);
-                    break;
+                    existingPrenotazioni.setUsers(user); break;
                 case "stanza":
                     Integer idStanza = (Integer) value;
                     Stanze stanza = stanzeRepository.findById(idStanza)
                         .orElseThrow(() -> new EntityNotFoundException("Stanza con ID " + idStanza + " non trovata"));
-                    existingPrenotazioni.setStanze(stanza);
-                    break;
+                    existingPrenotazioni.setStanze(stanza); break;
             }
         });
     
-        return prenotazioniRepository.save(existingPrenotazioni);
+        Prenotazioni updatedPrenotazioni = prenotazioniRepository.save(existingPrenotazioni);
+        return prenotazioniMapper.INSTANCE.toPrenotazioniDTO(updatedPrenotazioni);
     }
     
 
