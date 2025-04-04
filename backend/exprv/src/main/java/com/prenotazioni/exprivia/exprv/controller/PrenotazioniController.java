@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
 
@@ -34,25 +35,25 @@ public class PrenotazioniController {
     }
 
     @GetMapping()
-    public List<Prenotazioni> getPrenotazioni() {
+    public List<PrenotazioniDTO> getPrenotazioni() {
         return PrenotazioniService.cercaTutti();
     }
 
     @GetMapping("/Prenotazioni/{id_prenotazioni}")
-    public ResponseEntity<Prenotazioni> getPrenotazioniByID(@PathVariable Integer id_prenotazioni) {
+    public ResponseEntity<PrenotazioniDTO> getPrenotazioniByID(@PathVariable("id_prenotazioni") Integer id_prenotazioni) {
         try {
-            Prenotazioni Prenotazioni = PrenotazioniService.cercaSingolo(id_prenotazioni);
-            return ResponseEntity.ok(Prenotazioni);
+            PrenotazioniDTO prenotazioniDTO = PrenotazioniService.cercaSingolo(id_prenotazioni);
+            return ResponseEntity.ok(prenotazioniDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @PostMapping("/crea_Prenotazioni")
-    public ResponseEntity<?> creaPrenotazioni(@RequestBody Prenotazioni Prenotazioni) {
+    public ResponseEntity<?> creaPrenotazioni(@RequestBody PrenotazioniDTO prenotazioniDTO) {
         try {
-            Prenotazioni newPrenotazioni = PrenotazioniService.creaPrenotazioni(Prenotazioni);
-            return ResponseEntity.ok(newPrenotazioni);
+            PrenotazioniDTO newPrenotazioniDTO = PrenotazioniService.creaPrenotazioni(prenotazioniDTO);
+            return ResponseEntity.ok(newPrenotazioniDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -61,7 +62,7 @@ public class PrenotazioniController {
     @PutMapping("/{id}")
     public ResponseEntity<?> aggiornaPrenotazioni(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
-            Prenotazioni prenotazioniAggiornata = PrenotazioniService.updatePrenotazioni(id, updates);
+            PrenotazioniDTO prenotazioniAggiornata = PrenotazioniService.updatePrenotazioni(id, updates);
             return ResponseEntity.ok(prenotazioniAggiornata);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

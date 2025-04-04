@@ -29,6 +29,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserMapper userMapper;
+
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -45,20 +48,35 @@ public class UserService {
     }
 
     // findall Tutte gli utenti
-    public List<Users> cercaTutti() {
+    /*public List<Users> cercaTutti() {
         return userRepository.findAll();
+    }*/
+
+    //FindAllo con DTO
+    public List<UserDTO> cercaTutti() {
+        List<Users> usersList = userRepository.findAll();
+        return usersList.stream()
+            .map(UserMapper.INSTANCE::toUserDTO)
+            .toList();
     }
 
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    public Users cercaSingolo(Integer id) {
+    /*public Users cercaSingolo(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
+    }*/
+
+    //Cerca Singo con DTO
+    public UserDTO cercaSingolo(Integer id) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
+        return UserMapper.INSTANCE.toUserDTO(user);
     }
 
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
     // Come sopra ma per email, metodo findByEmail da creare nel repository
     // Creazione nuovo utente con enum -> stringa -> enum
-    @Transactional
+    /*@Transactional
     public Users creaUtente(Users user) {
         // Condizioni per i NOT NULL
         if (user.getRuolo_utente() == null) {
@@ -88,9 +106,44 @@ public class UserService {
         user.setPassword(hashedPassword);
 
         return userRepository.save(user);
+    }*/
+
+    //creaUtente con DTO
+    @Transactional
+    public UserDTO creaUtente(UserDTO userDTO) {
+        // Converte il DTO in entità Users
+        Users user = userMapper.toUser(userDTO);
+
+        // Condizioni per i NOT NULL
+        if (user.getRuolo_utente() == null) {
+            throw new IllegalArgumentException("Il ruolo non può essere nullo!");
+        }
+        if (user.getNome() == null || user.getNome().isEmpty()) {
+            throw new IllegalArgumentException("Il nome non può essere nullo!");
+        }
+        if (user.getCognome() == null || user.getCognome().isEmpty()) {
+            throw new IllegalArgumentException("Il cognome non può essere nullo!");
+        }
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("La mail non può essere nulla!");
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Esiste già un utente con questa email!");
+        }
+        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("La password non può essere nulla!");
+        }
+
+        // Hash della password
+        String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
+        user.setPassword(hashedPassword); // Setta la password sull'entità
+
+        Users savedUser = userRepository.save(user);
+
+        return userMapper.toUserDTO(savedUser);
     }
-    
-    public Users aggiornaUser(Integer id, Map<String, Object> updates) {
+
+    /*public Users aggiornaUser(Integer id, Map<String, Object> updates) {
         Users existingUser = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
     
@@ -106,7 +159,28 @@ public class UserService {
         });
     
         return userRepository.save(existingUser);
-    } 
+    }*/ 
+
+    //AggiornaUser con DTO
+    public UserDTO aggiornaUser(Integer id, Map<String, Object> updates) {
+        Users existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
+    
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "nome": existingUser.setNome((String) value); break;
+                case "cognome": existingUser.setCognome((String) value); break;
+                case "email": existingUser.setEmail((String) value); break;
+                case "login": existingUser.setLogin((String) value); break;
+                case "password": existingUser.setPassword(passwordEncoder.encode((String) value)); break;
+                case "ruolo_utente": existingUser.setRuolo_utente(ruolo_utente.valueOf((String) value)); break;
+            }
+        });
+    
+        Users updatedUser = userRepository.save(existingUser);
+        return UserMapper.INSTANCE.toUserDTO(updatedUser);
+    }
+    
 
     public void eliminaUser(Integer id) {
         if (userRepository.existsById(id)) {

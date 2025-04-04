@@ -10,6 +10,7 @@ public class UserDTO {
     private String email;
     private String login;
     private String token;
+    private String password;
     private ruolo_utente ruolo_utente;
 
     // Costruttore vuoto
@@ -17,13 +18,14 @@ public class UserDTO {
     }
 
     // Costruttore con parametri
-    public UserDTO(Integer id_user, String nome, String cognome, String email, String login, String token, ruolo_utente ruolo_utente) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String login, String token, String password, ruolo_utente ruolo_utente) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.login = login;
         this.token = token;
+        this.password = password;
         this.ruolo_utente = ruolo_utente;
     }
 
@@ -58,6 +60,14 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword(){
+        return password;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
     }
 
     public ruolo_utente getRuolo_utente() {
