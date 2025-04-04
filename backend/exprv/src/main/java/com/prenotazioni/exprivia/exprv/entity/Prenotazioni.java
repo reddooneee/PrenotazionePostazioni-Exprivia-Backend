@@ -3,7 +3,6 @@ package com.prenotazioni.exprivia.exprv.entity;
 //import Enum Prenotazioni
 import java.time.LocalDateTime;
 
-import org.apache.catalina.User;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -125,6 +124,4 @@ public class Prenotazioni {
     }
 
 // Getters and Setters
-    
-
 }
