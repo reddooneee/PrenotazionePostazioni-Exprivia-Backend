@@ -8,6 +8,8 @@ import { ErrorStateMatcher } from "@angular/material/core";
 import { Router, RouterLink } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { UserService } from "../../service/user.service";
+import { AuthService } from "../../service/auth.service";
+import { login } from "../../model/login.model";
 
 export class MyErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: FormControl | null): boolean {
@@ -26,6 +28,7 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
     ReactiveFormsModule,
     CommonModule,
     RouterLink,
+    
   ],
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
@@ -36,17 +39,29 @@ export class LoginComponent {
   matcher = new MyErrorStateMatcher();
   errorMessage: string = ''; // Variabile per il messaggio di errore
 
-  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {
+  constructor(private fb: FormBuilder, private userService: UserService, private router: Router, private authService: AuthService) {
     this.loginForm = this.fb.group({
-      email: ["", [Validators.required, Validators.email]],
+      login: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
     });
   }
 
   // Metodo per gestire il login
-  onSubmit() {
+  async onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Login riuscito:', this.loginForm.value);
+      const loginData: login = this.loginForm.value;
+      try {
+        const response = await this.authService.login(loginData);
+        console.log("Login riuscito:", response);
+        alert("Login riuscito:")
+        // Redirect o salvataggio dati utente qui
+      } catch (error) {
+        console.error("Errore durante il login:", error);
+        this.errorMessage = "Credenziali non valide";
+      }
+    } else {
+      this.errorMessage = "Compila correttamente tutti i campi!";
     }
   }
+  
 }
