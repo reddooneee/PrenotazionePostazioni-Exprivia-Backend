@@ -1,6 +1,5 @@
 package com.prenotazioni.exprivia.exprv.service;
 
-import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -41,9 +40,10 @@ public class UserService {
 
         Users user = userRepository.findByLogin(credentialsDto.login())
                 .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
-        if (passwordEncoder.matches(CharBuffer.wrap(credentialsDto.password()), user.getPassword())) {
+        if (passwordEncoder.matches(credentialsDto.password(), user.getPassword())) {
             return UserMapper.INSTANCE.toUserDTO(user);
         }
+
         throw new AppException("Password invalida", HttpStatus.BAD_REQUEST);
     }
 
@@ -51,13 +51,12 @@ public class UserService {
     /*public List<Users> cercaTutti() {
         return userRepository.findAll();
     }*/
-
     //FindAllo con DTO
     public List<UserDTO> cercaTutti() {
         List<Users> usersList = userRepository.findAll();
         return usersList.stream()
-            .map(UserMapper.INSTANCE::toUserDTO)
-            .toList();
+                .map(UserMapper.INSTANCE::toUserDTO)
+                .toList();
     }
 
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
@@ -65,7 +64,6 @@ public class UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
     }*/
-
     //Cerca Singo con DTO
     public UserDTO cercaSingolo(Integer id) {
         Users user = userRepository.findById(id)
@@ -107,7 +105,6 @@ public class UserService {
 
         return userRepository.save(user);
     }*/
-
     //creaUtente con DTO
     @Transactional
     public UserDTO creaUtente(UserDTO userDTO) {
@@ -159,28 +156,38 @@ public class UserService {
         });
     
         return userRepository.save(existingUser);
-    }*/ 
-
+    }*/
     //AggiornaUser con DTO
     public UserDTO aggiornaUser(Integer id, Map<String, Object> updates) {
         Users existingUser = userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
-    
+                .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
+
         updates.forEach((key, value) -> {
             switch (key) {
-                case "nome": existingUser.setNome((String) value); break;
-                case "cognome": existingUser.setCognome((String) value); break;
-                case "email": existingUser.setEmail((String) value); break;
-                case "login": existingUser.setLogin((String) value); break;
-                case "password": existingUser.setPassword(passwordEncoder.encode((String) value)); break;
-                case "ruolo_utente": existingUser.setRuolo_utente(ruolo_utente.valueOf((String) value)); break;
+                case "nome":
+                    existingUser.setNome((String) value);
+                    break;
+                case "cognome":
+                    existingUser.setCognome((String) value);
+                    break;
+                case "email":
+                    existingUser.setEmail((String) value);
+                    break;
+                case "login":
+                    existingUser.setLogin((String) value);
+                    break;
+                case "password":
+                    existingUser.setPassword(passwordEncoder.encode((String) value));
+                    break;
+                case "ruolo_utente":
+                    existingUser.setRuolo_utente(ruolo_utente.valueOf((String) value));
+                    break;
             }
         });
-    
+
         Users updatedUser = userRepository.save(existingUser);
         return UserMapper.INSTANCE.toUserDTO(updatedUser);
     }
-    
 
     public void eliminaUser(Integer id) {
         if (userRepository.existsById(id)) {

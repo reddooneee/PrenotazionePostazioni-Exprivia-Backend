@@ -3,17 +3,20 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.prenotazioni.exprivia.exprv.dto.PostazioniDTO;
-import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
-import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.service.PostazioniService;
-import com.prenotazioni.exprivia.exprv.service.StanzeService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -24,8 +27,9 @@ public class PostazioniController {
     @Autowired
     private PostazioniService postazioniService;
 
-    public PostazioniController(){}
-    
+    public PostazioniController() {
+    }
+
     public PostazioniController(PostazioniService PostazioniService) {
         this.postazioniService = PostazioniService;
     }
@@ -47,7 +51,6 @@ public class PostazioniController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-    
 
     //POST (CREA POSTAZIONE)
     @PostMapping("/crea_Postazione")
