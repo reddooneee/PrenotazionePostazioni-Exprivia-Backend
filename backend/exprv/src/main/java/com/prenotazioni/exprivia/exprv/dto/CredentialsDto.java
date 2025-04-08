@@ -1,5 +1,5 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
-public record CredentialsDto(String login, String password) {
+public record CredentialsDto(String email, String password) {
 
 }

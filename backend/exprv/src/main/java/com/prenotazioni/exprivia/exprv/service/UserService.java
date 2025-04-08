@@ -38,7 +38,7 @@ public class UserService {
 
     public UserDTO login(CredentialsDto credentialsDto) {
 
-        Users user = userRepository.findByLogin(credentialsDto.login())
+        Users user = userRepository.findByemail(credentialsDto.email())
                 .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
         if (passwordEncoder.matches(credentialsDto.password(), user.getPassword())) {
             return UserMapper.INSTANCE.toUserDTO(user);
@@ -140,23 +140,6 @@ public class UserService {
         return userMapper.toUserDTO(savedUser);
     }
 
-    /*public Users aggiornaUser(Integer id, Map<String, Object> updates) {
-        Users existingUser = userRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
-    
-        updates.forEach((key, value) -> {
-                switch (key) {
-                case "nome": existingUser.setNome((String) value); break;
-                case "cognome": existingUser.setCognome((String) value); break;
-                case "email": existingUser.setEmail((String) value); break;
-                case "login": existingUser.setLogin((String) value); break;
-                case "password": existingUser.setPassword((String) value); break;
-                case "ruolo_utente": existingUser.setRuolo_utente(ruolo_utente.valueOf((String) value)); break;
-            }
-        });
-    
-        return userRepository.save(existingUser);
-    }*/
     //AggiornaUser con DTO
     public UserDTO aggiornaUser(Integer id, Map<String, Object> updates) {
         Users existingUser = userRepository.findById(id)
@@ -172,9 +155,6 @@ public class UserService {
                     break;
                 case "email":
                     existingUser.setEmail((String) value);
-                    break;
-                case "login":
-                    existingUser.setLogin((String) value);
                     break;
                 case "password":
                     existingUser.setPassword(passwordEncoder.encode((String) value));
