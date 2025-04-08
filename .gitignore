@@ -4,14 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+### Angular ###
+frontend/node_modules
+frontend/.angular
 
 ### IntelliJ IDEA ###
 .idea
