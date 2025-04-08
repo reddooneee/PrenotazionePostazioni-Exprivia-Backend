@@ -8,6 +8,10 @@ import { ErrorStateMatcher } from "@angular/material/core";
 import { Router, RouterLink } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { UserService } from "../../service/user.service";
+import { User } from "../../model/user.model";
+import { AuthService } from "../../service/auth.service";
+import { login } from "../../model/login.model";
+
 
 export class MyErrorStateMatcher implements ErrorStateMatcher {
   isErrorState(control: FormControl | null): boolean {
@@ -36,7 +40,7 @@ export class LoginComponent {
   matcher = new MyErrorStateMatcher();
   errorMessage: string = ''; // Variabile per il messaggio di errore
 
-  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {
+  constructor(private fb: FormBuilder, private userService: UserService, private router: Router, private AuthService: AuthService) {
     this.loginForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
@@ -44,9 +48,19 @@ export class LoginComponent {
   }
 
   // Metodo per gestire il login
-  onSubmit() {
+  async onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Login riuscito:', this.loginForm.value);
+      const loginData: login = this.loginForm.value;
+      try {
+        const response = await this.AuthService.login(loginData);
+        console.log('Response ricevuta:', response);
+        // qui puoi fare redirect, salvare utente in localStorage, ecc.
+        alert("Utente Registrato")
+      } catch (error) {
+        console.error('Errore durante il login:', error);
+        this.errorMessage = 'Credenziali non valide';
+      }
     }
   }
+  
 }
