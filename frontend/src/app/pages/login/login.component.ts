@@ -55,7 +55,7 @@ export class LoginComponent {
         const response = await this.AuthService.login(loginData);
         console.log('Response ricevuta:', response);
         // qui puoi fare redirect, salvare utente in localStorage, ecc.
-        alert("Utente Registrato")
+        alert("Utente Loggato Con Successo")
       } catch (error) {
         console.error('Errore durante il login:', error);
         this.errorMessage = 'Credenziali non valide';

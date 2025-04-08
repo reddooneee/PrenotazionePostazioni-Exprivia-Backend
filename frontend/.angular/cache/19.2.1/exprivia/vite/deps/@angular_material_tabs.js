@@ -4,12 +4,12 @@ import {
   TemplatePortal
 } from "./chunk-OK5CY6JV.js";
 import {
+  SharedResizeObserver
+} from "./chunk-M5MDVY7A.js";
+import {
   CdkScrollable,
   ViewportRuler
 } from "./chunk-P45RX7I6.js";
-import {
-  SharedResizeObserver
-} from "./chunk-M5MDVY7A.js";
 import {
   CdkMonitorFocus,
   CdkObserveContent,
