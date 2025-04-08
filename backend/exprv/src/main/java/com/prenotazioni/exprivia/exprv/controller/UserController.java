@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.prenotazioni.exprivia.exprv.dto.PostazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
-import com.prenotazioni.exprivia.exprv.service.PostazioniService;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -29,7 +27,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    public UserController(){}
+    public UserController() {
+    }
 
     // Costruttore per iniettare il servizio UserService
     public UserController(UserService userService) {

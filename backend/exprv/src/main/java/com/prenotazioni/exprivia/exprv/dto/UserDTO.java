@@ -3,12 +3,11 @@ package com.prenotazioni.exprivia.exprv.dto;
 import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
 public class UserDTO {
-    
+
     private Integer id_user;
     private String nome;
     private String cognome;
     private String email;
-    private String login;
     private String token;
     private String password;
     private ruolo_utente ruolo_utente;
@@ -18,12 +17,11 @@ public class UserDTO {
     }
 
     // Costruttore con parametri
-    public UserDTO(Integer id_user, String nome, String cognome, String email, String login, String token, String password, ruolo_utente ruolo_utente) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String token, String password, ruolo_utente ruolo_utente) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
-        this.login = login;
         this.token = token;
         this.password = password;
         this.ruolo_utente = ruolo_utente;
@@ -62,11 +60,11 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getPassword(){
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password){
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -84,13 +82,5 @@ public class UserDTO {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
     }
 }

@@ -34,9 +34,6 @@ public class Users {
     @Column(length = 60, nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String login;
-
     // enum ruolo_utente_utente
     @Enumerated(EnumType.STRING)
     private ruolo_utente ruolo_utente;
@@ -57,14 +54,13 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password, String login) {
+    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.ruolo_utente = ruolo_utente;
         this.password = password;
-        this.login = login;
     }
 
     // Setters And Getters
@@ -122,20 +118,6 @@ public class Users {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    /**
-     * @return String return the login
-     */
-    public String getLogin() {
-        return login;
-    }
-
-    /**
-     * @param login the login to set
-     */
-    public void setLogin(String login) {
-        this.login = login;
     }
 
     /**
