@@ -44,7 +44,6 @@ export class RegisterComponent {
       cognome: ["", Validators.required],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
-      login: ["", Validators.required],
       ruolo_utente: ["", Validators.required],
     });
   }
