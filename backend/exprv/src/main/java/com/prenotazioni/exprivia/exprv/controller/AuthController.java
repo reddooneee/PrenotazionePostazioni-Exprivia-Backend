@@ -1,7 +1,10 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,28 +17,26 @@ import com.prenotazioni.exprivia.exprv.service.UserService;
 @RestController
 public class AuthController {
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
-    // Costruttore per l'iniezione di dipendenza
-    public AuthController(UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private JwtService jwtService;
 
-    public record JwtResponse(String token, UserDTO user) {
-
-    }
-    JwtService JwtService = new JwtService();
-
-    //Aggiunta verifica errori sul AuthController
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDto credentialsDto) {
         try {
-            UserDTO user = userService.login(credentialsDto);
-            String token = JwtService.generateToken(user.getEmail());
-            return ResponseEntity.ok(new JwtResponse(token, user));
+            UserDTO userDTO = userService.login(credentialsDto);
+            UserDetails userDetails = userService.loadUserByUsername(credentialsDto.email());
+            String token = jwtService.generateToken(userDetails);
+
+            // Restituisci il token e magari qualche info dell'utente
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "utente", userDTO
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(401).body("Credenziali non valide");
         }
     }
-
 }

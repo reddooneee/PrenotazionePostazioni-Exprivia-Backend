@@ -5,6 +5,10 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +24,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -47,10 +51,6 @@ public class UserService {
         throw new AppException("Password invalida", HttpStatus.BAD_REQUEST);
     }
 
-    // findall Tutte gli utenti
-    /*public List<Users> cercaTutti() {
-        return userRepository.findAll();
-    }*/
     //FindAllo con DTO
     public List<UserDTO> cercaTutti() {
         List<Users> usersList = userRepository.findAll();
@@ -60,10 +60,6 @@ public class UserService {
     }
 
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    /*public Users cercaSingolo(Integer id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
-    }*/
     //Cerca Singo con DTO
     public UserDTO cercaSingolo(Integer id) {
         Users user = userRepository.findById(id)
@@ -74,37 +70,6 @@ public class UserService {
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
     // Come sopra ma per email, metodo findByEmail da creare nel repository
     // Creazione nuovo utente con enum -> stringa -> enum
-    /*@Transactional
-    public Users creaUtente(Users user) {
-        // Condizioni per i NOT NULL
-        if (user.getRuolo_utente() == null) {
-            throw new IllegalArgumentException("Il ruolo non può essere nullo!");
-        }
-
-        if (user.getNome() == null) {
-            throw new IllegalArgumentException("Il nome non può essere nullo!");
-        }
-
-        if (user.getCognome() == null) {
-            throw new IllegalArgumentException("Il cognome non può essere nullo!");
-        }
-
-        if (user.getEmail() == null) {
-            throw new IllegalArgumentException("La mail non può essere nulla!");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Esiste già un utente con questa email!");
-        }
-
-        if (user.getPassword() == null) {
-            throw new IllegalArgumentException("La password non può essere nulla!");
-        }
-
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
-
-        return userRepository.save(user);
-    }*/
     //creaUtente con DTO
     @Transactional
     public UserDTO creaUtente(UserDTO userDTO) {
@@ -175,6 +140,20 @@ public class UserService {
         } else {
             throw new EntityNotFoundException("Utente con ID " + id + " non trovato");
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        // Cerca l'utente nel database con la email
+        Users user = userRepository.findByemail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato con email: " + email));
+
+        // Mappa l'utente in un oggetto UserDetails
+        return User.builder()
+                .username(user.getEmail()) // puoi usare anche l'email se preferisci
+                .password(user.getPassword()) // la password è già hashata nel database
+                .authorities(user.getRuolo_utente().name()) // aggiungi i ruoli
+                .build();
     }
 
 }
