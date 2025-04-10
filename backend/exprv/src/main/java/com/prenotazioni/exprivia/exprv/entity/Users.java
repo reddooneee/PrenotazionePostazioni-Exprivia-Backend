@@ -1,43 +1,68 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "users")
 public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Integer id_user; //Primary Key
 
-    @Column(length = 50)    //Forza Hibernate a stare con varchar(50) invece che dimensione predefinita
+    @Column(name = "nome", length = 50)
     private String nome;
 
-    @Column(length = 50)
+    @Column(name = "cognome", length = 50)
     private String cognome;
 
-    @Column(length = 100)
+    @Column(name = "email", unique = true, length = 100)
     private String email;
 
-    @Column(length = 60, nullable = false)
+    @Column(name = "password_hash", length = 60, nullable = false)
     private String password;
 
+    //Verify Code
+    @Column(name = "verification_code")
+    private String verificationCode;
+    //Expiration Code
+    @Column(name = "verification_expiration")
+    private LocalDateTime verificationCodeExpiresAt;
+
+    @Column
+    private boolean enabled;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "name"))
+    private Set<Authority> authorities = new HashSet<>();
+
+
+    /* 
     // enum ruolo_utente_utente
     @Enumerated(EnumType.STRING)
     private ruolo_utente ruolo_utente;
-
+     */
     //Usare LocalDateTime cosi si tiene traccia anche del tempo.
     //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
@@ -54,12 +79,10 @@ public class Users {
     }
 
     // Costruttore
-    public Users(Integer id_user, String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
-        this.id_user = id_user;
+    public Users(String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
-        this.ruolo_utente = ruolo_utente;
         this.password = password;
     }
 
@@ -96,14 +119,6 @@ public class Users {
         this.email = email;
     }
 
-    public ruolo_utente getRuolo_utente() {
-        return ruolo_utente;
-    }
-
-    public void setRuolo_utente(ruolo_utente ruolo_utente) {
-        this.ruolo_utente = ruolo_utente;
-    }
-
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
@@ -120,18 +135,51 @@ public class Users {
         this.password = password;
     }
 
-    /**
-     * @param creatoIl the creatoIl to set
-     */
     public void setCreatoIl(LocalDateTime creatoIl) {
         this.creatoIl = creatoIl;
     }
 
-    /**
-     * @param aggiornatoIl the aggiornatoIl to set
-     */
     public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
         this.aggiornatoIl = aggiornatoIl;
     }
 
+    // Metodi per gestire le authorities    
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public Users addAuthority(Authority authority) {
+        this.authorities.add(authority);
+        return this;
+    }
+
+    public Users removeAuthority(Authority authority) {
+        this.authorities.remove(authority);
+        return this;
+    }
+
+    // @Override
+    // public String getUsername() {
+    //     throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+    // }
+    // @Override
+    // public boolean isAccountNonExpired() {
+    //     return true;
+    // }
+    // @Override
+    // public boolean isAccountNonLocked() {
+    //     return true;
+    // }
+    // @Override
+    // public boolean isCredentialsNonExpired() {
+    //     return true;
+    // }
+    // @Override
+    // public boolean isEnabled() {
+    //     return enabled;
+    // }
 }
