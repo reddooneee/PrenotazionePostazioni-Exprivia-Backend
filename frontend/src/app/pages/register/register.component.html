@@ -29,11 +29,6 @@
                 </mat-form-field>
 
                 <mat-form-field class="example-full-width">
-                    <mat-label>Login</mat-label>
-                    <input matInput formControlName="login" />
-                </mat-form-field>
-
-                <mat-form-field class="example-full-width">
                     <mat-label>Ruolo Utente</mat-label>
                     <mat-select formControlName="ruolo_utente">
                         <mat-option *ngFor="let ruolo of ruoliUtente" [value]="ruolo">

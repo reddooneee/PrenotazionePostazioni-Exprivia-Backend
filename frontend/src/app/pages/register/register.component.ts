@@ -14,7 +14,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatOption, MatSelectModule } from "@angular/material/select"; // Importa MatSelectModule
 import { RouterLink } from "@angular/router";
 import { UserService } from "../../service/user.service";
-import { User } from "../../model/user.model";
+import { User } from "../../core/auth/user.model";
 
 @Component({
   selector: "app-register",
@@ -44,7 +44,6 @@ export class RegisterComponent {
       cognome: ["", Validators.required],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
-      login: ["", Validators.required],
       ruolo_utente: ["", Validators.required],
     });
   }
