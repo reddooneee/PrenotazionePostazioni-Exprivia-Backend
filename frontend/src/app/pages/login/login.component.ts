@@ -8,7 +8,7 @@ import { ErrorStateMatcher } from "@angular/material/core";
 import { Router, RouterLink } from "@angular/router";
 import { CommonModule } from "@angular/common";
 import { UserService } from "../../service/user.service";
-import { AuthService } from "../../service/auth.service";
+import { AuthService } from "../../core/auth/auth.service";
 import { login } from "../../model/login.model";
 
 export class MyErrorStateMatcher implements ErrorStateMatcher {
