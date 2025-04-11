@@ -55,6 +55,28 @@ public class UserService {
         throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
     }
 
+        /**
+     * Valida i dati dell'utente
+     * 
+     * @param userDTO dati da validare
+     * @throws IllegalArgumentException se i dati non sono validi
+     */
+    private void validateUserData(UserDTO userDTO) {
+        if (userDTO.getNome() == null || userDTO.getNome().isEmpty()) {
+            throw new IllegalArgumentException("Il nome non può essere nullo!");
+        }
+        if (userDTO.getCognome() == null || userDTO.getCognome().isEmpty()) {
+            throw new IllegalArgumentException("Il cognome non può essere nullo!");
+        }
+        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("La mail non può essere nulla!");
+        }
+        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("La password non può essere nulla!");
+        }
+        // da aggiungere controllo per authority
+    }
+
     /**
      * Recupera tutti gli utenti dal database
      * 
@@ -105,25 +127,6 @@ public class UserService {
 
         // Restituisci il DTO dell'utente salvato
         return userMapper.toDto(user);
-        // // Condizioni per i NOT NULL
-        // if (user.() == null) {
-        // throw new IllegalArgumentException("Il ruolo non può essere nullo!");
-        // }
-        // if (user.getNome() == null || user.getNome().isEmpty()) {
-        // throw new IllegalArgumentException("Il nome non può essere nullo!");
-        // }
-        // if (user.getCognome() == null || user.getCognome().isEmpty()) {
-        // throw new IllegalArgumentException("Il cognome non può essere nullo!");
-        // }
-        // if (user.getEmail() == null || user.getEmail().isEmpty()) {
-        // throw new IllegalArgumentException("La mail non può essere nulla!");
-        // }
-        // if (userRepository.existsByEmail(user.getEmail())) {
-        // throw new IllegalArgumentException("Esiste già un utente con questa email!");
-        // }
-        // if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-        // throw new IllegalArgumentException("La password non può essere nulla!");
-        // }
     }
 
     /**
@@ -214,24 +217,5 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-    /**
-     * Valida i dati dell'utente
-     * 
-     * @param userDTO dati da validare
-     * @throws IllegalArgumentException se i dati non sono validi
-     */
-    private void validateUserData(UserDTO userDTO) {
-        if (userDTO.getNome() == null || userDTO.getNome().isEmpty()) {
-            throw new IllegalArgumentException("Il nome non può essere nullo!");
-        }
-        if (userDTO.getCognome() == null || userDTO.getCognome().isEmpty()) {
-            throw new IllegalArgumentException("Il cognome non può essere nullo!");
-        }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("La mail non può essere nulla!");
-        }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("La password non può essere nulla!");
-        }
-    }
+
 }
