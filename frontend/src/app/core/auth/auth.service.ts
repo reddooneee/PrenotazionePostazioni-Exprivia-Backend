@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { AxiosService } from "./axios.service";
-import { login } from "../model/login.model";
+import { AxiosService } from "../../service/axios.service";
+import { login } from "../../model/login.model";
 
 
 @Injectable({
