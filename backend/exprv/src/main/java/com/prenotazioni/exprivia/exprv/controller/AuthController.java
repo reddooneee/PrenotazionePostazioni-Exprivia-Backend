@@ -1,10 +1,7 @@
 package com.prenotazioni.exprivia.exprv.controller;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,11 +16,14 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    //Aggiunta verifica errori sul AuthController
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDto credentialsDto) {
-
-        UserDTO userDTO = userService.login(credentialsDto);
-        UserDetails userDetails = userService.loadUserByUsername(credentialsDto.email());
-
+        try {
+            UserDTO user = userService.login(credentialsDto);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Credenziali non valide");
+        }
     }
 }

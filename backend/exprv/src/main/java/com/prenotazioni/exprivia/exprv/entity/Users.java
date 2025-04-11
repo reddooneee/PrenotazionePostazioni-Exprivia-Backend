@@ -43,16 +43,16 @@ public class Users {
     // Verify Code
     @Column(name = "verification_code")
     private String verificationCode;
-    
+
     // Expiration Code
     @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
 
-    @Column
+    @Column(name = "enabled")
     private boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "name"))
+    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "authority_name"))
     private Set<Authority> authorities = new HashSet<>();
 
     /*
