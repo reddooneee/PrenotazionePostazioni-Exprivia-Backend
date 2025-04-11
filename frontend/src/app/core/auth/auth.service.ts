@@ -13,9 +13,5 @@ export class AuthService {
     async login(credentials: { login: string; password: string }): Promise<login> {
         return this.axiosService.post("/login", credentials);
     }
-    
-
-
-
 
 }

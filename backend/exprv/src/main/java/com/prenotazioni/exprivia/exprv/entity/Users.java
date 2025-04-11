@@ -1,14 +1,11 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
@@ -29,7 +26,7 @@ public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Integer id_user; //Primary Key
+    private Integer id_user; // Primary Key
 
     @Column(name = "nome", length = 50)
     private String nome;
@@ -43,10 +40,11 @@ public class Users {
     @Column(name = "password_hash", length = 60, nullable = false)
     private String password;
 
-    //Verify Code
+    // Verify Code
     @Column(name = "verification_code")
     private String verificationCode;
-    //Expiration Code
+    
+    // Expiration Code
     @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
 
@@ -57,14 +55,14 @@ public class Users {
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "name"))
     private Set<Authority> authorities = new HashSet<>();
 
-
-    /* 
-    // enum ruolo_utente_utente
-    @Enumerated(EnumType.STRING)
-    private ruolo_utente ruolo_utente;
+    /*
+     * // enum ruolo_utente_utente
+     * 
+     * @Enumerated(EnumType.STRING)
+     * private ruolo_utente ruolo_utente;
      */
-    //Usare LocalDateTime cosi si tiene traccia anche del tempo.
-    //Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
+    // Usare LocalDateTime cosi si tiene traccia anche del tempo.
+    // Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
     @Column(name = "creatoil")
     private LocalDateTime creatoIl;
@@ -73,7 +71,8 @@ public class Users {
     @Column(name = "aggiornatoil")
     private LocalDateTime aggiornatoIl;
 
-    // JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
+    // JPA richiede un costruttore senza argomenti affinché possa creare istanze
+    // delle entità tramite reflection
     // Costruttore Vuoto - Per Jpa
     public Users() {
     }
@@ -143,7 +142,7 @@ public class Users {
         this.aggiornatoIl = aggiornatoIl;
     }
 
-    // Metodi per gestire le authorities    
+    // Metodi per gestire le authorities
     public Set<Authority> getAuthorities() {
         return authorities;
     }
@@ -164,22 +163,23 @@ public class Users {
 
     // @Override
     // public String getUsername() {
-    //     throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+    // throw new UnsupportedOperationException("Unimplemented method
+    // 'getUsername'");
     // }
     // @Override
     // public boolean isAccountNonExpired() {
-    //     return true;
+    // return true;
     // }
     // @Override
     // public boolean isAccountNonLocked() {
-    //     return true;
+    // return true;
     // }
     // @Override
     // public boolean isCredentialsNonExpired() {
-    //     return true;
+    // return true;
     // }
     // @Override
     // public boolean isEnabled() {
-    //     return enabled;
+    // return enabled;
     // }
 }
