@@ -55,7 +55,7 @@ public class UserService {
         throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
     }
 
-        /**
+    /**
      * Valida i dati dell'utente
      * 
      * @param userDTO dati da validare
@@ -217,5 +217,16 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-
+        /**
+     * Elimina un utente dal sistema
+     * 
+     * @param id ID dell'utente da eliminare
+     * @throws EntityNotFoundException se l'utente non esiste
+     */
+    public void eliminaUser(Integer id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("Utente con ID " + id + " non trovato");
+        }
+        userRepository.deleteById(id);
+    }
 }
