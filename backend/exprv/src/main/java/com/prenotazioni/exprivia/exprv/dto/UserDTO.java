@@ -1,6 +1,6 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
-import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
+import java.util.Set;
 
 public class UserDTO {
 
@@ -8,23 +8,22 @@ public class UserDTO {
     private String nome;
     private String cognome;
     private String email;
-    private String token;
+    //private String token;
     private String password;
-    private ruolo_utente ruolo_utente;
+    private Set<String> authorities;
 
     // Costruttore vuoto
     public UserDTO() {
     }
 
     // Costruttore con parametri
-    public UserDTO(Integer id_user, String nome, String cognome, String email, String token, String password, ruolo_utente ruolo_utente) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String password, Set<String> authorities) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
-        this.token = token;
         this.password = password;
-        this.ruolo_utente = ruolo_utente;
+        this.authorities = authorities;
     }
 
     // Getters e Setters
@@ -68,19 +67,18 @@ public class UserDTO {
         this.password = password;
     }
 
-    public ruolo_utente getRuolo_utente() {
-        return ruolo_utente;
+    public Set<String> getAuthorities() {
+        return authorities;
     }
 
-    public void setRuolo_utente(ruolo_utente ruolo_utente) {
-        this.ruolo_utente = ruolo_utente;
+    public void setAuthorities(Set<String> authorities) {
+        this.authorities = authorities;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
+    // public String getToken() {
+    //     return token;
+    // }
+    // public void setToken(String token) {
+    //     this.token = token;
+    // }
 }

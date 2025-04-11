@@ -19,12 +19,17 @@ import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
+import com.prenotazioni.exprivia.exprv.security.AuthoritiesConstants;
+import com.prenotazioni.exprivia.exprv.repository.AuthorityRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
 public class UserService implements UserDetailsService {
+
+    @Autowired
+    private AuthorityRepository authorityRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -35,9 +40,10 @@ public class UserService implements UserDetailsService {
     @Autowired
     private UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authorityRepository = authorityRepository;
     }
 
     public UserDTO login(CredentialsDto credentialsDto) {
@@ -48,7 +54,7 @@ public class UserService implements UserDetailsService {
             return UserMapper.INSTANCE.toUserDTO(user);
         }
 
-        throw new AppException("Password invalida", HttpStatus.BAD_REQUEST);
+        throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
     }
 
     //FindAllo con DTO
@@ -67,35 +73,32 @@ public class UserService implements UserDetailsService {
         return UserMapper.INSTANCE.toUserDTO(user);
     }
 
-    // Ricerca singola tramite id ma con messaggino personalizzato invece che null
-    // Come sopra ma per email, metodo findByEmail da creare nel repository
-    // Creazione nuovo utente con enum -> stringa -> enum
+    // Ricerca singola tramite id 
     //creaUtente con DTO
     @Transactional
-    public UserDTO creaUtente(UserDTO userDTO) {
+    public User creaUtente(UserDTO userDTO) {
         // Converte il DTO in entità Users
         Users user = userMapper.toUser(userDTO);
 
-        // Condizioni per i NOT NULL
-        if (user.getRuolo_utente() == null) {
-            throw new IllegalArgumentException("Il ruolo non può essere nullo!");
-        }
-        if (user.getNome() == null || user.getNome().isEmpty()) {
-            throw new IllegalArgumentException("Il nome non può essere nullo!");
-        }
-        if (user.getCognome() == null || user.getCognome().isEmpty()) {
-            throw new IllegalArgumentException("Il cognome non può essere nullo!");
-        }
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("La mail non può essere nulla!");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Esiste già un utente con questa email!");
-        }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("La password non può essere nulla!");
-        }
-
+        // // Condizioni per i NOT NULL
+        // if (user.() == null) {
+        //     throw new IllegalArgumentException("Il ruolo non può essere nullo!");
+        // }
+        // if (user.getNome() == null || user.getNome().isEmpty()) {
+        //     throw new IllegalArgumentException("Il nome non può essere nullo!");
+        // }
+        // if (user.getCognome() == null || user.getCognome().isEmpty()) {
+        //     throw new IllegalArgumentException("Il cognome non può essere nullo!");
+        // }
+        // if (user.getEmail() == null || user.getEmail().isEmpty()) {
+        //     throw new IllegalArgumentException("La mail non può essere nulla!");
+        // }
+        // if (userRepository.existsByEmail(user.getEmail())) {
+        //     throw new IllegalArgumentException("Esiste già un utente con questa email!");
+        // }
+        // if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+        //     throw new IllegalArgumentException("La password non può essere nulla!");
+        // }
         // Hash della password
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         user.setPassword(hashedPassword); // Setta la password sull'entità

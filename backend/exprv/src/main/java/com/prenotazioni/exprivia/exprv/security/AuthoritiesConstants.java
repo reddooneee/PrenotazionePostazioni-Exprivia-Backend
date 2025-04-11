@@ -1,4 +1,4 @@
-package com.prenotazioni.exprv.security;
+package com.prenotazioni.exprivia.exprv.security;
 
 public final class AuthoritiesConstants {
 
