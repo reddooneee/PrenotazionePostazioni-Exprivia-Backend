@@ -31,9 +31,9 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class UserService {
 
-    private UserRepository userRepository;
+    private UserRepository userRepository; //Repo User
     private PasswordEncoder passwordEncoder;
-    private UserMapper userMapper;
+    private UserMapper userMapper; //User Mapper
     private JwtTokenProvider jwtTokenProvider;
     private AuthenticationManager authenticationManager;
 
@@ -48,7 +48,7 @@ public class UserService {
 
     /**
      * Autenticazione dell'utente
-     * 
+     *
      * @param credentialsDto credenziali di accesso
      * @return AuthResponseDTO contenente il token JWT e i dati dell'utente
      * @throws AppException se le credenziali sono invalide
@@ -80,7 +80,7 @@ public class UserService {
 
     /**
      * Valida i dati dell'utente
-     * 
+     *
      * @param userDTO dati da validare
      * @throws IllegalArgumentException se i dati non sono validi
      */
@@ -102,7 +102,7 @@ public class UserService {
 
     /**
      * Recupera tutti gli utenti dal database
-     * 
+     *
      * @return Lista di UserDTO
      */
     public List<UserDTO> cercaTutti() {
@@ -111,8 +111,8 @@ public class UserService {
     }
 
     /**
-     * Recupera un utente da id
-     * 
+     * Recupera un utente con l'id
+     *
      * @return id UserDTO
      */
     public UserDTO cercaSingolo(Integer id) {
@@ -123,7 +123,7 @@ public class UserService {
 
     /**
      * Cerca un utente tramite l'email
-     * 
+     *
      * @param email indirizzo email dell'utente
      * @return UserDTO dell'utente trovato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -136,7 +136,7 @@ public class UserService {
 
     /**
      * Crea un nuovo utente
-     * 
+     *
      * @param userDTO dati del nuovo utente
      * @return UserDTO dell'utente creato
      * @throws IllegalArgumentException se ci sono problemi di validazione
@@ -165,8 +165,8 @@ public class UserService {
 
     /**
      * Aggiorna un utente esistente con i valori specificati
-     * 
-     * @param id      ID dell'utente da aggiornare
+     *
+     * @param id ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -214,8 +214,8 @@ public class UserService {
 
     /**
      * Aggiorna un utente con i dati forniti in un DTO
-     * 
-     * @param id      ID dell'utente da aggiornare
+     *
+     * @param id ID dell'utente da aggiornare
      * @param userDTO dati aggiornati dell'utente
      * @return UserDTO dell'utente aggiornato
      */
@@ -253,7 +253,7 @@ public class UserService {
 
     /**
      * Elimina un utente dal sistema
-     * 
+     *
      * @param id ID dell'utente da eliminare
      * @throws EntityNotFoundException se l'utente non esiste
      */
