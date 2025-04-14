@@ -7,8 +7,6 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -49,7 +47,7 @@ public class Users {
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column(name = "enabled")
-    private boolean enabled;
+    private Boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "authority_name"))
@@ -77,13 +75,24 @@ public class Users {
     public Users() {
     }
 
-    // Costruttore
-    public Users(String nome, String cognome, String email, ruolo_utente ruolo_utente, String password) {
+    
+
+    public Users(Integer id_user, String nome, String cognome, String email, String password, String verificationCode,
+            LocalDateTime verificationCodeExpiresAt, Boolean enabled, Set<Authority> authorities,
+            LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
+        this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.password = password;
+        this.verificationCode = verificationCode;
+        this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+        this.enabled = enabled;
+        this.authorities = authorities;
+        this.creatoIl = creatoIl;
+        this.aggiornatoIl = aggiornatoIl;
     }
+
 
     // Setters And Getters
     public Integer getId_user() {
