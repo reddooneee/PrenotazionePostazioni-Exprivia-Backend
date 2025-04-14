@@ -1,4 +1,3 @@
-//STANZE CONTROLLER
 package com.prenotazioni.exprivia.exprv.controller;
 
 import java.util.List;
