@@ -39,7 +39,7 @@ public class PostazioniController {
         return postazioniService.cercaTuttePostazioni();
     }
 
-    //GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
+    // GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
     @GetMapping("/postazioni/{id_postazione}")
     public ResponseEntity<PostazioniDTO> getPostazioneByID(@PathVariable("id_postazione") Integer id_postazione) {
         try {
@@ -52,7 +52,7 @@ public class PostazioniController {
         }
     }
 
-    //POST (CREA POSTAZIONE)
+    // POST (CREA POSTAZIONE)
     @PostMapping("/crea_Postazione")
     public ResponseEntity<?> creaPostazione(@RequestBody PostazioniDTO postazioniDTO) {
         try {
@@ -63,10 +63,9 @@ public class PostazioniController {
         }
     }
 
-    //DELETE (ELIMINA LA POSTAZIONE IN BASE ALL'ID)
+    // DELETE (ELIMINA LA POSTAZIONE IN BASE ALL'ID)
     @DeleteMapping("/elimina/{id}")
-    public ResponseEntity<String> eliminaPostazioni(@PathVariable Integer id
-    ) {
+    public ResponseEntity<String> eliminaPostazioni(@PathVariable Integer id) {
         {
             try {
                 postazioniService.eliminaPostazioni(id);

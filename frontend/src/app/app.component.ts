@@ -3,8 +3,8 @@ import { CommonModule } from "@angular/common"
 import { OnInit } from '@angular/core';
 import { initFlowbite } from 'flowbite';
 import { RouterOutlet } from "@angular/router"
-import { HeaderComponent } from "./components/header/header.component";
-import { FooterComponent } from "./components/footer/footer.component";
+import { HeaderComponent } from "./layout/header/header.component";
+import { FooterComponent } from "./layout/footer/footer.component";
 
 
 
@@ -15,7 +15,6 @@ import { FooterComponent } from "./components/footer/footer.component";
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
-
 
   ngOnInit(): void {
     initFlowbite();
