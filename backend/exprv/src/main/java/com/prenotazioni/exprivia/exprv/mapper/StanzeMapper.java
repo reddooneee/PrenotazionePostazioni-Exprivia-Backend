@@ -1,24 +1,26 @@
 package com.prenotazioni.exprivia.exprv.mapper;
 
+import java.util.List;
+
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StanzeMapper {
 
-    StanzeMapper INSTANCE = Mappers.getMapper(StanzeMapper.class);
+    StanzeDTO toDto(Stanze stanze);
 
-    //Decorazioni @Mapping in questo caso inutili perché i campi dell'entity sono uguali a nomi colonne db
-    /*@Mapping(source = "idStanza", target = "idStanza")
-    @Mapping(source = "capacitaStanza", target = "capacitaStanza")
-    @Mapping(source = "tipoStanza", target = "tipoStanza")*/
-    StanzeDTO toStanzeDTO(Stanze stanze);
-    
-    /*@Mapping(source = "idStanza", target = "idStanza")
-    @Mapping(source = "capacitaStanza", target = "capacitaStanza")
-    @Mapping(source = "tipoStanza", target = "tipoStanza")*/
-    Stanze toStanze(StanzeDTO stanzeDTO);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Stanze toEntity(StanzeDTO stanzeDTO);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateStanzaFromDto(StanzeDTO stanzeDTO, @MappingTarget Stanze stanze);
+
+    List<StanzeDTO> toDtoList(List<Stanze> stanzeList);
 }

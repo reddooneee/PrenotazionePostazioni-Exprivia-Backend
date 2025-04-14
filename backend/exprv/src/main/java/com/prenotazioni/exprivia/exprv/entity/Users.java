@@ -3,7 +3,6 @@ package com.prenotazioni.exprivia.exprv.entity;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -53,12 +52,6 @@ public class Users {
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "authority_name"))
     private Set<Authority> authorities = new HashSet<>();
 
-    /*
-     * // enum ruolo_utente_utente
-     * 
-     * @Enumerated(EnumType.STRING)
-     * private ruolo_utente ruolo_utente;
-     */
     // Usare LocalDateTime cosi si tiene traccia anche del tempo.
     // Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
@@ -75,8 +68,6 @@ public class Users {
     public Users() {
     }
 
-    
-
     public Users(Integer id_user, String nome, String cognome, String email, String password, String verificationCode,
             LocalDateTime verificationCodeExpiresAt, Boolean enabled, Set<Authority> authorities,
             LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
@@ -92,7 +83,6 @@ public class Users {
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
     }
-
 
     // Setters And Getters
     public Integer getId_user() {
@@ -170,25 +160,20 @@ public class Users {
         return this;
     }
 
-    // @Override
-    // public String getUsername() {
-    // throw new UnsupportedOperationException("Unimplemented method
-    // 'getUsername'");
-    // }
-    // @Override
-    // public boolean isAccountNonExpired() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isAccountNonLocked() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isCredentialsNonExpired() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isEnabled() {
-    // return enabled;
-    // }
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public LocalDateTime getVerificationCodeExpiresAt() {
+        return verificationCodeExpiresAt;
+    }
+
+    public void setVerificationCodeExpiresAt(LocalDateTime verificationCodeExpiresAt) {
+        this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+    }
+
 }

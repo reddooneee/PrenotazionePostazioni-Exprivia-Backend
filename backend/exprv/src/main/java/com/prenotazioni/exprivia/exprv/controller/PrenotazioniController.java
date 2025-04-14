@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
-import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
 
 import jakarta.persistence.EntityNotFoundException;
+
 
 @RestController
 @RequestMapping("/Prenotazioni")
