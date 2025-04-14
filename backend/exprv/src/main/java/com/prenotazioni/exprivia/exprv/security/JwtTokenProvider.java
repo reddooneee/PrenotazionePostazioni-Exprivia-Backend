@@ -24,6 +24,11 @@ public class JwtTokenProvider {
     // Genera token JWT dall'autenticazione
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
+        return generateToken(username);
+    }
+
+    // Genera token JWT dal nome utente
+    public String generateToken(String username) {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationInMs);
         
@@ -49,6 +54,16 @@ public class JwtTokenProvider {
         
         return claims.getSubject();
     }
+
+    public String refreshToken(String token) {
+        if (!validateToken(token)) {
+            throw new IllegalArgumentException("Invalid JWT token");
+        }
+    
+        String username = getUsernameFromToken(token);
+        return generateToken(username);  // genera un nuovo token con lo stesso nome utente
+    }
+    
     
     // Valida il token JWT
     public boolean validateToken(String token) {
