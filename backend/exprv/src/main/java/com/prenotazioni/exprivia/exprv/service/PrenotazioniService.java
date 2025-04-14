@@ -3,6 +3,7 @@ package com.prenotazioni.exprivia.exprv.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class PrenotazioniService {
 
     @Autowired
@@ -41,8 +43,11 @@ public class PrenotazioniService {
     private PrenotazioniMapper prenotazioniMapper;
 
     public PrenotazioniService() {
-    };
+    }
 
+    ;
+
+    //Costruttore PrenotazioniService
     public PrenotazioniService(PrenotazioniRepository prenotazioniRepository,
             PostazioniRepository postazioniRepository,
             StanzeRepository stanzeRepository,
@@ -55,85 +60,91 @@ public class PrenotazioniService {
         this.prenotazioniMapper = prenotazioniMapper;
     }
 
+    /**
+     * Valida i dati della Prenotazione e salva una nuova prenotazione se valida
+     *
+     * @param prenotazioniDTO dati da validare e salvare
+     * @return prenotazioniDTO della prenotazione salvata
+     * @throws IllegalArgumentException se i dati non sono validi
+     */
+    public void validatePrenotazioniDTO(PrenotazioniDTO prenotazioniDTO) {
+        if (prenotazioniDTO.getStanze() == null) {
+            throw new IllegalArgumentException("La stanza non può essere nulla!");
+        }
+
+        if (prenotazioniDTO.getUsers() == null) {
+            throw new IllegalArgumentException("L'User non può essere nullo!");
+        }
+
+        if (prenotazioniDTO.getStato_prenotazione() == null) {
+            throw new IllegalArgumentException("Lo stato della Prenotazioni non può essere nullo!");
+        }
+    }
+
     // findall Tutte le prenotazioni
     /*
-     * public List<Prenotazioni> cercaTutti() {
-     * return prenotazioniRepository.findAll();
-     * }
+     * Recupera tutte le prenotazioni dal DB
+     * 
+     * @return Lista di PrenotazioniDTO
      */
     public List<PrenotazioniDTO> cercaTutti() {
         List<Prenotazioni> prenotazioniList = prenotazioniRepository.findAll();
-        return prenotazioniList.stream()
-                .map(prenotazioniMapper.toDto())
-                .toList();
+        return prenotazioniMapper.toDtoList(prenotazioniList);
     }
 
     // Ricerca singola tramite id ma con messaggino personalizzato invece che null
     /*
-     * public Prenotazioni cercaSingolo(Integer id) {
-     * return prenotazioniRepository.findById(id)
-     * .orElseThrow(() -> new RuntimeException("Prenotazioni con id " + id +
-     * " non trovata."));
-     * }
+     * Recupera una prenotazione con l'id
+     * 
+     * @return Prenotazioni in base all'id
      */
     public PrenotazioniDTO cercaSingolo(Integer id) {
         Prenotazioni prenotazioni = prenotazioniRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
-        return PrenotazioniMapper.INSTANCE.toPrenotazioniDTO(prenotazioni);
+                .orElseThrow(() -> new RuntimeException("Prenotazione con id " + id + " non trovato"));
+        return prenotazioniMapper.toDto(prenotazioni);
     }
 
-    // Creazione nuova Prenotazioni con enum -> stringa -> enum
+    // Creazione nuova Prenotazioni
     @Transactional
     public PrenotazioniDTO creaPrenotazioni(PrenotazioniDTO prenotazioniDTO) {
-        Prenotazioni prenotazioni = prenotazioniMapper.toPrenotazioni(prenotazioniDTO);
 
-        // Condizioni per i NOT NULL
+        validatePrenotazioniDTO(prenotazioniDTO);
 
-        /*
-         * if (prenotazioni.getId_prenotazioni() == null) {
-         * throw new
-         * IllegalArgumentException("L'ID prenotazione non può essere nullo!");
-         * }
-         */
-        if (prenotazioni.getStanze() == null) {
-            throw new IllegalArgumentException("La stanza non può essere nulla!");
+        if (prenotazioniDTO.getId_prenotazioni() != null
+                && prenotazioniRepository.existsById(prenotazioniDTO.getId_prenotazioni())) {
+            throw new IllegalArgumentException("La Prenotazioni con ID "
+                    + prenotazioniDTO.getId_prenotazioni() + " esiste già.");
         }
 
-        if (prenotazioni.getUsers() == null) {
-            throw new IllegalArgumentException("L'User non può essere nullo!");
-        }
+        //Conversione DTO in entity
+        Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
 
-        if (prenotazioni.getStato_prenotazione() == null) {
-            throw new IllegalArgumentException("Lo stato della Prenotazioni non può essere nullo!");
-        }
-
-        /*
-         * if (prenotazioni.getId_prenotazioni() != null &&
-         * prenotazioniRepository.existsById(prenotazioni.getId_prenotazioni())) {
-         * throw new IllegalArgumentException("La Prenotazioni con ID " +
-         * prenotazioni.getId_prenotazioni() + " esiste già.");
-         * }
-         */
+        //Salva L'utente
         Prenotazioni savedPrenotazioni = prenotazioniRepository.save(prenotazioni);
-        return prenotazioniMapper.toPrenotazioniDTO(savedPrenotazioni);
+
+        //Restituisci il DTO dell'utente Salvato
+        return prenotazioniMapper.toDto(savedPrenotazioni);
     }
 
-    // Metodo Per Aggiornare Le Prenotazioni
-    /*
-     * public Prenotazioni aggiornaPrenotazioni(Integer id, Prenotazioni
-     * prenotazioni) {
-     * if (prenotazioniRepository.existsById(id)) {
-     * prenotazioni.setId_prenotazioni(id);
-     * return prenotazioniRepository.save(prenotazioni);
-     * } else {
-     * throw new EntityNotFoundException("Prenotazioni con ID " + id +
-     * " non trovata.");
-     * }
-     * }
+    /**
+     * Aggiorna una Prenotazione esistente con i valori specificati
+     *
+     * @param id ID dell'utente da aggiornare
+     * @param updates mappa dei campi da aggiornare
+     * @return UserDTO dell'utente aggiornato
+     * @throws EntityNotFoundException se l'utente non esiste
      */
     public PrenotazioniDTO updatePrenotazioni(Integer id, Map<String, Object> updates) {
         Prenotazioni existingPrenotazioni = prenotazioniRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prenotazione con ID " + id + " non trovata"));
+
+        if (updates.containsKey("id")) {
+            Integer newId = (Integer) updates.get("id_stanza");
+            Optional<Prenotazioni> prenotazioneWithSameId = prenotazioniRepository.findById(newId);
+            if (prenotazioneWithSameId.isPresent() && !prenotazioneWithSameId.get().getId_prenotazioni().equals(id)) {
+                throw new IllegalArgumentException("id già in uso");
+            }
+        }
 
         updates.forEach((key, value) -> {
             switch (key) {
@@ -150,7 +161,7 @@ public class PrenotazioniService {
                     Integer idPostazione = (Integer) value;
                     Postazioni postazione = postazioniRepository.findById(idPostazione)
                             .orElseThrow(() -> new EntityNotFoundException(
-                                    "Postazione con ID " + idPostazione + " non trovata"));
+                            "Postazione con ID " + idPostazione + " non trovata"));
                     existingPrenotazioni.setPostazione(postazione);
                     break;
                 case "user":
@@ -170,79 +181,16 @@ public class PrenotazioniService {
         });
 
         Prenotazioni updatedPrenotazioni = prenotazioniRepository.save(existingPrenotazioni);
-        return prenotazioniMapper.INSTANCE.toPrenotazioniDTO(updatedPrenotazioni);
+        return prenotazioniMapper.toDto(updatedPrenotazioni);
     }
 
     // Metodo Per Eliminare le prenotazioni
     public void eliminaPrenotazioni(Integer id) {
-        if (prenotazioniRepository.existsById(id)) {
-            prenotazioniRepository.deleteById(id);
-        } else {
+        if (!prenotazioniRepository.existsById(id)) {
             throw new EntityNotFoundException("Prenotazioni con ID " + id + " non trovata.");
+        } else {
+            prenotazioniRepository.deleteById(id);
         }
     }
 
 }
-
-/*
- * 
- * CODICE DA CONFERMARE:
- * 
- * // filepath: /D:/ITS/Exprivia
- * Prenotazioni/PrenotazionePostazioni-Exprivia-Backend/backend/exprv/src/main/
- * java/com/prenotazioni/exprivia/exprv/service/PrenotazioniService.java
- * package com.prenotazioni.exprivia.exprv.service;
- * 
- * import java.util.List;
- * 
- * import org.springframework.beans.factory.annotation.Autowired;
- * import org.springframework.stereotype.Service;
- * 
- * import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
- * import com.prenotazioni.exprivia.exprv.repository.PrenotazioniRepository;
- * 
- * @Service
- * public class PrenotazioniService {
- * 
- * private final PrenotazioniRepository prenotazioniRepository;
- * 
- * @Autowired
- * public PrenotazioniService(PrenotazioniRepository prenotazioniRepository) {
- * this.prenotazioniRepository = prenotazioniRepository;
- * }
- * 
- * public List<Prenotazioni> cercaTutti() {
- * return prenotazioniRepository.findAll();
- * }
- * 
- * public Prenotazioni cercaSingolo(Integer id) {
- * return prenotazioniRepository.findById(id).orElseThrow(() -> new
- * RuntimeException("Prenotazione non trovata"));
- * }
- * 
- * public Prenotazioni creaPrenotazioni(Prenotazioni prenotazioni) {
- * return prenotazioniRepository.save(prenotazioni);
- * }
- * 
- * public Prenotazioni aggiornaPrenotazioni(Integer id, Prenotazioni
- * prenotazioni) {
- * Prenotazioni esistente = prenotazioniRepository.findById(id).orElseThrow(()
- * -> new EntityNotFoundException("Prenotazione non trovata"));
- * esistente.setUser(prenotazioni.getUser());
- * esistente.setPostazione(prenotazioni.getPostazione());
- * esistente.setStanza(prenotazioni.getStanza());
- * esistente.setStato_prenotazione(prenotazioni.getStato_prenotazione());
- * esistente.setDataInizio(prenotazioni.getDataInizio());
- * esistente.setDataFine(prenotazioni.getDataFine());
- * return prenotazioniRepository.save(esistente);
- * }
- * 
- * public void eliminaPrenotazioni(Integer id) {
- * Prenotazioni esistente = prenotazioniRepository.findById(id).orElseThrow(()
- * -> new EntityNotFoundException("Prenotazione non trovata"));
- * prenotazioniRepository.delete(esistente);
- * }
- * }
- * 
- * 
- */
