@@ -3,15 +3,12 @@ package com.prenotazioni.exprivia.exprv.entity;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,7 +40,7 @@ public class Users {
     // Verify Code
     @Column(name = "verification_code")
     private String verificationCode;
-    
+
     // Expiration Code
     @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
@@ -51,16 +48,10 @@ public class Users {
     @Column
     private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "name"))
+    @ManyToMany
+    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_name"))
     private Set<Authority> authorities = new HashSet<>();
 
-    /*
-     * // enum ruolo_utente_utente
-     * 
-     * @Enumerated(EnumType.STRING)
-     * private ruolo_utente ruolo_utente;
-     */
     // Usare LocalDateTime cosi si tiene traccia anche del tempo.
     // Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
     @CreationTimestamp
@@ -84,6 +75,13 @@ public class Users {
         this.email = email;
         this.password = password;
     }
+
+    // @Override
+    // public Collection<? extends GrantedAuthority> getAuthorities() {
+    //     return authorities.stream()
+    //             .map(authority -> new SimpleGrantedAuthority(authority.getName()))
+    //             .collect(Collectors.toList());
+    // }
 
     // Setters And Getters
     public Integer getId_user() {
@@ -161,25 +159,20 @@ public class Users {
         return this;
     }
 
-    // @Override
-    // public String getUsername() {
-    // throw new UnsupportedOperationException("Unimplemented method
-    // 'getUsername'");
-    // }
-    // @Override
-    // public boolean isAccountNonExpired() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isAccountNonLocked() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isCredentialsNonExpired() {
-    // return true;
-    // }
-    // @Override
-    // public boolean isEnabled() {
-    // return enabled;
-    // }
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
+
+    public LocalDateTime getVerificationCodeExpiresAt() {
+        return verificationCodeExpiresAt;
+    }
+
+    public void setVerificationCodeExpiresAt(LocalDateTime verificationCodeExpiresAt) {
+        this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+    }
+
 }

@@ -15,8 +15,6 @@ import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
-
-
 @Service
 public class PostazioniService {
 
@@ -26,92 +24,79 @@ public class PostazioniService {
     @Autowired
     private PostazioniMapper postazioniMapper;
 
-    public PostazioniService(){}
+    public PostazioniService() {}
 
-    public PostazioniService(PostazioniRepository postazioniRepository/*, AuthController authController*/) {
+    public PostazioniService(PostazioniRepository postazioniRepository) {
         this.postazioniRepository = postazioniRepository;
     }
 
-//Findall Tutte le Postazioni
+    /**
+     * Recupera tutte le postazioni.
+     */
     public List<PostazioniDTO> cercaTuttePostazioni() {
         List<Postazioni> postazioniList = postazioniRepository.findAll();
-        return postazioniList.stream()
-            .map(PostazioniMapper.INSTANCE::toPostazioniDTO)
-            .toList();
+        return postazioniMapper.toDtoList(postazioniList);
     }
 
-    //Ricerca Singola tramite id
+    /**
+     * Cerca una singola postazione per ID.
+     */
     public PostazioniDTO cercaSingolo(Integer id) {
         Postazioni postazioni = postazioniRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
-        return PostazioniMapper.INSTANCE.toPostazioniDTO(postazioni);
+        return postazioniMapper.toDto(postazioni);
     }
 
-    //Creazione Nuova Postazioni
+    /**
+     * Crea una nuova postazione.
+     */
     public PostazioniDTO creaPostazione(PostazioniDTO postazioniDTO) {
-        /*if (postazioni.getId_postazione() == null) {
-            throw new IllegalArgumentException("L'id della postazione non puo essere nullo!");
-        }*/
-        Postazioni postazioni = postazioniMapper.toPostazioni(postazioniDTO);
+        Postazioni postazioni = postazioniMapper.toEntity(postazioniDTO);
 
         if (postazioni.getStato_postazione() == null) {
-            throw new IllegalArgumentException("Lo stato della postazione non puo essere nullo!");
+            throw new IllegalArgumentException("Lo stato della postazione non può essere nullo!");
         }
 
-        /*Stanze = id_Stanze */
         if (postazioni.getStanze() == null) {
-            throw new IllegalArgumentException("L'id della stanza non puo essere nullo!");
+            throw new IllegalArgumentException("L'id della stanza non può essere nullo!");
         }
 
-        Postazioni savedPostazioni = postazioniRepository.save(postazioni);
-
-        return postazioniMapper.toPostazioniDTO(savedPostazioni);
+        Postazioni saved = postazioniRepository.save(postazioni);
+        return postazioniMapper.toDto(saved);
     }
 
-    //Metodo per aggiornare le postazioni
-public PostazioniDTO aggiornaPostazioni(Integer id, Map<String, Object> updates) {
-    Postazioni existingPostazione = postazioniRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata"));
+    /**
+     * Aggiorna una postazione esistente.
+     */
+    public PostazioniDTO aggiornaPostazioni(Integer id, Map<String, Object> updates) {
+        Postazioni postazione = postazioniRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
 
-    updates.forEach((key, value) -> {
-        switch (key) {
-            case "stanze":
-                existingPostazione.setstanze(new Stanze((Integer) value));
-                break;
-            case "stato_postazione":
-                existingPostazione.setStato_postazione(stato_postazione.valueOf((String) value)); 
-                break;
-            default:
-                throw new IllegalArgumentException("Chiave non valida: " + key);
-        }
-    });
-
-    Postazioni updatedPostazione = postazioniRepository.save(existingPostazione);
-    return postazioniMapper.INSTANCE.toPostazioniDTO(updatedPostazione);
-}
-
-               
-    /*public Postazioni aggiornaPostazioni(Integer id, Map<String, Object> updates){
-        Postazioni existingPostazioni = postazioniRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
-    
         updates.forEach((key, value) -> {
-                switch (key) {
-                case "Stanza": existingPostazioni.setstanze((Stanze) value); break;
-                case "Stato Postazione": existingPostazioni.setStato_postazione(stato_postazione.valueOf((String) value)); break;
+            switch (key) {
+                case "stanze":
+                    postazione.setstanze(new Stanze((Integer) value));
+                    break;
+                case "stato_postazione":
+                    postazione.setStato_postazione(stato_postazione.valueOf((String) value));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Chiave non valida: " + key);
             }
         });
 
-        return postazioniRepository.save(existingPostazioni);
-    }*/
+        Postazioni updated = postazioniRepository.save(postazione);
+        return postazioniMapper.toDto(updated);
+    }
 
-    //Metodo Per Eliminare la Posstazione
+    /**
+     * Elimina una postazione per ID.
+     */
     public void eliminaPostazioni(Integer id) {
         if (postazioniRepository.existsById(id)) {
             postazioniRepository.deleteById(id);
         } else {
-            throw new EntityNotFoundException("Postazione con id" + id + "Non Trovata");
+            throw new EntityNotFoundException("Postazione con id " + id + " non trovata.");
         }
     }
-
 }

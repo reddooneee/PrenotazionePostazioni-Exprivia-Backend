@@ -3,6 +3,9 @@ package com.prenotazioni.exprivia.exprv.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
 
 import com.prenotazioni.exprivia.exprv.entity.Users;
@@ -14,6 +17,10 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
 
     Optional<Users> findByEmail(String email);
 
-    //Search for verificationCode
     Optional<Users> findByVeriricationCode(String verificationCode);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO user_authority (user_id, authority) VALUES (:userId, :authority)", nativeQuery = true)
+    void saveUserAuthority(Long userId, String authority);
 }

@@ -6,16 +6,23 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
 import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
-import com.prenotazioni.exprivia.exprv.repository.AuthorityRepository;
+import com.prenotazioni.exprivia.exprv.security.JwtTokenProvider;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -24,35 +31,51 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class UserService {
 
-    private AuthorityRepository authorityRepository;
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper;
+    private JwtTokenProvider jwtTokenProvider;
+    private AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            AuthorityRepository authorityRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
+            JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authorityRepository = authorityRepository;
         this.userMapper = userMapper;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.authenticationManager = authenticationManager;
     }
 
     /**
      * Autenticazione dell'utente
      * 
      * @param credentialsDto credenziali di accesso
-     * @return UserDTO dell'utente autenticato
+     * @return AuthResponseDTO contenente il token JWT e i dati dell'utente
      * @throws AppException se le credenziali sono invalide
      */
-    public UserDTO login(CredentialsDto credentialsDto) {
+    public AuthResponseDTO login(CredentialsDto credentialsDto) {
+        try {
+            // Autenticazione dell'utente con il AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(credentialsDto.email(), credentialsDto.password()));
 
-        Users user = userRepository.findByEmail(credentialsDto.email())
-                .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
-        if (passwordEncoder.matches(credentialsDto.password(), user.getPassword())) {
-            return userMapper.toDto(user);
+            // Se l'autenticazione è riuscita, otteniamo l'utente
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Users user = userRepository.findByEmail(credentialsDto.email())
+                    .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
+
+            // Generazione del token JWT
+            String jwt = jwtTokenProvider.generateToken(authentication);
+
+            // Creazione della risposta con token e dati utente
+            UserDTO userDTO = userMapper.toDto(user);
+
+            return new AuthResponseDTO(jwt, userDTO);
+        } catch (BadCredentialsException e) {
+            throw new AppException("Credenziali non valide", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            throw new AppException("Errore durante l'autenticazione", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        throw new AppException("Password non valida", HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -88,15 +111,26 @@ public class UserService {
     }
 
     /**
-     * Cerca un utente specifico per ID
+     * Recupera un utente da id
      * 
-     * @param id identificativo dell'utente
-     * @return UserDTO dell'utente trovato
-     * @throws RuntimeException se l'utente non esiste
+     * @return id UserDTO
      */
     public UserDTO cercaSingolo(Integer id) {
         Users user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
+        return userMapper.toDto(user);
+    }
+
+    /**
+     * Cerca un utente tramite l'email
+     * 
+     * @param email indirizzo email dell'utente
+     * @return UserDTO dell'utente trovato
+     * @throws EntityNotFoundException se l'utente non esiste
+     */
+    public UserDTO cercaPerEmail(String email) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
         return userMapper.toDto(user);
     }
 
@@ -217,7 +251,7 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-        /**
+    /**
      * Elimina un utente dal sistema
      * 
      * @param id ID dell'utente da eliminare
@@ -229,4 +263,9 @@ public class UserService {
         }
         userRepository.deleteById(id);
     }
+
+    public UserDetails loadUserByUsername(String email) {
+        throw new UnsupportedOperationException("Unimplemented method 'loadUserByUsername'");
+    }
+
 }
