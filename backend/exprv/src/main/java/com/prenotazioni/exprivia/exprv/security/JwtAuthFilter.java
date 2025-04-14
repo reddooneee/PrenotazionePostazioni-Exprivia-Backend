@@ -1,8 +1,5 @@
 package com.prenotazioni.exprivia.exprv.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureException;
 import org.springframework.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,28 +27,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        try {
+            String jwt = getJwtFromRequest(request);
+            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+                // Ottieni username dal token
+                String username = tokenProvider.getUsernameFromToken(jwt);
 
-        // Ottieni JWT dalla richiesta HTTP
-        String token = getJwtFromRequest(request);
-
-        // Convalida il token
-        if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
-            // Ottieni username dal token
-            String username = tokenProvider.getUsernameFromToken(token);
-
-            // Carica l'utente associato al token
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-
-            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            // Imposta l'autenticazione nel contesto di sicurezza
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+         } catch (Exception e) {
+            logger.warn("Autenticazione fallita: {}");
         }
 
         filterChain.doFilter(request, response);
