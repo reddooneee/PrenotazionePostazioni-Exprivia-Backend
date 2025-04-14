@@ -4,7 +4,6 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +25,6 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/Stanze")
 public class StanzeController {
 
-    // private StanzeRepository stanzeRepository;
-    @Autowired
     private StanzeService StanzeService;
 
     public StanzeController(){}
@@ -88,9 +85,6 @@ public class StanzeController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    
-
-
 
     @DeleteMapping("/eliminastanza/{id}")
     public ResponseEntity<String> eliminaStanza(@PathVariable Integer id) {
