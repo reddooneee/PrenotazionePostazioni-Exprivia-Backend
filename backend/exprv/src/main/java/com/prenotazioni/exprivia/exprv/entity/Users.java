@@ -9,6 +9,7 @@ import com.prenotazioni.exprivia.exprv.enumerati.ruolo_utente;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,11 +46,11 @@ public class Users {
     @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
 
-    @Column
+    @Column(name = "enabled")
     private boolean enabled;
 
-    @ManyToMany
-    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_name"))
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "authority_name"))
     private Set<Authority> authorities = new HashSet<>();
 
     // Usare LocalDateTime cosi si tiene traccia anche del tempo.

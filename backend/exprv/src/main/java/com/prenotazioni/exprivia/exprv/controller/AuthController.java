@@ -28,6 +28,7 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    //Aggiunta verifica errori sul AuthController
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody CredentialsDto credentialsDto) {
         Authentication authentication = authenticationManager.authenticate(
