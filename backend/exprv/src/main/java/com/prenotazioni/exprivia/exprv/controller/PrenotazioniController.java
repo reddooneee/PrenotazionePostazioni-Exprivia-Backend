@@ -20,16 +20,16 @@ import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-
 @RestController
-@RequestMapping("/Prenotazioni")
+@RequestMapping("/api/prenotazioni")
 public class PrenotazioniController {
 
     @Autowired
     private PrenotazioniService PrenotazioniService;
 
-    public PrenotazioniController(){}
-    
+    public PrenotazioniController() {
+    }
+
     public PrenotazioniController(PrenotazioniService PrenotazioniService) {
         this.PrenotazioniService = PrenotazioniService;
     }
@@ -39,7 +39,7 @@ public class PrenotazioniController {
         return PrenotazioniService.cercaTutti();
     }
 
-    @GetMapping("/Prenotazioni/{id_prenotazioni}")
+    @GetMapping("/{idPrenotazioni}")
     public ResponseEntity<PrenotazioniDTO> getPrenotazioniByID(@PathVariable("id_prenotazioni") Integer id_prenotazioni) {
         try {
             PrenotazioniDTO prenotazioniDTO = PrenotazioniService.cercaSingolo(id_prenotazioni);
@@ -49,7 +49,7 @@ public class PrenotazioniController {
         }
     }
 
-    @PostMapping("/crea_Prenotazioni")
+    @PostMapping("/creaPrenotazione")
     public ResponseEntity<?> creaPrenotazioni(@RequestBody PrenotazioniDTO prenotazioniDTO) {
         try {
             PrenotazioniDTO newPrenotazioniDTO = PrenotazioniService.creaPrenotazioni(prenotazioniDTO);
@@ -59,7 +59,7 @@ public class PrenotazioniController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/aggiornaPrenotazione/{id}")
     public ResponseEntity<?> aggiornaPrenotazioni(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             PrenotazioniDTO prenotazioniAggiornata = PrenotazioniService.updatePrenotazioni(id, updates);
@@ -69,7 +69,7 @@ public class PrenotazioniController {
         }
     }
 
-    @DeleteMapping("/elimina/{id}")
+    @DeleteMapping("/eliminaPrenotazione/{id}")
     public ResponseEntity<String> eliminaPrenotazioni(@PathVariable Integer id) {
         try {
             PrenotazioniService.eliminaPrenotazioni(id);

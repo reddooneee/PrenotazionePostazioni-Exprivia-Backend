@@ -21,7 +21,7 @@ import com.prenotazioni.exprivia.exprv.service.PostazioniService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/Postazioni")
+@RequestMapping("/api/postazioni")
 public class PostazioniController {
 
     @Autowired
@@ -40,7 +40,7 @@ public class PostazioniController {
     }
 
     // GET (RICEVE LA POSTAZIONE IN BASE ALL'ID)
-    @GetMapping("/postazioni/{id_postazione}")
+    @GetMapping("/{id_postazione}")
     public ResponseEntity<PostazioniDTO> getPostazioneByID(@PathVariable("id_postazione") Integer id_postazione) {
         try {
             PostazioniDTO newPostazioniDTO = postazioniService.cercaSingolo(id_postazione);
@@ -53,7 +53,7 @@ public class PostazioniController {
     }
 
     // POST (CREA POSTAZIONE)
-    @PostMapping("/crea_Postazione")
+    @PostMapping("/creaPostazione")
     public ResponseEntity<?> creaPostazione(@RequestBody PostazioniDTO postazioniDTO) {
         try {
             PostazioniDTO newPostazioniDTO = postazioniService.creaPostazione(postazioniDTO);
@@ -64,7 +64,7 @@ public class PostazioniController {
     }
 
     // DELETE (ELIMINA LA POSTAZIONE IN BASE ALL'ID)
-    @DeleteMapping("/elimina/{id}")
+    @DeleteMapping("/eliminaPostazione/{id}")
     public ResponseEntity<String> eliminaPostazioni(@PathVariable Integer id) {
         {
             try {
@@ -77,7 +77,7 @@ public class PostazioniController {
 
     }
 
-    @PutMapping("/aggiornaStanza/{id}")
+    @PutMapping("/aggiornaPostazione/{id}")
     public ResponseEntity<?> aggiornaPostazioni(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             PostazioniDTO postazioneAggiornata = postazioniService.aggiornaPostazioni(id, updates);

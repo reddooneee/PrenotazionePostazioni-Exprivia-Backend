@@ -21,7 +21,7 @@ import com.prenotazioni.exprivia.exprv.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController // Indica che questa classe è un controller REST
-@RequestMapping("/Utenti") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
+@RequestMapping("/api/utenti") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
 public class UserController {
 
     @Autowired
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     // Gestisce le richieste GET per ottenere un singolo utente tramite ID
-    @GetMapping("/utente/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getPostazioneByID(@PathVariable("id") Integer id_user) {
         try {
             UserDTO newUserDTO = userService.cercaSingolo(id_user);
