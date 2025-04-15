@@ -21,12 +21,13 @@ import com.prenotazioni.exprivia.exprv.service.StanzeService;
 import jakarta.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/Stanze")
+@RequestMapping("/api/stanze")
 public class StanzeController {
 
     private StanzeService StanzeService;
 
-    public StanzeController(){}
+    public StanzeController() {
+    }
 
     //Costruttore Per Iniettare Il Servizio
     public StanzeController(StanzeService StanzeService) {
@@ -41,7 +42,7 @@ public class StanzeController {
     }
 
     //Richiesta GET per ricevere una stanza in abse all'ID
-    @GetMapping("/stanze/{id_stanza}")
+    @GetMapping("/{id_stanza}")
     public ResponseEntity<StanzeDTO> getStanzeByID(@PathVariable("id_stanza") Integer id_stanza) {
         try {
             StanzeDTO stanzeDTO = StanzeService.cercaStanzaSingola(id_stanza);
@@ -63,7 +64,7 @@ public class StanzeController {
         }
     }
 
-       /*@PostMapping("/crea_Postazione")
+    /*@PostMapping("/crea_Postazione")
     public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
         System.out.println("Ricevuto: " + postazioni.getStanze() + ", " + postazioni.getStato_postazione());
         try {
@@ -73,7 +74,6 @@ public class StanzeController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }*/
-
     // Gestisce Le Richieste PUT per aggiornare una Stanza tramite ID
     @PutMapping("/aggiornastanza/{id}")
     public ResponseEntity<?> aggiornaStanza(@PathVariable("id") Integer id_stanza, @RequestBody Map<String, Object> updates) {
