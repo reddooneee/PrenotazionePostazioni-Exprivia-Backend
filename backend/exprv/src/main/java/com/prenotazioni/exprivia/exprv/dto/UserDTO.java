@@ -1,6 +1,5 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
-import java.util.Set;
 
 public class UserDTO {
 
@@ -8,22 +7,19 @@ public class UserDTO {
     private String nome;
     private String cognome;
     private String email;
-    //private String token;
     private String password;
-    private Set<String> authorities;
 
     // Costruttore vuoto
     public UserDTO() {
     }
 
     // Costruttore con parametri
-    public UserDTO(Integer id_user, String nome, String cognome, String email, String password, Set<String> authorities) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String password) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
         this.password = password;
-        this.authorities = authorities;
     }
 
     // Getters e Setters
@@ -67,18 +63,4 @@ public class UserDTO {
         this.password = password;
     }
 
-    public Set<String> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Set<String> authorities) {
-        this.authorities = authorities;
-    }
-
-    // public String getToken() {
-    //     return token;
-    // }
-    // public void setToken(String token) {
-    //     this.token = token;
-    // }
 }

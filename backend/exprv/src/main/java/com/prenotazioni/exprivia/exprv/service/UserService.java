@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
 import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
@@ -31,9 +32,9 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class UserService {
 
-    private UserRepository userRepository; //Repo User
+    private UserRepository userRepository; // Repo User
     private PasswordEncoder passwordEncoder;
-    private UserMapper userMapper; //User Mapper
+    private UserMapper userMapper; // User Mapper
     private JwtTokenProvider jwtTokenProvider;
     private AuthenticationManager authenticationManager;
 
@@ -67,10 +68,20 @@ public class UserService {
             // Generazione del token JWT
             String jwt = jwtTokenProvider.generateToken(authentication);
 
-            // Creazione della risposta con token e dati utente
-            UserDTO userDTO = userMapper.toDto(user);
+            // Verifica se l'utente ha il ruolo di ADMIN
+            boolean isAdmin = user.getAuthorities().stream()
+                    .anyMatch(auth -> auth.getName().equals("ROLE_ADMIN"));
 
-            return new AuthResponseDTO(jwt, userDTO);
+            // In base al ruolo, restituisci il DTO appropriato
+            if (isAdmin) {
+                // Per admin, restituisci AdminDTO con tutte le informazioni
+                AdminDTO adminDTO = userMapper.toAdminDto(user);
+                return AuthResponseDTO.forAdmin(jwt, adminDTO);
+            } else {
+                // Per utenti normali, restituisci UserDTO con informazioni limitate
+                UserDTO userDTO = userMapper.toDto(user);
+                return AuthResponseDTO.forUser(jwt, userDTO);
+            }
         } catch (BadCredentialsException e) {
             throw new AppException("Credenziali non valide", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -101,37 +112,38 @@ public class UserService {
     }
 
     /**
-     * Recupera tutti gli utenti dal database
+     * Recupera tutti gli utenti dal database come AdminDTO
+     * (per utenti con ruolo ADMIN)
      *
-     * @return Lista di UserDTO
+     * @return Lista di AdminDTO
      */
-    public List<UserDTO> cercaTutti() {
+    public List<AdminDTO> cercaTutti() {
         List<Users> usersList = userRepository.findAll();
-        return userMapper.toDtoList(usersList);
+        return userMapper.toAdminDtoList(usersList);
     }
 
     /**
-     * Recupera un utente con l'id
+     * Recupera un utente con l'id come AdminDTO
+     * (per utenti con ruolo ADMIN)
      *
-     * @return id UserDTO
+     * @return AdminDTO
      */
-    public UserDTO cercaSingolo(Integer id) {
+    public AdminDTO cercaSingolo(Integer id) {
         Users user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utente con id " + id + " non trovato"));
-        return userMapper.toDto(user);
+                .orElseThrow(() -> new EntityNotFoundException("Utente con id " + id + " non trovato"));
+        return new AdminDTO(user);
     }
 
     /**
-     * Cerca un utente tramite l'email
+     * Recupera un utente tramite email come AdminDTO
+     * (per utenti con ruolo ADMIN)
      *
-     * @param email indirizzo email dell'utente
-     * @return UserDTO dell'utente trovato
-     * @throws EntityNotFoundException se l'utente non esiste
+     * @return AdminDTO
      */
-    public UserDTO cercaPerEmail(String email) {
+    public AdminDTO cercaPerEmail(String email) {
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
-        return userMapper.toDto(user);
+        return new AdminDTO(user);
     }
 
     /**
@@ -166,7 +178,7 @@ public class UserService {
     /**
      * Aggiorna un utente esistente con i valori specificati
      *
-     * @param id ID dell'utente da aggiornare
+     * @param id      ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -215,7 +227,7 @@ public class UserService {
     /**
      * Aggiorna un utente con i dati forniti in un DTO
      *
-     * @param id ID dell'utente da aggiornare
+     * @param id      ID dell'utente da aggiornare
      * @param userDTO dati aggiornati dell'utente
      * @return UserDTO dell'utente aggiornato
      */

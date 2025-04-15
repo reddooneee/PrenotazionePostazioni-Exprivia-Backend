@@ -3,80 +3,74 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@RestController // Indica che questa classe è un controller REST
-@RequestMapping("/api/utenti") // Mappa le richieste HTTP che iniziano con "/Users" a questo controller
+@RestController
+@RequestMapping("/api/utenti")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    public UserController() {
-    }
-
-    // Costruttore per iniettare il servizio UserService
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    // Gestisce le richieste GET per ottenere tutti gli utenti
+    // Ottiene tutti gli utenti (visibili come AdminDTO, cioè visione admin)
     @GetMapping
-    public List<UserDTO> getUtentiTotali() {
-        return userService.cercaTutti(); // Chiama il servizio per ottenere tutti gli utenti
+    public ResponseEntity<List<AdminDTO>> getUtentiTotali() {
+        List<AdminDTO> utenti = userService.cercaTutti();
+        return ResponseEntity.ok(utenti);
     }
 
-    // Gestisce le richieste GET per ottenere un singolo utente tramite ID
+    // Ottiene un utente singolo (sempre AdminDTO)
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getPostazioneByID(@PathVariable("id") Integer id_user) {
+    public ResponseEntity<AdminDTO> getUserById(@PathVariable("id") Integer id) {
         try {
-            UserDTO newUserDTO = userService.cercaSingolo(id_user);
-            return ResponseEntity.ok(newUserDTO);
+            AdminDTO adminDTO = userService.cercaSingolo(id);
+            return ResponseEntity.ok(adminDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    // Gestisce le richieste POST per aggiungere un nuovo utente
+    // Crea un nuovo utente (dati in input come UserDTO)
     @PostMapping("/creaUtente")
     public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
         try {
-            UserDTO newUserDTO = userService.creaUtente(userDTO);
-            return ResponseEntity.ok(newUserDTO);
+            UserDTO newUser = userService.creaUtente(userDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // Gestisce le richieste PUT per aggiornare un utente esistente tramite ID
+    // Aggiorna un utente esistente (ritorna UserDTO aggiornato)
     @PutMapping("/aggiornaUtente/{id}")
-    public UserDTO aggiornaUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
-        return userService.aggiornaUser(id, updates);
+    public ResponseEntity<UserDTO> aggiornaUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+        try {
+            UserDTO updatedUser = userService.aggiornaUser(id, updates);
+            return ResponseEntity.ok(updatedUser);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
-    // Gestisce le richieste DELETE per eliminare un utente tramite ID
+    // Elimina un utente
     @DeleteMapping("/eliminaUtente/{id}")
     public ResponseEntity<String> eliminaUser(@PathVariable Integer id) {
         try {
-            userService.eliminaUser(id);// Chiama il servizio per eliminare l'utente
-            return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)
+            userService.eliminaUser(id);
+            return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());//Lancia un messaggio se non è stato eliminato l'utente
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }
