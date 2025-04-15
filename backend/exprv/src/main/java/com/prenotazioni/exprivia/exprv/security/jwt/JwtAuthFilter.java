@@ -1,4 +1,4 @@
-package com.prenotazioni.exprivia.exprv.security;
+package com.prenotazioni.exprivia.exprv.security.jwt;
 
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
@@ -6,7 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.context.SecurityContextHolder;  
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

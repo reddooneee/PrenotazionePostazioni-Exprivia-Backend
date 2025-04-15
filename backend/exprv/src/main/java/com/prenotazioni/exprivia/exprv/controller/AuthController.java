@@ -3,7 +3,7 @@ package com.prenotazioni.exprivia.exprv.controller;
 import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
 import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
-import com.prenotazioni.exprivia.exprv.security.JwtTokenProvider;
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtTokenProvider;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

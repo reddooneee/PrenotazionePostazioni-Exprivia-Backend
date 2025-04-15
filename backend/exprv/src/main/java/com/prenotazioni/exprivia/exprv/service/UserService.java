@@ -22,7 +22,7 @@ import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
-import com.prenotazioni.exprivia.exprv.security.JwtTokenProvider;
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtTokenProvider;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

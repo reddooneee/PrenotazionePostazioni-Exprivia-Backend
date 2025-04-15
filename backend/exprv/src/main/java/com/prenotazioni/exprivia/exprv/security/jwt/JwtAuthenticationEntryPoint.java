@@ -1,4 +1,4 @@
-package com.prenotazioni.exprivia.exprv.security;
+package com.prenotazioni.exprivia.exprv.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

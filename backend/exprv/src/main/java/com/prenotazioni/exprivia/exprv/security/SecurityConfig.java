@@ -11,6 +11,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthFilter;
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthenticationEntryPoint;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -30,19 +33,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+    public SecurityFilterChain securityFilterChain(Http
+                
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(handling -> handling
-                        .authenticationEntryPoint(authenticationEntryPoint))
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+                onHandling(handling -> handling
+                        .authenticationEntryPoint(a
+                Management(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                zeHttpRequests(auth -> auth
                         .requestMatchers("/login**", "/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
