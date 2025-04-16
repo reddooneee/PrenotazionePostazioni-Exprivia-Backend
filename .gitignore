@@ -35,3 +35,6 @@ build/
 ### Angular ###
 frontend/node_modules/
 frontend/.angular/
+
+### App Secret Properties 
+backend/exprv/src/main/resources/application-secrets.properties
