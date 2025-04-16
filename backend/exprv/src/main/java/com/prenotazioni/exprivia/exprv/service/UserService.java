@@ -1,15 +1,21 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,9 +25,11 @@ import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
 import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
+import com.prenotazioni.exprivia.exprv.repository.AuthorityRepository;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 import com.prenotazioni.exprivia.exprv.security.jwt.JwtTokenProvider;
 
@@ -33,12 +41,14 @@ import jakarta.transaction.Transactional;
 public class UserService {
 
     private UserRepository userRepository; // Repo User
+    private AuthorityRepository authorityRepository; // Repo Authority
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper; // User Mapper
     private JwtTokenProvider jwtTokenProvider;
     private AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper,
+    public UserService(UserRepository userRepository, AuthorityRepository authoryRepository,
+            PasswordEncoder passwordEncoder, UserMapper userMapper,
             JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -105,7 +115,6 @@ public class UserService {
         if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException("La password non può essere nulla!");
         }
-        // da aggiungere controllo per authority
     }
 
     /**
@@ -165,6 +174,18 @@ public class UserService {
         // Hash della password
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
+        // Assegna il ruolo predefinito "ROLE_USER"
+        Authority userAuthority = authorityRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Ruolo ROLE_USER non trovato"));
+
+        Set<Authority> authorities = new HashSet<>();
+        authorities.add(userAuthority);
+        user.setAuthorities(authorities);
+
+        // Imposta altri campi necessari
+        user.setEnabled(true);
+        user.setCreatoIl(LocalDateTime.now());
+
         // Salva l'utente
         user = userRepository.save(user);
 
@@ -181,6 +202,16 @@ public class UserService {
      * @throws EntityNotFoundException se l'utente non esiste
      */
     public UserDTO aggiornaUser(Integer id, Map<String, Object> updates) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new AccessDeniedException("Accesso negato: solo un amministratore può aggiornare un utente");
+        }
+
         Users existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
 
@@ -207,7 +238,6 @@ public class UserService {
                     existingUser.setPassword(passwordEncoder.encode((String) value));
                     break;
                 case "authorities":
-                    // Gestione delle authorities attraverso il mapper
                     if (value instanceof Set) {
                         @SuppressWarnings("unchecked")
                         Set<String> authorities = (Set<String>) value;
