@@ -1,6 +1,5 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.debug.settings.onBuildFailureProceed": true,
-    "spring-boot.run.profiles": "secrets"
+    "java.debug.settings.onBuildFailureProceed": true
 }
