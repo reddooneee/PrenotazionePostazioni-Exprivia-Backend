@@ -72,13 +72,10 @@ public class UserService {
             boolean isAdmin = user.getAuthorities().stream()
                     .anyMatch(auth -> auth.getName().equals("ROLE_ADMIN"));
 
-            // In base al ruolo, restituisci il DTO appropriato
             if (isAdmin) {
-                // Per admin, restituisci AdminDTO con tutte le informazioni
                 AdminDTO adminDTO = userMapper.toAdminDto(user);
                 return AuthResponseDTO.forAdmin(jwt, adminDTO);
             } else {
-                // Per utenti normali, restituisci UserDTO con informazioni limitate
                 UserDTO userDTO = userMapper.toDto(user);
                 return AuthResponseDTO.forUser(jwt, userDTO);
             }

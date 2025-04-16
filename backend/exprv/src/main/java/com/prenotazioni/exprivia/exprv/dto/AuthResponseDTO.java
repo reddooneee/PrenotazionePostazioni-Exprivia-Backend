@@ -1,6 +1,8 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
-
+/**
+ * Record che rappresenta la risposta di autenticazione con token JWT e dati utente.
+ */
 public record AuthResponseDTO(String token, Object userInfo, boolean isAdmin) {
     
     /**
