@@ -25,6 +25,7 @@ import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
 import { AxiosService } from "./app/service/axios.service";
 import { UserService } from "./app/service/user.service";
+import { AuthService } from "./app/core/auth/auth.service";
 
 // Importa la configurazione delle rotte
 
@@ -48,5 +49,6 @@ bootstrapApplication(AppComponent, {
     ),
     AxiosService,
     UserService,
+    AuthService,
   ],
 }).catch((err) => console.error(err));
