@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Admin;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
