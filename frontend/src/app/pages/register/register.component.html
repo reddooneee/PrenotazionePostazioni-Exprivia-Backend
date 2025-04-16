@@ -27,15 +27,6 @@
                     <mat-label>Password</mat-label>
                     <input matInput formControlName="password">
                 </mat-form-field>
-                <!-- Ruolo Utente -->
-                <mat-form-field class="example-full-width">
-                    <mat-label>Ruolo Utente</mat-label>
-                    <mat-select formControlName="ruolo_utente">
-                        <mat-option *ngFor="let ruolo of ruoliUtente" [value]="ruolo">
-                            {{ ruolo }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
                 <!-- Pulsante Registrati -->
                 <button
                     class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"

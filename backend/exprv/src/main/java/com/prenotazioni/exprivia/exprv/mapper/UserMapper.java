@@ -66,7 +66,7 @@ public interface UserMapper {
     @Mapping(target = "email", source = "email")
     @Mapping(target = "password", source = "password")
     @Mapping(target = "authorities", ignore = true)
-    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "creatoIl", ignore = true)
     @Mapping(target = "aggiornatoIl", ignore = true)
     void updateUserFromDto(UserDTO userDTO, @MappingTarget Users user);

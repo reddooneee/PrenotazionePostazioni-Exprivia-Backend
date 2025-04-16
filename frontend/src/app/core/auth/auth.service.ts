@@ -1,17 +1,65 @@
-import { Injectable } from "@angular/core";
-import { AxiosService } from "../../service/axios.service";
-import { login } from "../../model/login.model";
-
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from './user.model';
+import { AxiosService } from '../../service/axios.service';
 
 @Injectable({
-    providedIn: "root",
+  providedIn: 'root'
 })
-
 export class AuthService {
-    constructor(private axiosService: AxiosService) { }
 
-    async login(credentials: { login: string; password: string }): Promise<login> {
-        return this.axiosService.post("/login", credentials);
-    }
+  private registerEndpoint = '/auth/register';  // Endpoint di registrazione
+  private loginEndpoint = '/auth/login';        // Endpoint di login
 
+  constructor(private axiosService: AxiosService) {}
+
+  // Registrazione utente
+  registerUser(user: User): Observable<any> {
+    return new Observable((observer) => {
+      this.axiosService.post(this.registerEndpoint, user)
+        .then((response) => {
+          observer.next(response);
+          observer.complete();
+        })
+        .catch((error) => {
+          observer.error(error);
+        });
+    });
+  }
+
+  // Login utente
+  loginUser(email: string, password: string): Observable<any> {
+    const credentials = { email, password };
+    return new Observable((observer) => {
+      this.axiosService.post(this.loginEndpoint, credentials)
+        .then((response) => {
+          if (response.token) {
+            localStorage.setItem('jwt_token', response.token);
+            observer.next(response);
+            observer.complete();
+          } else {
+            observer.error('Login fallito');
+          }
+        })
+        .catch((error) => {
+          observer.error('Credenziali errate');
+        });
+    });
+  }
+
+  // Logout utente
+  logoutUser(): void {
+    localStorage.removeItem('jwt_token');
+  }
+
+  // Ottieni il token JWT
+  getToken(): string | null {
+    return localStorage.getItem('jwt_token');
+  }
+
+  // Verifica se l'utente è autenticato
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    return !!token;  // ritorna true se il token è presente, altrimenti false
+  }
 }

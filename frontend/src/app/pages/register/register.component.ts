@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, inject, Inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import {
   FormsModule,
@@ -9,11 +9,12 @@ import {
   FormControl,
 } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatFormFieldControl, MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { MatOption, MatSelectModule } from "@angular/material/select"; // Importa MatSelectModule
-import { RouterLink } from "@angular/router";
-import { UserService } from "../../service/user.service";
+import { MatSelectModule } from "@angular/material/select"; // Importa MatSelectModule
+import { Router, RouterModule } from "@angular/router"; // Importa solo Router (non RouterLink)
+import { AuthService } from "../../core/auth/auth.service"; // Se usi AuthService
+import { UserService } from "../../service/user.service"; // Se usi UserService
 import { User } from "../../core/auth/user.model";
 
 @Component({
@@ -27,24 +28,22 @@ import { User } from "../../core/auth/user.model";
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    RouterLink,
-    MatOption,
-    MatSelectModule, // Aggiungi MatSelectModule
+    MatSelectModule,
+    RouterModule // Aggiungi MatSelectModule
   ],
 })
 export class RegisterComponent {
   registerForm: FormGroup; // Dichiara il form
+  private authService = inject(AuthService); // Inietta il servizio utente
 
-  ruoliUtente = ["Amministratore", "BuildingManager", "Dipendente"]; // Enum convertito in array
-
-  constructor(private fb: FormBuilder, private userService: UserService) {
+  // Inietta il Router nel costruttore
+  constructor(private fb: FormBuilder, private router: Router) {
     // Inizializza il form con FormBuilder
     this.registerForm = this.fb.group({
       nome: ["", Validators.required],
       cognome: ["", Validators.required],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
-      ruolo_utente: ["", Validators.required],
     });
   }
 
@@ -52,19 +51,20 @@ export class RegisterComponent {
   async onSubmit() {
     if (this.registerForm.valid) {
       const user: User = this.registerForm.value;
-      console.log("Dati del form:", user); // Log dei dati per verificare che vengano correttamente letti
-
+      console.log("Dati del form:", user);
+  
       try {
-        const response = await this.userService.registerUser(user);
+        console.log("Invio richiesta...");
+        const response = await this.authService.registerUser(user);
+        console.log("Risposta dal backend:", response);
         alert("Registrazione avvenuta con successo!");
-        console.log(response); // Verifica la risposta
+        this.router.navigate(['/login']);
       } catch (error) {
         console.error("Errore durante la registrazione:", error);
         alert("Errore durante la registrazione.");
       }
     } else {
-      console.log("Il form non è valido:", this.registerForm); // Log per vedere se il form è valido
-      alert("Compila correttamente tutti i campi.");
+      console.warn("Form non valido");
     }
-  }
+  }  
 }

@@ -8,13 +8,14 @@ public class UserDTO {
     private String cognome;
     private String email;
     private String password;
+    private Boolean enabled;
 
     // Costruttore vuoto
     public UserDTO() {
     }
 
     // Costruttore con parametri
-    public UserDTO(Integer id_user, String nome, String cognome, String email, String password) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String password, Boolean enabled) {
         this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
@@ -61,6 +62,14 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
 }
