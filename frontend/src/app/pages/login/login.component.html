@@ -7,9 +7,9 @@
         <div>
             <form class="flex flex-col gap-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <!-- Email -->
-                <mat-form-field>
+                <mat-form-field class="example-full-width">
                     <mat-label>Email</mat-label>
-                    <input matInput type="email" formControlName="email" placeholder="nome.cognome@exprivia.com">
+                    <input matInput formControlName="email" placeholder="nome.cognome@exprivia.com">
                     <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
                         Email <strong>richiesta</strong>
                     </mat-error>
@@ -18,9 +18,9 @@
                     </mat-error>
                 </mat-form-field>
                 <!-- Password -->
-                <mat-form-field>
+                <mat-form-field class="example-full-width">
                     <mat-label>Password</mat-label>
-                    <input matInput type="password" formControlName="password" placeholder="Inserisci la password">
+                    <input matInput formControlName="password" placeholder="Inserisci la password">
                     <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
                         Password <strong>richiesta</strong>
                     </mat-error>

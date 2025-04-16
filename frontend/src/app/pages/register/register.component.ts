@@ -9,7 +9,7 @@ import {
   FormControl,
 } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldControl, MatFormFieldModule } from "@angular/material/form-field";
+import { MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select"; // Importa MatSelectModule
 import { Router, RouterModule } from "@angular/router"; // Importa solo Router (non RouterLink)
@@ -28,7 +28,7 @@ import { User } from "../../core/auth/user.model";
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    MatSelectModule,
+    MatLabel,
     RouterModule // Aggiungi MatSelectModule
   ],
 })

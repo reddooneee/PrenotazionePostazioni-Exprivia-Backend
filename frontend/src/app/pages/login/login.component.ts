@@ -4,12 +4,20 @@ import { AuthService } from "../../core/auth/auth.service";
 import { CommonModule } from "@angular/common";
 import { MatError, MatFormField, MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { Router, RouterModule } from "@angular/router";
+import { MatCardModule } from "@angular/material/card";
+import { MatInputModule } from "@angular/material/input";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
-  imports: [CommonModule, MatFormFieldModule, MatFormField, MatError, MatLabel, RouterModule, ReactiveFormsModule, FormsModule],
-  styleUrls: ["./login.component.css"],
+  imports: [MatCardModule,
+      MatFormFieldModule,
+      MatInputModule,
+      FormsModule,
+      ReactiveFormsModule,
+      CommonModule,
+      MatLabel,
+      RouterModule]
 })
 export class LoginComponent {
   loginForm: FormGroup;
