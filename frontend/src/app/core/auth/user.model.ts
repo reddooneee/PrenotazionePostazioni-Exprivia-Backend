@@ -1,8 +1,8 @@
 export interface User {
-    id_user?: number;      // facoltativo
+    id_user?: number | null;      // facoltativo
     nome: string;
     cognome: string;
     email: string;
     password: string;
-    enabled?: boolean;     // facoltativo
+    enabled?: boolean | null;     // facoltativo
 }

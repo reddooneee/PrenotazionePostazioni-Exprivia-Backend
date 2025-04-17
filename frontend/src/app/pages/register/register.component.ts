@@ -9,12 +9,10 @@ import {
   FormControl,
 } from "@angular/forms";
 import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
+import { MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { MatSelectModule } from "@angular/material/select"; // Importa MatSelectModule
 import { Router, RouterModule } from "@angular/router"; // Importa solo Router (non RouterLink)
 import { AuthService } from "../../core/auth/auth.service"; // Se usi AuthService
-import { UserService } from "../../service/user.service"; // Se usi UserService
 import { User } from "../../core/auth/user.model";
 
 @Component({
@@ -44,27 +42,28 @@ export class RegisterComponent {
       cognome: ["", Validators.required],
       email: ["", [Validators.required, Validators.email]],
       password: ["", [Validators.required, Validators.minLength(6)]],
+      enabled: [true]
     });
   }
 
-  // Funzione per registrare l'utente
-  async onSubmit() {
-    if (this.registerForm.valid) {
-      const user: User = this.registerForm.value;
-      console.log("Dati del form:", user);
+  onSubmit() {
+    console.log('Submit triggered');
+    console.log('Form stato valido:', this.registerForm.valid);
+    console.log('Valori form:', this.registerForm.value);
   
-      try {
-        console.log("Invio richiesta...");
-        const response = await this.authService.registerUser(user);
-        console.log("Risposta dal backend:", response);
-        alert("Registrazione avvenuta con successo!");
-        this.router.navigate(['/login']);
-      } catch (error) {
-        console.error("Errore durante la registrazione:", error);
-        alert("Errore durante la registrazione.");
-      }
-    } else {
-      console.warn("Form non valido");
+    if (this.registerForm.invalid) {
+      console.warn('Form non valido, abort');
+      return;
     }
-  }  
+  
+    const user: User = {
+      ...this.registerForm.value,
+      enabled: true
+    };
+  
+    this.authService.registerUser(user).subscribe({
+      next: (res) => console.log('Registrazione completata', res),
+      error: (err) => console.error('Errore durante la registrazione:', err)
+    });
+  }
 }

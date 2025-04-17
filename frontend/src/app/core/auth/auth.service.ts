@@ -13,7 +13,6 @@ export class AuthService {
 
   constructor(private axiosService: AxiosService) {}
 
-  // Registrazione utente
   registerUser(user: User): Observable<any> {
     return new Observable((observer) => {
       this.axiosService.post(this.registerEndpoint, user)

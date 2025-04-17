@@ -39,13 +39,13 @@ import jakarta.transaction.Transactional;
 public class UserService {
 
     private UserRepository userRepository; // Repo User
-    private AuthorityRepository authorityRepository; // Repo Authority
+    private AuthorityRepository authorityRepository;
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper; // User Mapper
     private JwtTokenProvider jwtTokenProvider;
     private AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository, AuthorityRepository authoryRepository,
+    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder, UserMapper userMapper,
             JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
@@ -53,6 +53,7 @@ public class UserService {
         this.userMapper = userMapper;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
+        this.authorityRepository = authorityRepository;
     }
 
     /**
@@ -148,6 +149,11 @@ public class UserService {
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
         return new AdminDTO(user);
+    }
+
+    public Authority getAuthorityByName(String name) {
+        return authorityRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Authority not found with name: " + name));
     }
 
     /**
