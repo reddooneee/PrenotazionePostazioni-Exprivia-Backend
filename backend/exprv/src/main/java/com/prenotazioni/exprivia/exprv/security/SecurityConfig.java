@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login**").permitAll()
+                        .requestMatchers("/auth/login**", "/auth/register**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/utenti/**").hasAuthority(AuthoritiesConstants.ADMIN) // solo admin
                         .requestMatchers("/api/prenotazioni/**")

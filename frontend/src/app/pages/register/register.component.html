@@ -25,12 +25,18 @@
                 <!-- Password -->
                 <mat-form-field class="example-full-width">
                     <mat-label>Password</mat-label>
-                    <input matInput formControlName="password">
+                    <input matInput type="password" formControlName="password">
+                    <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+                        La password è obbligatoria
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+                        La password deve contenere almeno 6 caratteri
+                    </mat-error>
                 </mat-form-field>
                 <!-- Pulsante Registrati -->
                 <button
                     class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
-                    type="submit">
+                    type="submit" [disabled]="registerForm.invalid">
                     Registrati
                 </button>
                 <div class="text-center text-sm">
