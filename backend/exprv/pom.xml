@@ -136,6 +136,11 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Dipendenza per l'Email Service - Recupero Password -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
 
         <!-- Dipendenza per Jakarta Servlet API, necessaria per applicazioni web -->
         <dependency>
