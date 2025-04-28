@@ -1,17 +1,12 @@
 package com.prenotazioni.exprivia.exprv.service;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,12 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
-import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
-import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
-import com.prenotazioni.exprivia.exprv.exceptions.AppException;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.AuthorityRepository;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
@@ -42,8 +34,6 @@ public class UserService {
     private AuthorityRepository authorityRepository;
     private PasswordEncoder passwordEncoder;
     private UserMapper userMapper; // User Mapper
-    private JwtTokenProvider jwtTokenProvider;
-    private AuthenticationManager authenticationManager;
 
     public UserService(UserRepository userRepository, AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder, UserMapper userMapper,
@@ -51,48 +41,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.authenticationManager = authenticationManager;
         this.authorityRepository = authorityRepository;
-    }
-
-    /**
-     * Autenticazione dell'utente
-     *
-     * @param credentialsDto credenziali di accesso
-     * @return AuthResponseDTO contenente il token JWT e i dati dell'utente
-     * @throws AppException se le credenziali sono invalide
-     */
-    public AuthResponseDTO login(CredentialsDto credentialsDto) {
-        try {
-            // Autenticazione dell'utente con il AuthenticationManager
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(credentialsDto.email(), credentialsDto.password()));
-
-            // Se l'autenticazione è riuscita, otteniamo l'utente
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            Users user = userRepository.findByEmail(credentialsDto.email())
-                    .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
-
-            // Generazione del token JWT
-            String jwt = jwtTokenProvider.generateToken(authentication);
-
-            // Verifica se l'utente ha il ruolo di ADMIN
-            boolean isAdmin = user.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getName().equals("ROLE_ADMIN"));
-
-            if (isAdmin) {
-                AdminDTO adminDTO = userMapper.toAdminDto(user);
-                return AuthResponseDTO.forAdmin(jwt, adminDTO);
-            } else {
-                UserDTO userDTO = userMapper.toDto(user);
-                return AuthResponseDTO.forUser(jwt, userDTO);
-            }
-        } catch (BadCredentialsException e) {
-            throw new AppException("Credenziali non valide", HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            throw new AppException("Errore durante l'autenticazione", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**
@@ -101,24 +50,9 @@ public class UserService {
      * @param userDTO dati da validare
      * @throws IllegalArgumentException se i dati non sono validi
      */
-    private void validateUserData(UserDTO userDTO) {
-        if (userDTO.getNome() == null || userDTO.getNome().isEmpty()) {
-            throw new IllegalArgumentException("Il nome non può essere nullo!");
-        }
-        if (userDTO.getCognome() == null || userDTO.getCognome().isEmpty()) {
-            throw new IllegalArgumentException("Il cognome non può essere nullo!");
-        }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("La mail non può essere nulla!");
-        }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("La password non può essere nulla!");
-        }
-    }
-
     /**
-     * Recupera tutti gli utenti dal database come AdminDTO
-     * (per utenti con ruolo ADMIN)
+     * Recupera tutti gli utenti dal database come AdminDTO (per utenti con
+     * ruolo ADMIN)
      *
      * @return Lista di AdminDTO
      */
@@ -128,8 +62,7 @@ public class UserService {
     }
 
     /**
-     * Recupera un utente con l'id come AdminDTO
-     * (per utenti con ruolo ADMIN)
+     * Recupera un utente con l'id come AdminDTO (per utenti con ruolo ADMIN)
      *
      * @return AdminDTO
      */
@@ -140,8 +73,8 @@ public class UserService {
     }
 
     /**
-     * Recupera un utente tramite email come AdminDTO
-     * (per utenti con ruolo ADMIN)
+     * Recupera un utente tramite email come AdminDTO (per utenti con ruolo
+     * ADMIN)
      *
      * @return AdminDTO
      */
@@ -157,50 +90,9 @@ public class UserService {
     }
 
     /**
-     * Crea un nuovo utente
-     *
-     * @param userDTO dati del nuovo utente
-     * @return UserDTO dell'utente creato
-     * @throws IllegalArgumentException se ci sono problemi di validazione
-     */
-    public UserDTO creaUtente(UserDTO userDTO) {
-        // Validazione dei dati
-        validateUserData(userDTO);
-
-        // Verifica che l'email non sia già in uso
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Esiste già un utente con questa email!");
-        }
-
-        // Converti DTO in entity
-        Users user = userMapper.toEntity(userDTO);
-
-        // Hash della password
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-
-        // Assegna il ruolo predefinito "ROLE_USER"
-        Authority userAuthority = authorityRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Ruolo ROLE_USER non trovato"));
-
-        Set<Authority> authorities = new HashSet<>();
-        authorities.add(userAuthority);
-        user.setAuthorities(authorities);
-
-        // Imposta altri campi necessari
-        user.setEnabled(true);
-        user.setCreatoIl(LocalDateTime.now());
-
-        // Salva l'utente
-        user = userRepository.save(user);
-
-        // Restituisci il DTO dell'utente salvato
-        return userMapper.toDto(user);
-    }
-
-    /**
      * Aggiorna un utente esistente con i valori specificati
      *
-     * @param id      ID dell'utente da aggiornare
+     * @param id ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -258,7 +150,7 @@ public class UserService {
     /**
      * Aggiorna un utente con i dati forniti in un DTO
      *
-     * @param id      ID dell'utente da aggiornare
+     * @param id ID dell'utente da aggiornare
      * @param userDTO dati aggiornati dell'utente
      * @return UserDTO dell'utente aggiornato
      */
