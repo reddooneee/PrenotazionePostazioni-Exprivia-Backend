@@ -10,6 +10,8 @@ export class AuthService {
 
   private registerEndpoint = '/auth/register';  // Endpoint di registrazione
   private loginEndpoint = '/auth/login';        // Endpoint di login
+  private forgotpwdEndpoint = '/auth/forgot-password' //Endpoint Per recupero pwd
+  private resetpwdEndpoint = '/auth/reset-password' //Endpoint conferma pwd
 
   constructor(private axiosService: AxiosService) {}
 
@@ -51,6 +53,37 @@ export class AuthService {
     localStorage.removeItem('jwt_token');
   }
 
+//Recupero pwd utente
+  forgotPassword(email: string): Observable<any> {
+    return new Observable((observer) => {
+      this.axiosService.post(this.forgotpwdEndpoint, { email })
+        .then((response) => {
+          observer.next(response);
+          observer.complete();
+        })
+        .catch((error) => {
+          observer.error(error);
+        });
+    });
+  }
+
+// ...existing code...
+
+resetPassword(token: string, newPassword: string): Observable<any> {
+  return new Observable((observer) => {
+    this.axiosService.post(this.resetpwdEndpoint, {
+      token,
+      newPassword
+    })
+    .then((response) => {
+      observer.next(response);
+      observer.complete();
+    })
+    .catch((error) => {
+      observer.error(error);
+    });
+  });
+}
   // Ottieni il token JWT
   getToken(): string | null {
     return localStorage.getItem('jwt_token');
@@ -61,4 +94,7 @@ export class AuthService {
     const token = this.getToken();
     return !!token;  // ritorna true se il token è presente, altrimenti false
   }
+
+
+
 }

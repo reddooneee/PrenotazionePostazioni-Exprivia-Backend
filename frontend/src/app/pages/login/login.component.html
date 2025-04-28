@@ -39,12 +39,23 @@
                     {{ errorMessage }}
                 </div>
 
+                <!-- Recupero Password -->
+                <div class="text-center text-sm mt-4">
+                    
+                    <a [routerLink]="['/forgot-password']" class="text-expriviaOrange underline-offset-4 hover:underline">
+                    Password dimenticata? Recuperala QUI
+                </a> 
+                </div>
+
                 <div class="text-center text-sm mt-4">
                     Non hai un account?
                     <a [routerLink]="['/registrazione']" class="text-expriviaOrange underline-offset-4 hover:underline">
                         Registrati
                     </a>
                 </div>
+
+                
+
             </form>
         </div>
     </div>
