@@ -31,7 +31,12 @@
           type="submit"
           [disabled]="forgotPwdForm.invalid || isLoading"
         >
-          <span *ngIf="!isLoading">Invia Email</span>
+            <span *ngIf="!isLoading">Invia Email</span>
+            <span *ngIf="isLoading">
+              <!-- Cambiare h- e w- per dimensioni -->
+            <img src="https://cdn3.emoji.gg/emojis/1420-walking.gif" alt="Loading..." class="h-20 w-20 inline"/>
+            </span>
+          
         </button>
       </form>
     </div>
