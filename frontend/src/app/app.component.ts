@@ -2,9 +2,10 @@ import { Component } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { OnInit } from '@angular/core';
 import { initFlowbite } from 'flowbite';
-import { RouterOutlet } from "@angular/router"
+import { RouterOutlet, Router, NavigationEnd } from "@angular/router"
 import { HeaderComponent } from "./layout/header/header.component";
 import { FooterComponent } from "./layout/footer/footer.component";
+import { filter } from "rxjs";
 
 
 
@@ -15,9 +16,17 @@ import { FooterComponent } from "./layout/footer/footer.component";
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
+  showLayout: boolean = true;
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    initFlowbite();
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      // Cambia '/admin-dashboard' con il path corretto della tua rotta
+      this.showLayout = !event.urlAfterRedirects.includes('/admin-dashboard');
+    });
   }
 }
 
