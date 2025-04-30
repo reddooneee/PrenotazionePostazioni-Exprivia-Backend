@@ -12,8 +12,8 @@ export const routes: Routes = [
     { path: "", component: HomeComponent }, // La home sarà il componente di default
     { path: "registrazione", component: RegisterComponent }, // Rotta per la registrazione
     { path: "accedi", component: LoginComponent }, //rotta per il login
-    {path: "dashboard", component: DashBoardComponent}, // Rotta per il dashboard
-    {path: "forgot-password", component: ForgotpwdComponent}, // Rotta per il forgot password
-    {path: "reset-password", component: ResetpwdComponent}, // Rotta per il reset password
-    {path: "admin-dashboard", component: AdminDashboardComponent} //Rotta per la dashboard admin
+    { path: "dashboard", component: DashBoardComponent }, // Rotta per il dashboard
+    { path: "forgot-password", component: ForgotpwdComponent }, // Rotta per il forgot password
+    { path: "reset-password", component: ResetpwdComponent }, // Rotta per il reset password
+    { path: "admin-dashboard", component: AdminDashboardComponent } //Rotta per la dashboard admin
 ];

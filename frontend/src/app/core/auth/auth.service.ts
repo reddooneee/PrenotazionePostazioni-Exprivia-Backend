@@ -67,8 +67,6 @@ export class AuthService {
     });
   }
 
-// ...existing code...
-
 resetPassword(token: string, newPassword: string): Observable<any> {
   return new Observable((observer) => {
     this.axiosService.post(this.resetpwdEndpoint, {
