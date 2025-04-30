@@ -3,7 +3,7 @@ import { FormBuilder, FormControlName, FormGroup, ReactiveFormsModule, Validator
 import { CommonModule } from "@angular/common";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { AuthService } from "../../core/auth/auth.service";
+import { AuthService } from "../../../core/auth/auth.service";
 import { RouterModule } from "@angular/router";
 @Component({
   selector: 'app-forgotpwd',

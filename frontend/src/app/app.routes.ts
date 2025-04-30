@@ -3,8 +3,8 @@ import { HomeComponent } from "./pages/home/home.component";
 import { RegisterComponent } from "./pages/register/register.component";
 import { LoginComponent } from "./pages/login/login.component";
 import { DashBoardComponent } from "./pages/dashboard/dashboard.component";
-import { ForgotpwdComponent } from "./pages/forgotpwd/forgotpwd.component";
-import { ResetpwdComponent } from "./pages/resetpwd/resetpwd.component";
+import { ForgotpwdComponent } from "./pages/password/forgotpwd/forgotpwd.component";
+import { ResetpwdComponent } from "./pages/password/resetpwd/resetpwd.component";
 import { AdminDashboardComponent } from "./pages/admin-dashboard/admin-dashboard.component";
 
 // Definisci le rotte
