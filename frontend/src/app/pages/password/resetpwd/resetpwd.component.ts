@@ -3,7 +3,7 @@ import { FormGroup, ReactiveFormsModule, Validators, FormControl } from "@angula
 import { CommonModule } from "@angular/common";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { AuthService } from "../../core/auth/auth.service";
+import { AuthService } from "../../../core/auth/auth.service";
 import { RouterModule, ActivatedRoute } from "@angular/router";
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
