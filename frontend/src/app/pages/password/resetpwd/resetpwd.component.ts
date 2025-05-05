@@ -6,6 +6,7 @@ import { MatInputModule } from "@angular/material/input";
 import { AuthService } from "../../../core/auth/auth.service";
 import { RouterModule, ActivatedRoute } from "@angular/router";
 import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { MatIcon, MatIconModule } from "@angular/material/icon";
 
 
 // Validator corretto
@@ -23,7 +24,8 @@ export function passwordMatchValidator(control: AbstractControl): ValidationErro
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
-    CommonModule
+    CommonModule,
+    MatIconModule
   ],
   templateUrl: './resetpwd.component.html',
   styleUrl: './resetpwd.component.css'
@@ -32,6 +34,9 @@ export class ResetpwdComponent implements OnInit {
   private token = '';
   private authService = inject(AuthService);
   isLoading: boolean = false;
+
+  hideNewPwd = true;
+  hideConfirmPwd = true;
 
   resetPwdForm = new FormGroup({
     password: new FormControl('', [Validators.required]),

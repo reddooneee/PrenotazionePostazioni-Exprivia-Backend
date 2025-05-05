@@ -14,6 +14,7 @@ import { MatInputModule } from "@angular/material/input";
 import { Router, RouterModule } from "@angular/router"; // Importa solo Router (non RouterLink)
 import { AuthService } from "../../core/auth/auth.service"; // Se usi AuthService
 import { User } from "../../core/auth/user.model";
+import { MatIconModule } from "@angular/material/icon"
 
 @Component({
   selector: "app-register",
@@ -27,12 +28,15 @@ import { User } from "../../core/auth/user.model";
     ReactiveFormsModule,
     CommonModule,
     MatLabel,
-    RouterModule // Aggiungi MatSelectModule
+    RouterModule, // Aggiungi MatSelectModule
+    MatIconModule
   ],
 })
 export class RegisterComponent {
   registerForm: FormGroup; // Dichiara il form
   private authService = inject(AuthService); // Inietta il servizio utente
+
+  hidePwd = true;
 
   // Inietta il Router nel costruttore
   constructor(private fb: FormBuilder, private router: Router) {

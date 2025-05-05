@@ -1,53 +1,72 @@
 <main class="flex min-h-screen items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
-      <h1 class="text-2xl font-bold">Conferma Password</h1>
-      <p class="text-gray-400">
-        <br>
-        Procedi con il cambio password.
-      </p>
-      <form
-        class="flex flex-col gap-4 mt-6"
-        [formGroup]="resetPwdForm"
-        (ngSubmit)="onSubmit()"
-      >
-        <!-- Nuova Password -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Nuova Password</mat-label>
-          <input
-            matInput
-            type="password"
-            formControlName="password"
-            placeholder="Inserisci la nuova password"
-          />
-          <mat-error *ngIf="resetPwdForm.get('password')?.hasError('required')">
-            <strong>Password richiesta</strong>
-          </mat-error>
-        </mat-form-field>
-  
-        <!-- Conferma Password -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Conferma Password</mat-label>
-          <input
-            matInput
-            type="password"
-            formControlName="confirmPassword"
-            placeholder="Ripeti la nuova password"
-          />
-          <mat-error *ngIf="resetPwdForm.get('confirmPassword')?.hasError('required')">
-            <strong>Conferma password richiesta</strong>
-          </mat-error>
-          <mat-error *ngIf="resetPwdForm.hasError('passwordMismatch')">
-            Le password non coincidono
-          </mat-error>
-        </mat-form-field>
-  
+  <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
+    <h1 class="text-2xl font-bold">Conferma Password</h1>
+    <p class="text-gray-400">
+      <br />
+      Procedi con il cambio password.
+    </p>
+    <form
+      class="flex flex-col gap-4 mt-6"
+      [formGroup]="resetPwdForm"
+      (ngSubmit)="onSubmit()"
+    >
+      <!-- Nuova Password -->
+      <mat-form-field class="example-full-width relative" appearance="fill">
+        <mat-label>Nuova Password</mat-label>
+        <input
+          matInput
+          [type]="hideNewPwd ? 'password' : 'text'"
+          formControlName="password"
+          placeholder="Inserisci la nuova password"
+          class="pr-10"
+          autocomplete="new-password"
+        />
         <button
-          class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
-          type="submit"
-          [disabled]="resetPwdForm.invalid || isLoading"
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hideNewPwd = !hideNewPwd"
+          [attr.aria-label]="
+            hideNewPwd ? 'Mostra password' : 'Nascondi password'
+          "
+          class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          tabindex="-1"
         >
-          <span *ngIf="!isLoading">Cambia Password</span>
+          <mat-icon>{{
+            hideNewPwd ? "visibility" : "visibility_off"
+          }}</mat-icon>
         </button>
-      </form>
-    </div>
-  </main>
+        <mat-error *ngIf="resetPwdForm.get('password')?.hasError('required')">
+          <strong>Password richiesta</strong>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Conferma Password -->
+      <mat-form-field class="example-full-width">
+        <mat-label>Conferma Password</mat-label>
+        <input
+          matInput
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Ripeti la nuova password"
+        />
+        <mat-error
+          *ngIf="resetPwdForm.get('confirmPassword')?.hasError('required')"
+        >
+          <strong>Conferma password richiesta</strong>
+        </mat-error>
+        <mat-error *ngIf="resetPwdForm.hasError('passwordMismatch')">
+          Le password non coincidono
+        </mat-error>
+      </mat-form-field>
+
+      <button
+        class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
+        type="submit"
+        [disabled]="resetPwdForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Cambia Password</span>
+      </button>
+    </form>
+  </div>
+</main>

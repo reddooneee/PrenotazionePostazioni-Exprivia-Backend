@@ -6,6 +6,7 @@ import { MatError, MatFormField, MatFormFieldControl, MatFormFieldModule, MatLab
 import { Router, RouterModule } from "@angular/router";
 import { MatCardModule } from "@angular/material/card";
 import { MatInputModule } from "@angular/material/input";
+import { MatIcon, MatIconModule } from "@angular/material/icon"
 
 @Component({
   selector: "app-login",
@@ -17,7 +18,8 @@ import { MatInputModule } from "@angular/material/input";
       ReactiveFormsModule,
       CommonModule,
       MatLabel,
-      RouterModule]
+      RouterModule,
+      MatIconModule]
 })
 export class LoginComponent {
   loginForm: FormGroup;
@@ -25,6 +27,8 @@ export class LoginComponent {
   errorMessage: string = '';
   private authService = inject(AuthService); // Inietta il servizio utente
   private router = inject(Router)
+
+  hidePwd = true;
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
