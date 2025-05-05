@@ -25,7 +25,6 @@ export class LoginComponent {
   isLoading: boolean = false;
   errorMessage: string = '';
   
-  // Iniezione tramite inject
   private authService = inject(AuthService);
   private router = inject(Router);
 
