@@ -1,30 +1,33 @@
 import { Component, inject } from "@angular/core";
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AuthService } from "../../core/auth/auth.service";
 import { CommonModule } from "@angular/common";
-import { MatError, MatFormField, MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
-import { Router, RouterModule } from "@angular/router";
 import { MatCardModule } from "@angular/material/card";
+import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
+import { RouterModule, Router } from "@angular/router";
+import { MatLabel } from "@angular/material/form-field";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
-  imports: [MatCardModule,
-      MatFormFieldModule,
-      MatInputModule,
-      FormsModule,
-      ReactiveFormsModule,
-      CommonModule,
-      MatLabel,
-      RouterModule]
+  imports: [
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    CommonModule,
+    RouterModule,
+    MatLabel
+  ]
 })
 export class LoginComponent {
   loginForm: FormGroup;
   isLoading: boolean = false;
   errorMessage: string = '';
-  private authService = inject(AuthService); // Inietta il servizio utente
-  private router = inject(Router)
+  
+  // Iniezione tramite inject
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
@@ -45,8 +48,7 @@ export class LoginComponent {
           localStorage.setItem('jwt_token', res.token);
           this.isLoading = false;
           this.loginForm.reset();
-          // Reindirizzamento
-          this.router.navigate(['/dashboard']);  // oppure this.router.navigate(...) se lo hai iniettato
+          this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           this.isLoading = false;
@@ -56,5 +58,4 @@ export class LoginComponent {
       });
     }
   }
-  
 }

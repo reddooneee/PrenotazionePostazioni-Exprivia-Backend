@@ -1,6 +1,9 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.prenotazioni.exprivia.exprv.security.AuthoritiesConstants;
@@ -22,6 +25,22 @@ public class AuthorityService {
         return authentication.getAuthorities().stream()
                 .map(ga -> ga.getAuthority())
                 .anyMatch(auth -> auth.equals(authority));
+    }
+
+        /**
+     * Recupera i ruoli correnti dell'utente autenticato.
+     *
+     * @return lista di autorità (es. ROLE_ADMIN, ROLE_USER)
+     */
+    public static List<String> getCurrentUserRoles() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return List.of();
+        }
+
+        return auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
     }
 
     /*

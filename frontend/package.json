@@ -24,6 +24,7 @@
     "axios": "^1.8.1",
     "exprivia": "file:",
     "flowbite": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "lucide-angular": "^0.479.0",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",

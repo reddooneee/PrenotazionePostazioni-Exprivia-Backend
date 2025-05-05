@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "authority")
 public class Authority implements Serializable {
@@ -53,6 +54,7 @@ public class Authority implements Serializable {
         this.name = name;
         return this;
     }
+
 
     @Override
     public boolean equals(Object o) {
