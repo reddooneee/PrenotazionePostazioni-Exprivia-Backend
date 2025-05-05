@@ -7,6 +7,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { RouterModule, Router } from "@angular/router";
 import { MatLabel } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: "app-login",
@@ -17,7 +19,9 @@ import { MatLabel } from "@angular/material/form-field";
     MatInputModule,
     CommonModule,
     RouterModule,
-    MatLabel
+    MatLabel,
+    ReactiveFormsModule,
+    MatIconModule
   ]
 })
 export class LoginComponent {
@@ -28,6 +32,9 @@ export class LoginComponent {
   // Iniezione tramite inject
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  hidePwd = true;
+
 
   constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
