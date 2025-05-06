@@ -1,0 +1,252 @@
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.fullscreen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.fullscreen-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.fullscreen-close-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fullscreen-close-btn:hover {
+  background-color: #dc2626;
+}
+
+.fullscreen-content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.planimetria-container {
+  position: relative;
+  max-width: 100%;
+  max-height: calc(100vh - 180px);
+}
+
+.planimetria-img {
+  max-width: 100%;
+  max-height: calc(100vh - 180px);
+  object-fit: contain;
+}
+
+.floor-plan-marker {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  margin-left: -16px;
+  margin-top: -16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.marker-label {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.floor-plan-marker.available {
+  background-color: #10b981;
+  animation: pulse 2s infinite;
+}
+
+.floor-plan-marker.unavailable {
+  background-color: #ef4444;
+  opacity: 0.7;
+}
+
+.floor-plan-marker.selected {
+  background-color: #3b82f6;
+  transform: scale(1.5);
+  z-index: 10;
+}
+
+.floor-plan-marker:hover {
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+.floor-plan-marker.selected:hover {
+  transform: scale(1.5);
+}
+
+.marker-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  z-index: 20;
+  margin-bottom: 8px;
+  min-width: 150px;
+  text-align: center;
+}
+
+.tooltip-status {
+  display: block;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+.tooltip-status.available {
+  color: #10b981;
+}
+
+.tooltip-status.unavailable {
+  color: #ef4444;
+}
+
+.floor-plan-marker:hover .marker-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fullscreen-footer {
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 24px;
+}
+
+.floor-plan-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.available {
+  background-color: #10b981;
+  animation: pulse 2s infinite;
+}
+
+.legend-dot.unavailable {
+  background-color: #ef4444;
+  opacity: 0.7;
+}
+
+.legend-dot.selected {
+  background-color: #3b82f6;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .floor-plan-marker {
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+    margin-top: -12px;
+    font-size: 10px;
+  }
+
+  .marker-tooltip {
+    font-size: 10px;
+    padding: 6px 8px;
+    min-width: 120px;
+  }
+
+  .floor-plan-legend {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .legend-item {
+    font-size: 12px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+  }
+}

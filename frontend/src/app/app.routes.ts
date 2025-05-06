@@ -7,7 +7,7 @@ import { ForgotpwdComponent } from "./pages/password/forgotpwd/forgotpwd.compone
 import { ResetpwdComponent } from "./pages/password/resetpwd/resetpwd.component";
 import { AdminDashboardComponent } from "./pages/admin-dashboard/admin-dashboard.component";
 import { AuthGuard } from "./core/auth/auth.guard";
-
+import { PrenotazionePosizioneComponent } from "./pages/prenotazione-posizione/prenotazione-posizione.component";
 
 
 // Definisci le rotte
@@ -29,5 +29,6 @@ export const routes: Routes = [
     },
     { path: "forgot-password", component: ForgotpwdComponent },
     { path: "reset-password", component: ResetpwdComponent },
+    { path: "prenotazione-posizione", component: PrenotazionePosizioneComponent},
   ];
   
