@@ -1,17 +1,14 @@
 import { Routes } from "@angular/router";
 import { HomeComponent } from "./pages/home/home.component";
-import { RegisterComponent } from "./account/register/register.component";
 import { LoginComponent } from "./login/login.component";
-import { DashboardComponent } from "./pages/dashboard/dashboard.component";
 import { ForgotpwdComponent } from "./account/password/forgot-password/forgotpwd.component";
 import { ResetpwdComponent } from "./account/password/reset-password/resetpwd.component";
 import { AuthGuard } from "./core/auth/auth.guard";
 import { ForbiddenComponent } from "./pages/forbidden/forbidden.component";
-import { UserManagementComponent } from "./pages/dashboard/user-management/user-management.component";
-import { UserBookingsComponent } from "./pages/dashboard/user-bookings/user-bookings.component";
 import { inject } from "@angular/core";
 import { AuthService } from "./core/auth/auth.service";
 import { Router } from "@angular/router";
+import { RegisterComponent } from "./account/register/register.component";
 
 // Guard to redirect authenticated users to dashboard
 const redirectAuthenticatedToDashboard = () => {
@@ -31,30 +28,32 @@ export const routes: Routes = [
     component: HomeComponent,
     canActivate: [() => redirectAuthenticatedToDashboard()]
   },
-  { path: "registrazione", component: RegisterComponent },
-  { path: "accedi", component: LoginComponent },
+  { 
+    path: "registrazione", 
+    component: RegisterComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { 
+    path: "accedi", 
+    component: LoginComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
   {
     path: "dashboard",
-    component: DashboardComponent,
+    loadChildren: () => import('./pages/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
     canActivate: [AuthGuard],
-    data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] },
-    children: [
-      {
-        path: 'user-management',
-        component: UserManagementComponent,
-        data: { authorities: ['ROLE_ADMIN'] }
-      },
-      {
-        path: 'bookings',
-        component: UserBookingsComponent,
-        data: { authorities: ['ROLE_USER'] }
-      },
-      // Add other dashboard routes here
-      { path: '', redirectTo: 'bookings', pathMatch: 'full' }
-    ]
+    data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] }
   },
-  { path: "forgot-password", component: ForgotpwdComponent },
-  { path: "reset-password", component: ResetpwdComponent },
+  { 
+    path: "forgot-password", 
+    component: ForgotpwdComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { 
+    path: "reset-password", 
+    component: ResetpwdComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
   { path: "forbidden", component: ForbiddenComponent },
   { path: "**", redirectTo: "" }
 ];

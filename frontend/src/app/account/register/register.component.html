@@ -1,88 +1,246 @@
-<main class="flex min-h-screen items-center justify-center px-4 py-12">
-  <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
-    <header class="space-y-2.5 mb-8">
-      <h1 class="text-2xl font-bold">Crea un account</h1>
-      <p class="text-gray-400">
-        Inserisci i tuoi dati per registrarti al sistema di prenotazione
+<main class="min-h-screen flex items-center justify-center bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70 px-4 py-12 relative overflow-hidden">
+  <div class="w-full max-w-md p-8 bg-white backdrop-blur-lg shadow-2xl rounded-2xl transform transition-all duration-500 hover:shadow-expriviaOrange/20">
+    <div class="text-center mb-8">
+      <div class="relative inline-block">
+        <img src="LogoExprivia.svg" alt="Exprivia Logo" class="h-12 mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
+      </div>
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
+        Registrazione
+      </h1>
+      <p class="text-gray-600 mt-2">
+        Crea il tuo account
       </p>
-    </header>
-    <div>
-      <form
-        [formGroup]="registerForm"
-        (ngSubmit)="onSubmit()"
-        class="flex flex-col gap-4"
-      >
-        <!-- Nome -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Nome</mat-label>
-          <input matInput formControlName="nome" />
-        </mat-form-field>
-        <!-- Cognome -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Cognome</mat-label>
-          <input matInput formControlName="cognome" />
-        </mat-form-field>
-        <!-- Email -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" />
-        </mat-form-field>
-        <!-- Password -->
-        <mat-form-field class="example-full-width relative" appearance="fill">
-          <mat-label>Password</mat-label>
-
-          <input
-            matInput
-            [type]="hidePwd ? 'password' : 'text'"
-            formControlName="password"
-            class="pr-10"
-            autocomplete="new-password"
-          />
-
-          <!-- Icon Button -->
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="hidePwd = !hidePwd"
-            [attr.aria-label]="
-              hidePwd ? 'Mostra password' : 'Nascondi password'
-            "
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-            tabindex="-1"
-          >
-            <mat-icon>{{ hidePwd ? "visibility" : "visibility_off" }}</mat-icon>
-          </button>
-
-          <!-- Errori -->
-          <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-            La password è obbligatoria
-          </mat-error>
-          <mat-error
-            *ngIf="registerForm.get('password')?.hasError('minlength')"
-          >
-            La password deve contenere almeno 6 caratteri
-          </mat-error>
-        </mat-form-field>
-
-        <!-- Pulsante Registrati -->
-        <button
-          class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
-          type="submit"
-          [disabled]="registerForm.invalid"
-        >
-          Registrati
-        </button>
-        <div class="text-center text-sm">
-          Hai già un account?
-          <a
-            [routerLink]="['/accedi']"
-            class="text-expriviaOrange underline-offset-4 hover:underline"
-          >
-            Accedi
-          </a>
-        </div>
-      </form>
     </div>
+
+    <form class="space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div [@slideUp]="{ value: '', params: { delay: '100ms' } }" class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">person</mat-icon>
+          </div>
+          <input 
+            matInput 
+            formControlName="firstName" 
+            placeholder="Nome" 
+            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" 
+          />
+        </div>
+        <div *ngIf="firstNameInvalid && registerForm.get('firstName')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Nome <strong>richiesto</strong>
+        </div>
+        <div *ngIf="firstNameInvalid && registerForm.get('firstName')?.hasError('minlength')" class="text-red-500 text-sm mt-1">
+          Il nome deve essere di almeno 2 caratteri
+        </div>
+      </div>
+
+      <div [@slideUp]="{ value: '', params: { delay: '200ms' } }" class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">person</mat-icon>
+          </div>
+          <input 
+            matInput 
+            formControlName="lastName" 
+            placeholder="Cognome" 
+            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" 
+          />
+        </div>
+        <div *ngIf="lastNameInvalid && registerForm.get('lastName')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Cognome <strong>richiesto</strong>
+        </div>
+        <div *ngIf="lastNameInvalid && registerForm.get('lastName')?.hasError('minlength')" class="text-red-500 text-sm mt-1">
+          Il cognome deve essere di almeno 2 caratteri
+        </div>
+      </div>
+
+      <div [@slideUp]="{ value: '', params: { delay: '300ms' } }" class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">mail</mat-icon>
+          </div>
+          <input 
+            matInput 
+            formControlName="email" 
+            placeholder="Email" 
+            type="email"
+            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" 
+          />
+        </div>
+        <div *ngIf="emailInvalid && registerForm.get('email')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Email <strong>richiesta</strong>
+        </div>
+        <div *ngIf="emailInvalid && registerForm.get('email')?.hasError('email')" class="text-red-500 text-sm mt-1">
+          Inserisci una mail valida
+        </div>
+      </div>
+
+      <div [@slideUp]="{ value: '', params: { delay: '400ms' } }" class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">lock</mat-icon>
+          </div>
+          <input 
+            matInput 
+            [type]="hidePwd ? 'password' : 'text'" 
+            formControlName="password"
+            placeholder="Password"
+            autocomplete="new-password"
+            class="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" 
+          />
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <button 
+              type="button" 
+              (click)="hidePwd = !hidePwd"
+              class="text-gray-400 hover:text-expriviaOrange transition-colors duration-200 w-6 h-6"
+            >
+              <mat-icon>{{ hidePwd ? "visibility" : "visibility_off" }}</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="passwordInvalid && registerForm.get('password')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Password <strong>richiesta</strong>
+        </div>
+        <div *ngIf="passwordInvalid && registerForm.get('password')?.hasError('minlength')" class="text-red-500 text-sm mt-1">
+          La password deve essere di almeno 6 caratteri
+        </div>
+      </div>
+
+      <div [@slideUp]="{ value: '', params: { delay: '500ms' } }" class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">lock</mat-icon>
+          </div>
+          <input 
+            matInput 
+            [type]="hideConfirmPwd ? 'password' : 'text'" 
+            formControlName="confirmPassword"
+            placeholder="Conferma Password"
+            autocomplete="new-password"
+            class="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" 
+          />
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <button 
+              type="button" 
+              (click)="hideConfirmPwd = !hideConfirmPwd"
+              class="text-gray-400 hover:text-expriviaOrange transition-colors duration-200 w-6 h-6"
+            >
+              <mat-icon>{{ hideConfirmPwd ? "visibility" : "visibility_off" }}</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="confirmPasswordInvalid && registerForm.get('confirmPassword')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Conferma password <strong>richiesta</strong>
+        </div>
+        <div *ngIf="confirmPasswordInvalid && registerForm.get('confirmPassword')?.hasError('passwordMismatch')" class="text-red-500 text-sm mt-1">
+          Le password non coincidono
+        </div>
+      </div>
+
+      <div [@slideUp]="{ value: '', params: { delay: '600ms' } }">
+        <button
+          mat-raised-button
+          class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+          type="submit" 
+          [disabled]="registerForm.invalid || isLoading">
+          <div class="absolute inset-0 bg-gradient-to-r from-expriviaOrange400 to-expriviaOrange opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="relative flex items-center justify-center gap-2">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
+            <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Registrati</span>
+          </div>
+        </button>
+      </div>
+
+      <div *ngIf="errorMessage" class="p-4 text-sm text-red-600 bg-red-50 rounded-lg" [@shake]>
+        <div class="flex items-center gap-2">
+          <mat-icon class="text-red-500 animate-pulse">error</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </div>
+
+      <div class="text-center text-sm mt-6" [@slideUp]="{ value: '', params: { delay: '700ms' } }">
+        <span class="text-gray-600">Hai già un account?</span>
+        <a [routerLink]="['/accedi']" class="text-sm text-expriviaOrange hover:text-expriviaOrange400 transition-colors duration-200 ml-1 relative group">
+          Accedi
+          <span class="absolute bottom-0 left-0 w-full h-0.5 bg-expriviaOrange transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+      </div>
+    </form>
   </div>
 </main>
+
+<style>
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient 8s linear infinite;
+  }
+
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field:hover .mat-mdc-form-field-focus-overlay {
+    opacity: 0.04 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
+    opacity: 0.04 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
+    background-color: transparent !important;
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background-color: transparent !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix .mat-icon {
+    margin: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-prefix .mat-icon {
+    margin: 0 !important;
+  }
+</style>

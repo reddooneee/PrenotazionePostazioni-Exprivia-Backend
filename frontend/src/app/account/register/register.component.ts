@@ -1,80 +1,95 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { UserService } from '../../service/user.service';
 import { User } from '../../core/auth/user.model';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatSnackBarModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    RouterModule
+  ],
   template: `
-    <div class="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Registrazione
-        </h2>
-      </div>
-
-      <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
-            <div>
-              <label for="nome" class="block text-sm font-medium text-gray-700">Nome</label>
-              <div class="mt-1">
-                <input id="nome" name="nome" type="text" formControlName="nome"
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-expriviaBlue focus:border-expriviaBlue sm:text-sm">
-              </div>
-              <div *ngIf="registerForm.get('nome')?.invalid && registerForm.get('nome')?.touched" class="text-red-500 text-sm mt-1">
-                Nome è obbligatorio
-              </div>
-            </div>
-
-            <div>
-              <label for="cognome" class="block text-sm font-medium text-gray-700">Cognome</label>
-              <div class="mt-1">
-                <input id="cognome" name="cognome" type="text" formControlName="cognome"
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-expriviaBlue focus:border-expriviaBlue sm:text-sm">
-              </div>
-              <div *ngIf="registerForm.get('cognome')?.invalid && registerForm.get('cognome')?.touched" class="text-red-500 text-sm mt-1">
-                Cognome è obbligatorio
-              </div>
-            </div>
-
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-              <div class="mt-1">
-                <input id="email" name="email" type="email" formControlName="email"
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-expriviaBlue focus:border-expriviaBlue sm:text-sm">
-              </div>
-              <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="text-red-500 text-sm mt-1">
-                Email non valida
-              </div>
-            </div>
-
-            <div>
-              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-              <div class="mt-1">
-                <input id="password" name="password" type="password" formControlName="password"
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-expriviaBlue focus:border-expriviaBlue sm:text-sm">
-              </div>
-              <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="text-red-500 text-sm mt-1">
-                Password deve essere di almeno 6 caratteri
-              </div>
-            </div>
-
-            <div>
-              <button type="submit" [disabled]="registerForm.invalid"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaBlue disabled:opacity-50 disabled:cursor-not-allowed">
-                Registrati
-              </button>
-            </div>
-          </form>
+    <main class="flex min-h-screen items-center justify-center px-4 py-12">
+      <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
+        <div class="space-y-2.5 mb-8">
+          <h1 class="text-2xl font-bold">Registrazione</h1>
+          <p class="text-gray-400">
+            Crea il tuo account per accedere al sistema di prenotazione
+          </p>
         </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+          <!-- Nome -->
+          <mat-form-field class="example-full-width">
+            <mat-label>Nome</mat-label>
+            <input matInput formControlName="nome" placeholder="Inserisci il tuo nome" />
+            <mat-error *ngIf="registerForm.get('nome')?.hasError('required')">
+              Nome <strong>richiesto</strong>
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Cognome -->
+          <mat-form-field class="example-full-width">
+            <mat-label>Cognome</mat-label>
+            <input matInput formControlName="cognome" placeholder="Inserisci il tuo cognome" />
+            <mat-error *ngIf="registerForm.get('cognome')?.hasError('required')">
+              Cognome <strong>richiesto</strong>
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Email -->
+          <mat-form-field class="example-full-width">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" placeholder="nome.cognome@exprivia.com" />
+            <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
+              Email <strong>richiesta</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
+              Inserisci una mail valida
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Password -->
+          <mat-form-field class="example-full-width">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password" placeholder="Inserisci la password" />
+            <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+              Password <strong>richiesta</strong>
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+              La password deve essere di almeno 6 caratteri
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Submit Button -->
+          <button type="submit" [disabled]="registerForm.invalid"
+            class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            Registrati
+          </button>
+
+          <!-- Login Link -->
+          <div class="text-center text-sm mt-4">
+            Hai già un account?
+            <a [routerLink]="['/accedi']" class="text-expriviaOrange underline-offset-4 hover:underline">
+              Accedi
+            </a>
+          </div>
+        </form>
       </div>
-    </div>
+    </main>
   `
 })
 export class RegisterComponent {

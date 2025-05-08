@@ -1,72 +1,190 @@
-<main class="flex min-h-screen items-center justify-center px-4 py-12">
-  <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
-    <div class="space-y-2.5 mb-8">
-      <h1 class="text-2xl font-bold">Accedi</h1>
-      <p class="text-gray-400">
-        Inserisci le tue credenziali per accedere al sistema di prenotazione
+<!-- Container principale con sfondo sfumato e pattern -->
+<main
+  class="min-h-screen flex items-center justify-center bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70 px-4 py-12 relative overflow-hidden">
+  <!-- Card di login con effetto glassmorphism e animazione fluttuante -->
+  <div
+    class="w-full max-w-md p-8 bg-white backdrop-blur-lg shadow-2xl rounded-2xl transform transition-all duration-500 hover:shadow-expriviaOrange/20">
+    <div class="text-center mb-8">
+      <div class="relative inline-block">
+        <img src="LogoExprivia.svg" alt="Exprivia Logo"
+          class="h-12 mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
+      </div>
+      <h1
+        class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
+        Benvenuto
+      </h1>
+      <p class="text-gray-600 mt-2">
+        Accedi al sistema di prenotazione
       </p>
     </div>
-    <div>
-      <form class="flex flex-col gap-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <!-- Email -->
-        <mat-form-field class="example-full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" placeholder="nome.cognome@exprivia.com" />
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-            Email <strong>richiesta</strong>
-          </mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
-            Inserisci una mail valida
-          </mat-error>
-        </mat-form-field>
-        <!-- Password -->
-        <mat-form-field class="example-full-width relative" appearance="fill">
-          <mat-label>Password</mat-label>
 
-          <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password"
-            placeholder="Inserisci la password" class="pr-10" autocomplete="current-password" />
+    <!-- Form di login -->
+    <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Campo Email -->
+      <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
+        class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">mail</mat-icon>
+          </div>
+          <input matInput formControlName="email" placeholder="Email" type="email"
+            class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" />
+        </div>
+        <div *ngIf="emailInvalid && loginForm.get('email')?.hasError('required')" class="text-red-500 text-sm mt-1">
+          Email <strong>richiesta</strong>
+        </div>
+        <div *ngIf="emailInvalid && loginForm.get('email')?.hasError('email')" class="text-red-500 text-sm mt-1">
+          Inserisci una mail valida
+        </div>
+      </div>
 
-          <!-- Icona occhio -->
-          <button mat-icon-button matSuffix type="button" (click)="hidePwd = !hidePwd" [attr.aria-label]="
-              hidePwd ? 'Mostra password' : 'Nascondi password'
-            " class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" tabindex="-1">
-            <mat-icon>{{ hidePwd ? "visibility" : "visibility_off" }}</mat-icon>
-          </button>
+      <!-- Campo Password -->
+      <div [@slideUp]="{ value: '', params: { delay: '200ms' } }"
+        class="transform hover:scale-[1.02] transition-transform duration-300">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <mat-icon class="text-gray-400">lock</mat-icon>
+          </div>
+          <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
+            autocomplete="current-password"
+            class="w-full pl-10 pr-12 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" />
+          <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
+            <button type="button" (click)="hidePwd = !hidePwd"
+              class="text-gray-400 hover:text-expriviaOrange transition-colors duration-200 w-6 h-6">
+              <mat-icon>{{ hidePwd ? "visibility" : "visibility_off" }}</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div *ngIf="passwordInvalid && loginForm.get('password')?.hasError('required')"
+          class="text-red-500 text-sm mt-1">
+          Password <strong>richiesta</strong>
+        </div>
+        <div *ngIf="passwordInvalid && loginForm.get('password')?.hasError('minlength')"
+          class="text-red-500 text-sm mt-1">
+          La password deve essere di almeno 6 caratteri
+        </div>
+      </div>
 
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            Password <strong>richiesta</strong>
-          </mat-error>
-        </mat-form-field>
+      <!-- Link Password dimenticata -->
+      <div class="text-right" [@slideUp]="{ value: '', params: { delay: '300ms' } }">
+        <a [routerLink]="['/forgot-password']"
+          class="text-sm text-expriviaOrange hover:text-expriviaOrange400 transition-colors duration-200 relative group">
+          Password dimenticata?
+          <span
+            class="absolute bottom-0 left-0 w-full h-0.5 bg-expriviaOrange transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+      </div>
 
-        <!-- Bottone Login -->
-        <button
-          class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer"
+      <!-- Bottone Login -->
+      <div [@slideUp]="{ value: '', params: { delay: '400ms' } }">
+        <button mat-raised-button
+          class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
           type="submit" [disabled]="loginForm.invalid || isLoading">
-          <span *ngIf="isLoading" class="loader"></span>
-          <!-- Aggiungi un'icona di caricamento -->
-          <span *ngIf="!isLoading">Accedi</span>
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-expriviaOrange400 to-expriviaOrange opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          </div>
+          <div class="relative flex items-center justify-center gap-2">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
+            <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Accedi</span>
+          </div>
         </button>
+      </div>
 
-        <!-- Messaggio errore generale -->
-        <div *ngIf="errorMessage" class="text-red-500 text-center mt-2">
-          {{ errorMessage }}
+      <!-- Messaggio errore -->
+      <div *ngIf="errorMessage" class="p-4 text-sm text-red-600 bg-red-50 rounded-lg" [@shake]>
+        <div class="flex items-center gap-2">
+          <mat-icon class="text-red-500 animate-pulse">error</mat-icon>
+          <span>{{ errorMessage }}</span>
         </div>
+      </div>
 
-        <!-- Recupero Password -->
-        <div class="text-center text-sm mt-4">
-          <a [routerLink]="['/forgot-password']"
-            class="text-expriviaOrange underline-offset-4 hover:underline hover:text-[#E9500E] transition-colors duration-300">
-            Password dimenticata?
-          </a>
-        </div>
-
-        <div class="text-center text-sm mt-4">
-          Non hai un account?
-          <a [routerLink]="['/registrazione']" class="text-expriviaOrange underline-offset-4 hover:underline">
-            Registrati
-          </a>
-        </div>
-      </form>
-    </div>
+      <!-- Link Registrazione -->
+      <div class="text-center text-sm mt-6" [@slideUp]="{ value: '', params: { delay: '500ms' } }">
+        <span class="text-gray-600">Non hai un account?</span>
+        <a [routerLink]="['/registrazione']"
+          class="text-sm text-expriviaOrange hover:text-expriviaOrange400 transition-colors duration-200 ml-1 relative group">
+          Registrati
+          <span
+            class="absolute bottom-0 left-0 w-full h-0.5 bg-expriviaOrange transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+        </a>
+      </div>
+    </form>
   </div>
 </main>
+
+<style>
+  /* Animazione del gradiente per il titolo */
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient 8s linear infinite;
+  }
+
+  /* Override Material styles */
+  ::ng-deep .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field:hover .mat-mdc-form-field-focus-overlay {
+    opacity: 0.04 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
+    opacity: 0.04 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-flex {
+    background-color: transparent !important;
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background-color: transparent !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-prefix {
+    padding: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-suffix .mat-icon {
+    margin: 0 !important;
+  }
+
+  ::ng-deep .mat-mdc-form-field .mat-mdc-form-field-icon-prefix .mat-icon {
+    margin: 0 !important;
+  }
+</style>

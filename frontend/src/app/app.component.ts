@@ -16,6 +16,7 @@ import { filter } from "rxjs";
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
+  title = 'exprivia';
   showLayout: boolean = true;
 
   constructor(private router: Router) {}

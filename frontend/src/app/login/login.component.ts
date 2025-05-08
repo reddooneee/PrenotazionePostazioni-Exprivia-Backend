@@ -1,65 +1,81 @@
-import { Component, inject } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { RouterModule, Router, ActivatedRoute } from "@angular/router";
-import { LoginService } from "./login.service";
-import { MatCardModule } from "@angular/material/card";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatInputModule } from "@angular/material/input";
-import { MatIconModule } from "@angular/material/icon";
-import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from "@angular/common";
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { LoginService } from './login.service';
+import { authAnimations } from '../shared/animations/auth.animations';
 
 @Component({
-  selector: "app-login",
-  templateUrl: "./login.component.html",
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  standalone: true,
   imports: [
-    MatCardModule,
+    CommonModule,
+    ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    MatIconModule
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    RouterLink
+  ],
+  animations: [
+    authAnimations.fadeIn,
+    authAnimations.slideUp,
+    authAnimations.shake,
+    authAnimations.scaleIn
   ]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  isLoading: boolean = false;
-  errorMessage: string = '';
-  hidePwd: boolean = true;
+  hidePwd = true;
+  isLoading = false;
+  errorMessage: string | null = null;
 
-  private loginService = inject(LoginService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute)
-
-  constructor(private fb: FormBuilder) {
-    this.loginForm = this.fb.group({
-      email: ["", [Validators.required, Validators.email]],
-      password: ["", [Validators.required, Validators.minLength(6)]],  // Password minimo 6 caratteri
+  constructor(
+    private formBuilder: FormBuilder,
+    private loginService: LoginService,
+    private router: Router
+  ) {
+    this.loginForm = this.formBuilder.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
+  ngOnInit(): void {}
+
   onSubmit(): void {
-    this.loginService
-      .login({
-        email: this.loginForm.get('email')?.value,
-        password: this.loginForm.get('password')?.value,
-      })
-      .subscribe({
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = null;
+      
+      this.loginService.login(this.loginForm.value).subscribe({
         next: () => {
-          // Ottieni l'URL di ritorno dai parametri della query o usa l'URL predefinito
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-          this.router.navigateByUrl(returnUrl);
+          this.isLoading = false;
         },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = 'Credenziali non valide. Riprova.';
+          console.error('Login error:', error);
+        }
       });
+    }
   }
 
-  // Metodo per verificare se il controllo è stato toccato e se è valido
-  get emailInvalid() {
-    return this.loginForm.get('email')?.invalid && this.loginForm.get('email')?.touched;
+  get emailInvalid(): boolean {
+    const control = this.loginForm.get('email');
+    return control ? (control.dirty || control.touched) && control.invalid : false;
   }
 
-  get passwordInvalid() {
-    return this.loginForm.get('password')?.invalid && this.loginForm.get('password')?.touched;
+  get passwordInvalid(): boolean {
+    const control = this.loginForm.get('password');
+    return control ? (control.dirty || control.touched) && control.invalid : false;
   }
 }

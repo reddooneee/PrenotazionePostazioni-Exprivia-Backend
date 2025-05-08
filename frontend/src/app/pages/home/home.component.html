@@ -12,9 +12,12 @@
                         </p>
                     </div>
                     <div class="flex flex-col gap-2 min-[400px]:flex-row">
-                            <button type="button" class="flex items-center  gap-1 text-white bg-expriviaOrange hover:bg-expriviaOrange400 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2" [routerLink]="['/registrazione']">Inizia ora
-                                <lucide-icon name="arrow-right"></lucide-icon>
-                            </button>                        
+                        <button type="button" 
+                            class="cursor-pointer inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md" 
+                            [routerLink]="['/registrazione']">
+                            Inizia ora
+                            <lucide-icon name="arrow-right" class="w-5 h-5"></lucide-icon>
+                        </button>                        
                     </div>
                 </div>
                 <div class="flex items-center justify-center">

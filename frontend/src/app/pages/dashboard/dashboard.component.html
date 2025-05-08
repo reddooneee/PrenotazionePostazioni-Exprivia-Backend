@@ -1,1 +1,95 @@
-<p>dashboard works!</p>
+<!-- Stato di caricamento iniziale -->
+<app-loading 
+  *ngIf="isLoading"
+  message="Caricamento dashboard..."
+  size="md"
+  color="primary"
+  containerClass="min-h-[60vh]">
+</app-loading>
+
+<!-- Stato di errore -->
+<div *ngIf="error && !isLoading" class="container mx-auto px-4 py-8">
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center animate-fade-in">
+    <div class="text-red-600 mb-4">
+      <lucide-icon name="alert-circle" class="w-12 h-12 mx-auto"></lucide-icon>
+    </div>
+    <h3 class="text-lg font-semibold text-red-800 mb-2">Errore</h3>
+    <p class="text-red-600 mb-4">{{error}}</p>
+    <button 
+      (click)="retryInitialization()"
+      class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md">
+      <lucide-icon name="refresh-cw" class="w-4 h-4 mr-2"></lucide-icon>
+      Riprova
+    </button>
+  </div>
+</div>
+
+<!-- Contenuto del Dashboard -->
+<div *ngIf="!isLoading && !error" class="container mx-auto px-4 py-8">
+  <!-- Sezione di benvenuto -->
+  <div class="mb-8 animate-fade-in">
+    <h2 class="text-3xl font-bold text-gray-800">
+      Benvenuto, {{currentUser?.nome}} {{currentUser?.cognome}}
+    </h2>
+    <p class="text-gray-600 mt-2">
+      {{isAdmin ? 'Pannello di controllo amministratore' : 'Gestisci le tue prenotazioni'}}
+    </p>
+  </div>
+
+  <!-- Dashboard Amministratore -->
+  <div *ngIf="isAdmin" class="admin-dashboard animate-fade-in">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div *ngFor="let card of adminCards" class="card transform hover:scale-105 transition-all duration-300">
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl">
+          <div class="flex items-center gap-3 mb-4">
+            <lucide-icon [name]="card.icon" class="w-6 h-6 text-expriviaOrange"></lucide-icon>
+            <h5 class="text-xl font-semibold text-gray-700">{{card.title}}</h5>
+          </div>
+          <p class="text-gray-600 mb-4">{{card.description}}</p>
+          <button 
+            class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            (click)="navigateTo(card.route)">
+            {{card.action}}
+            <lucide-icon name="arrow-right" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Utente -->
+  <div *ngIf="!isAdmin" class="user-dashboard animate-fade-in">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div *ngFor="let card of userCards" class="card transform hover:scale-105 transition-all duration-300">
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl">
+          <div class="flex items-center gap-3 mb-4">
+            <lucide-icon [name]="card.icon" class="w-6 h-6 text-expriviaOrange"></lucide-icon>
+            <h5 class="text-xl font-semibold text-gray-700">{{card.title}}</h5>
+          </div>
+          <p class="text-gray-600 mb-4">{{card.description}}</p>
+          <button 
+            class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            (click)="navigateTo(card.route)">
+            {{card.action}}
+            <lucide-icon name="arrow-right" class="w-4 h-4"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stato di caricamento per le route figlie -->
+  <div *ngIf="isChildRouteLoading" class="mt-8">
+    <app-loading 
+      message="Caricamento contenuto..."
+      size="sm"
+      color="primary"
+      containerClass="min-h-[200px]">
+    </app-loading>
+  </div>
+
+  <!-- Router Outlet per le route annidate -->
+  <div class="mt-8 animate-fade-in" *ngIf="hasActiveChildRoute() && !isChildRouteLoading">
+    <router-outlet></router-outlet>
+  </div>
+</div>

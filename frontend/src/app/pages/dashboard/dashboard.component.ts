@@ -1,88 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
 import { User } from '../../core/auth/user.model';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, Event, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LucideAngularModule, Users, BarChart, Settings, Calendar, UserCog, ArrowRight } from 'lucide-angular';
+import { DashboardService, DashboardCard } from './dashboard.service';
+import { forkJoin, Subscription, catchError, of } from 'rxjs';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-dashboard',
-  template: `
-    <div class="container mx-auto px-4 py-8">
-      <!-- Admin Dashboard -->
-      <div *ngIf="isAdmin" class="admin-dashboard animate-fade-in">
-        <h2 class="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="card transform hover:scale-105 transition-transform duration-300">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <h5 class="text-xl font-semibold mb-3 text-gray-700">Gestione Utenti</h5>
-              <p class="text-gray-600 mb-4">Gestisci gli utenti del sistema</p>
-              <button 
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-                (click)="navigateTo('user-management')">
-                Gestisci Utenti
-              </button>
-            </div>
-          </div>
-          <div class="card transform hover:scale-105 transition-transform duration-300">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <h5 class="text-xl font-semibold mb-3 text-gray-700">Statistiche</h5>
-              <p class="text-gray-600 mb-4">Visualizza le statistiche del sistema</p>
-              <button 
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-                (click)="navigateTo('statistics')">
-                Visualizza Statistiche
-              </button>
-            </div>
-          </div>
-          <div class="card transform hover:scale-105 transition-transform duration-300">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <h5 class="text-xl font-semibold mb-3 text-gray-700">Configurazione</h5>
-              <p class="text-gray-600 mb-4">Configura le impostazioni del sistema</p>
-              <button 
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-                (click)="navigateTo('settings')">
-                Configura
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Dashboard -->
-      <div *ngIf="!isAdmin" class="user-dashboard animate-fade-in">
-        <h2 class="text-3xl font-bold mb-8 text-gray-800">Dashboard Utente</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="card transform hover:scale-105 transition-transform duration-300">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <h5 class="text-xl font-semibold mb-3 text-gray-700">Le Mie Prenotazioni</h5>
-              <p class="text-gray-600 mb-4">Visualizza e gestisci le tue prenotazioni</p>
-              <button 
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-                (click)="navigateTo('bookings')">
-                Gestisci Prenotazioni
-              </button>
-            </div>
-          </div>
-          <div class="card transform hover:scale-105 transition-transform duration-300">
-            <div class="bg-white rounded-lg shadow-lg p-6">
-              <h5 class="text-xl font-semibold mb-3 text-gray-700">Profilo</h5>
-              <p class="text-gray-600 mb-4">Gestisci il tuo profilo utente</p>
-              <button 
-                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-                (click)="navigateTo('profile')">
-                Modifica Profilo
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Router Outlet for nested routes -->
-      <div class="mt-8 animate-fade-in">
-        <router-outlet></router-outlet>
-      </div>
-    </div>
-  `,
+  templateUrl: './dashboard.component.html',
   styles: [`
     :host {
       display: block;
@@ -106,27 +34,131 @@ import { CommonModule } from '@angular/common';
     }
   `],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    LucideAngularModule,
+    LoadingComponent
+  ]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  // Stato dell'utente e del dashboard
   isAdmin = false;
   currentUser: User | null = null;
+  adminCards: DashboardCard[] = [];
+  userCards: DashboardCard[] = [];
+  
+  // Stati di caricamento e gestione errori
+  isLoading = true;
+  isChildRouteLoading = false;
+  error: string | null = null;
+  private routerSubscription: Subscription;
+
+  // Definizione delle icone per il template
+  protected readonly icons = {
+    users: Users,
+    barChart: BarChart,
+    settings: Settings,
+    calendar: Calendar,
+    user: UserCog,
+    arrowRight: ArrowRight
+  };
 
   constructor(
     private authService: AuthService,
+    private dashboardService: DashboardService,
     private router: Router
-  ) {}
-
-  ngOnInit() {
-    this.authService.getIdentity().subscribe(user => {
-      this.currentUser = user;
-      this.isAdmin = this.authService.hasAnyAuthority(['ROLE_ADMIN']);
-      console.log('Dashboard: User loaded, isAdmin:', this.isAdmin);
+  ) {
+    // Sottoscrizione agli eventi del router per tracciare il caricamento delle route figlie
+    this.routerSubscription = this.router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationStart) {
+        this.isChildRouteLoading = true;
+      } else if (event instanceof NavigationEnd || 
+                 event instanceof NavigationCancel || 
+                 event instanceof NavigationError) {
+        this.isChildRouteLoading = false;
+      }
     });
   }
 
+  ngOnInit() {
+    console.log('Dashboard: Inizializzazione componente...');
+    
+    // Verifica iniziale dell'autenticazione dell'utente
+    if (!this.authService.isAuthenticated()) {
+      console.error('Dashboard: Utente non autenticato');
+      this.router.navigate(['/']);
+      return;
+    }
+
+    // Caricamento parallelo dei dati utente e dello stato admin
+    forkJoin({
+      user: this.dashboardService.getCurrentUser().pipe(
+        catchError(error => {
+          console.error('Dashboard: Errore nel caricamento dei dati utente:', error);
+          this.error = 'Errore nel caricamento dei dati utente';
+          return of(null);
+        })
+      ),
+      isAdmin: this.dashboardService.isAdmin().pipe(
+        catchError(error => {
+          console.error('Dashboard: Errore nel controllo dello stato admin:', error);
+          return of(false);
+        })
+      )
+    }).subscribe({
+      next: ({ user, isAdmin }) => {
+        console.log('Dashboard: Dati utente caricati:', user);
+        console.log('Dashboard: Stato admin:', isAdmin);
+        
+        // Verifica della presenza dei dati utente
+        if (!user) {
+          this.error = 'Impossibile caricare i dati utente';
+          this.isLoading = false;
+          return;
+        }
+        
+        // Aggiornamento dello stato del componente
+        this.currentUser = user;
+        this.isAdmin = isAdmin;
+        
+        // Caricamento delle card appropriate in base al ruolo
+        this.adminCards = this.dashboardService.getAdminCards();
+        this.userCards = this.dashboardService.getUserCards();
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Dashboard: Errore durante l\'inizializzazione:', error);
+        this.error = 'Si è verificato un errore durante l\'inizializzazione';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    // Pulizia della sottoscrizione al router
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+
+  // Navigazione alle route figlie
   navigateTo(route: string) {
-    console.log('Dashboard: Navigating to', route);
+    console.log('Dashboard: Navigazione verso', route);
     this.router.navigate([`/dashboard/${route}`]);
+  }
+
+  // Verifica se è attiva una route figlia
+  hasActiveChildRoute(): boolean {
+    const currentUrl = this.router.url;
+    return currentUrl !== '/dashboard';
+  }
+
+  // Riprova l'inizializzazione in caso di errore
+  retryInitialization() {
+    this.error = null;
+    this.isLoading = true;
+    this.ngOnInit();
   }
 }

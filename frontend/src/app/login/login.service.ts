@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { mergeMap, Observable, tap } from 'rxjs';
+import { mergeMap, Observable, tap, finalize } from 'rxjs';
 import { AuthJwtService } from '../core/auth/auth-jwt.service';
 import { User } from '../core/auth/user.model';
 import { AuthService } from '../core/auth/auth.service';
@@ -30,11 +30,23 @@ export class LoginService {
       tap((user) => {
         if (user) {
           console.log('LoginService: User authenticated, roles:', user.authorities);
-          this.router.navigate(['/dashboard']).then(success => {
-            console.log('LoginService: Navigation result:', success ? 'Success' : 'Failed');
-          });
+          this.authService.authenticate(user);
         } else {
-          console.log('LoginService: No user identity found');
+          console.error('LoginService: No user identity found');
+        }
+      }),
+      finalize(() => {
+        if (this.authService.isAuthenticated()) {
+          console.log('LoginService: User is authenticated, navigating to dashboard...');
+          // Use createUrlTree for more reliable navigation
+          const urlTree = this.router.createUrlTree(['/dashboard']);
+          this.router.navigateByUrl(urlTree).then(success => {
+            if (success) {
+              console.log('LoginService: Successfully navigated to dashboard');
+            } else {
+              console.error('LoginService: Failed to navigate to dashboard');
+            }
+          });
         }
       })
     );
@@ -50,8 +62,13 @@ export class LoginService {
         console.log('LoginService: JWT logout completed');
         this.authService.authenticate(null);
         console.log('LoginService: User identity cleared');
-        this.router.navigate(['/']).then(success => {
-          console.log('LoginService: Navigation result:', success ? 'Success' : 'Failed');
+        const urlTree = this.router.createUrlTree(['/']);
+        this.router.navigateByUrl(urlTree).then(success => {
+          if (success) {
+            console.log('LoginService: Successfully navigated to home');
+          } else {
+            console.error('LoginService: Failed to navigate to home');
+          }
         });
       }
     });

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { AuthJwtService } from './auth-jwt.service';
 import { AxiosService } from '../../service/axios.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { User } from './user.model';
 
 @Injectable({
@@ -61,6 +61,7 @@ export class AuthService {
           observer.complete();
         })
         .catch((error) => {
+          console.error('AuthService: Error fetching user identity:', error);
           this.authenticate(null);
           observer.next(null);
           observer.complete();
@@ -70,6 +71,7 @@ export class AuthService {
 
   // Autentica l'utente con i dati dell'account
   authenticate(identity: User | null): void {
+    console.log('AuthService: Authenticating user:', identity?.email);
     this.userIdentity.next(identity);
     this.authenticationState.next(identity !== null);
 
@@ -91,8 +93,7 @@ export class AuthService {
 
   // Verifica se l'utente è autenticato
   isAuthenticated(): boolean {
-    const isAuthenticated = this.authenticationState.value;
-    return isAuthenticated;
+    return this.authenticationState.value && this.authJwtService.isAuthenticated();
   }
 
   // Sottoscrizione alle modifiche dello stato di autenticazione
