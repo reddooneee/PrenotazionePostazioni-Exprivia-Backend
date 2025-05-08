@@ -23,9 +23,10 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      // Cambia '/admin-dashboard' con il path corretto della tua rotta
-      this.showLayout = !event.urlAfterRedirects.includes('/admin-dashboard');
+    ).subscribe((event: NavigationEnd) => {
+      // Aggiungi il controllo per la rotta 'prenotazione-posizione'
+      this.showLayout = !event.urlAfterRedirects.includes('/admin-dashboard') &&
+                        !event.urlAfterRedirects.includes('/prenotazione-posizione');
     });
   }
 }

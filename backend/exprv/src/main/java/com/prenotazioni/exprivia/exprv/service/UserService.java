@@ -203,9 +203,19 @@ public class UserService {
         throw new UnsupportedOperationException("Unimplemented method 'loadUserByUsername'");
     }
 
+    public UserDTO getDetailsForAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();  // Ottieni l'email dell'utente autenticato
+    
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
+    
+        return userMapper.toDto(user);  // Restituisci il DTO dell'utente
+    }
+    
     public UserDTO findByEmail(String email) {
         Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato con email: " + email));
+                .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
         return userMapper.toDto(user);
     }
 

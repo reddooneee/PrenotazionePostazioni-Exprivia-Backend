@@ -1,0 +1,50 @@
+<div class="fullscreen-overlay">
+  <div class="fullscreen-header">
+    <h3 class="fullscreen-title">
+      <i class="fas fa-map-marked-alt mr-2"></i>
+      Planimetria {{ stanzaSelezionata }}
+    </h3>
+    <button class="fullscreen-close-btn" (click)="chiudiModale()">
+      <i class="fas fa-times"></i> Chiudi
+    </button>
+  </div>
+
+  <div class="fullscreen-content">
+    <div class="planimetria-container">
+      <img src="Planimetria.png" alt="Planimetria" crossOrigin="anonymous" class="planimetria-img">
+      
+      <div *ngFor="let marker of markers" 
+           class="floor-plan-marker"
+           [class.available]="marker.available"
+           [class.unavailable]="!marker.available"
+           [class.selected]="marker.selected"
+           [style.left.%]="marker.x"
+           [style.top.%]="marker.y"
+           (click)="selezionaMarker(marker)">
+        <span class="marker-label">{{ marker.label }}</span>
+        <div class="marker-tooltip">
+          {{ marker.tooltip }}
+          <span *ngIf="marker.available" class="tooltip-status available">Disponibile</span>
+          <span *ngIf="!marker.available" class="tooltip-status unavailable">Non disponibile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fullscreen-footer">
+    <div class="floor-plan-legend">
+      <div class="legend-item">
+        <div class="legend-dot available"></div>
+        <span>Postazione disponibile</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot unavailable"></div>
+        <span>Postazione non disponibile</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot selected"></div>
+        <span>Postazione selezionata</span>
+      </div>
+    </div>
+  </div>
+</div>
