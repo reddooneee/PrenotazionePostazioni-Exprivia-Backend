@@ -61,27 +61,24 @@
           </div>
 
           <div class="calendar-grid">
-            <div *ngFor="let day of calendarDays" 
-                class="calendar-day" 
-                [class.other-month]="day.isOtherMonth"
-                [class.today]="day.isToday"
-                [class.selected]="day.isSelected"
-                [class.multi-selected]="isMultiSelected(day.date)"
-                [class.weekend]="day.dayOfWeek === 0 || day.dayOfWeek === 6"
-                (click)="selectDate(day.date, day.dayOfWeek)">
+            <div *ngFor="let day of calendarDays" class="calendar-day" [class.other-month]="day.isOtherMonth"
+              [class.today]="day.isToday" [class.selected]="day.isSelected"
+              [class.multi-selected]="isMultiSelected(day.date)"
+              [class.weekend]="day.dayOfWeek === 0 || day.dayOfWeek === 6"
+              (click)="selectDate(day.date, day.dayOfWeek)">
               <span class="day-number">{{day.day}}</span>
-              
+
               <div *ngIf="!isWeekend(day.date) && day.bookingsCount > 0" class="booking-count">
                 <i class="fas fa-calendar-check"></i> {{day.bookingsCount}}
               </div>
-              
+
               <!-- Modifico l'indicatore di disponibilità per mostrare solo il pallino -->
               <div *ngIf="!isWeekend(day.date)" class="availability-indicator" [class]="getAvailabilityClass(day.date)">
                 <span class="availability-dot"></span>
               </div>
             </div>
           </div>
-          
+
           <!-- Legenda disponibilità -->
           <div class="availability-legend">
             <div class="legend-item">
@@ -192,7 +189,8 @@
             <label for="filterWorkspace">Postazione</label>
             <select id="filterWorkspace" [(ngModel)]="filterWorkspace" (change)="applyFilters()">
               <option value="">Tutte</option>
-              <option *ngFor="let workspace of workspaceOptions | filterByFloor:filterFloor" [value]="workspace.workspace">
+              <option *ngFor="let workspace of workspaceOptions | filterByFloor:filterFloor"
+                [value]="workspace.workspace">
                 {{workspace.workspace}}
               </option>
             </select>
@@ -213,7 +211,8 @@
             Attenzione: alcune date selezionate sono nei giorni di sabato e domenica. L'azienda è chiusa nei weekend.
           </div>
 
-          <div *ngIf="selectedDates.length > 0 && filteredBookings.length === 0 && !hasWeekendDates()" class="no-bookings">
+          <div *ngIf="selectedDates.length > 0 && filteredBookings.length === 0 && !hasWeekendDates()"
+            class="no-bookings">
             Nessuna prenotazione per le date selezionate.
           </div>
 
@@ -226,7 +225,7 @@
                   <p>{{booking.userEmail}}</p>
                 </div>
               </div>
-              
+
               <div class="booking-details">
                 <div class="detail-item">
                   <i class="fas fa-calendar"></i>
@@ -254,7 +253,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="booking-actions">
               <button class="edit-btn" (click)="editBooking(booking)">
                 <i class="fas fa-edit"></i>
@@ -278,18 +277,18 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="modal-body">
         <div class="form-group">
           <label for="addUserName">Nome Utente</label>
           <input type="text" id="addUserName" [(ngModel)]="newBooking.userName" placeholder="Inserisci il nome">
         </div>
-        
+
         <div class="form-group">
           <label for="addUserEmail">Email Utente</label>
           <input type="email" id="addUserEmail" [(ngModel)]="newBooking.userEmail" placeholder="Inserisci l'email">
         </div>
-        
+
         <div class="form-group" *ngIf="selectedDates.length > 1">
           <label for="addDate">Data</label>
           <select id="addDate" [(ngModel)]="newBooking.date">
@@ -298,41 +297,42 @@
             </option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="addType">Cosa e Durata</label>
           <select id="addType" [(ngModel)]="newBooking.type" (change)="updateTimeForFullDay()">
             <option *ngFor="let type of typeOptions" [value]="type">{{type}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="addTime">Orario</label>
           <select id="addTime" [(ngModel)]="newBooking.time" [disabled]="newBooking.type.includes('Giornata intera')">
             <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="addFloor">Piano</label>
           <select id="addFloor" [(ngModel)]="newBooking.floor" (change)="filterWorkspacesByFloor(newBooking.floor)">
             <option *ngFor="let floor of floorOptions" [value]="floor">{{floor}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="addWorkspace">Postazione</label>
           <select id="addWorkspace" [(ngModel)]="newBooking.workspace">
-            <option *ngFor="let workspace of filteredWorkspaceOptions" [value]="workspace.workspace">{{workspace.workspace}}</option>
+            <option *ngFor="let workspace of filteredWorkspaceOptions" [value]="workspace.workspace">
+              {{workspace.workspace}}</option>
           </select>
         </div>
-        
+
         <div class="form-group checkbox" *ngIf="selectedDates.length > 1">
           <input type="checkbox" id="applyToAllDates" [(ngModel)]="applyToAllDates">
           <label for="applyToAllDates">Applica a tutte le date selezionate</label>
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <button class="cancel-btn" (click)="closeAddBookingModal()">Annulla</button>
         <button class="save-btn" (click)="saveNewBooking()">Salva</button>
@@ -349,52 +349,56 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      
+
       <div class="modal-body">
         <div class="form-group">
           <label for="editUserName">Nome Utente</label>
           <input type="text" id="editUserName" [(ngModel)]="currentBooking!.userName" placeholder="Inserisci il nome">
         </div>
-        
+
         <div class="form-group">
           <label for="editUserEmail">Email Utente</label>
-          <input type="email" id="editUserEmail" [(ngModel)]="currentBooking!.userEmail" placeholder="Inserisci l'email">
+          <input type="email" id="editUserEmail" [(ngModel)]="currentBooking!.userEmail"
+            placeholder="Inserisci l'email">
         </div>
-        
+
         <div class="form-group">
           <label for="editDate">Data</label>
           <input type="text" id="editDate" [value]="currentBooking!.date | date:'fullDate':'it-IT'" disabled>
         </div>
-        
+
         <div class="form-group">
           <label for="editType">Cosa e Durata</label>
           <select id="editType" [(ngModel)]="currentBooking!.type" (change)="updateTimeForFullDayEdit()">
             <option *ngFor="let type of typeOptions" [value]="type">{{type}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="editTime">Orario</label>
-          <select id="editTime" [(ngModel)]="currentBooking!.time" [disabled]="currentBooking!.type.includes('Giornata intera')">
+          <select id="editTime" [(ngModel)]="currentBooking!.time"
+            [disabled]="currentBooking!.type.includes('Giornata intera')">
             <option *ngFor="let time of timeOptions" [value]="time">{{time}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="editFloor">Piano</label>
-          <select id="editFloor" [(ngModel)]="currentBooking!.floor" (change)="filterWorkspacesByFloor(currentBooking!.floor)">
+          <select id="editFloor" [(ngModel)]="currentBooking!.floor"
+            (change)="filterWorkspacesByFloor(currentBooking!.floor)">
             <option *ngFor="let floor of floorOptions" [value]="floor">{{floor}}</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="editWorkspace">Postazione</label>
           <select id="editWorkspace" [(ngModel)]="currentBooking!.workspace">
-            <option *ngFor="let workspace of filteredWorkspaceOptions" [value]="workspace.workspace">{{workspace.workspace}}</option>
+            <option *ngFor="let workspace of filteredWorkspaceOptions" [value]="workspace.workspace">
+              {{workspace.workspace}}</option>
           </select>
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <button class="cancel-btn" (click)="cancelEdit()">Annulla</button>
         <button class="save-btn" (click)="saveBooking()">Salva</button>
@@ -402,4 +406,3 @@
     </div>
   </div>
 </div>
-

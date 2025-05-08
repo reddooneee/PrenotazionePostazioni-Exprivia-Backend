@@ -203,4 +203,10 @@ public class UserService {
         throw new UnsupportedOperationException("Unimplemented method 'loadUserByUsername'");
     }
 
+    public UserDTO findByEmail(String email) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato con email: " + email));
+        return userMapper.toDto(user);
+    }
+
 }

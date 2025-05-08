@@ -1,5 +1,9 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.prenotazioni.exprivia.exprv.entity.Authority;
+import com.prenotazioni.exprivia.exprv.entity.Users;
 
 public class UserDTO {
 
@@ -9,6 +13,7 @@ public class UserDTO {
     private String email;
     private String password;
     private Boolean enabled;
+    private Set<String> authorities;
 
     // Costruttore vuoto
     public UserDTO() {
@@ -21,6 +26,17 @@ public class UserDTO {
         this.cognome = cognome;
         this.email = email;
         this.password = password;
+        this.enabled = enabled;
+    }
+
+    public UserDTO(Users user) {
+        this.id_user = user.getId_user();
+        this.nome = user.getNome();
+        this.cognome = user.getCognome();
+        this.email = user.getEmail();
+        this.authorities = user.getAuthorities().stream()
+                .map(Authority::getName)
+                .collect(Collectors.toSet());
     }
 
     // Getters e Setters
@@ -70,6 +86,14 @@ public class UserDTO {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Set<String> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<String> authorities) {
+        this.authorities = authorities;
     }
 
 }

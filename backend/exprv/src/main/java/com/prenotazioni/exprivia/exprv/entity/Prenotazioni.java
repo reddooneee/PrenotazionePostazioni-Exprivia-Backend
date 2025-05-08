@@ -28,17 +28,17 @@ public class Prenotazioni {
     @Column(name = "id_prenotazione")
     private Integer id_prenotazioni;
 
-    @ManyToOne  //Si passano gli oggetti interi, non solo delle variabili 
+    @ManyToOne // Si passano gli oggetti interi, non solo delle variabili
     @JoinColumn(name = "id_user", referencedColumnName = "id_user")
-    private Users users; //FK Chiave esterna che collega la prenotazione all'utente che l'ha effettuata.
+    private Users users; // FK Chiave esterna che collega la prenotazione all'utente che l'ha effettuata.
 
     @ManyToOne
     @JoinColumn(name = "id_postazione", referencedColumnName = "id_postazione")
-    private Postazioni postazione; //FK Chiave esterna che collega la prenotazione alla postazione prenotata.
+    private Postazioni postazione; // FK Chiave esterna che collega la prenotazione alla postazione prenotata.
 
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
-    private Stanze stanze;   //FK Chiave esterna che collega la prenotazione alla stanza prenotata.
+    private Stanze stanze; // FK Chiave esterna che collega la prenotazione alla stanza prenotata.
 
     @Enumerated(EnumType.STRING)
     private stato_prenotazione stato_prenotazione;
@@ -49,15 +49,17 @@ public class Prenotazioni {
     @UpdateTimestamp
     private LocalDateTime dataFine;
 
-//Creato il e Aggiornato il;
-//data_inizio, data_fine Da Aggiungere!!; 
-//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
-//Costruttore Per JPa
+    // Creato il e Aggiornato il;
+    // data_inizio, data_fine Da Aggiungere!!;
+    // JPA richiede un costruttore senza argomenti affinché possa creare istanze
+    // delle entità tramite reflection
+    // Costruttore Per JPa
     public Prenotazioni() {
     }
 
-//Costruttore
-    public Prenotazioni(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze, stato_prenotazione stato_prenotazione, LocalDateTime dataInizio, LocalDateTime dataFine) {
+    // Costruttore
+    public Prenotazioni(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze,
+            stato_prenotazione stato_prenotazione, LocalDateTime dataInizio, LocalDateTime dataFine) {
         this.id_prenotazioni = id_prenotazioni;
         this.users = users;
         this.postazione = postazione;
@@ -123,5 +125,5 @@ public class Prenotazioni {
         this.dataFine = dataFine;
     }
 
-// Getters and Setters
+    // Getters and Setters
 }

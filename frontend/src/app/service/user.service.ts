@@ -14,7 +14,7 @@ export class UserService {
   // Ottieni tutti gli utenti
   async getAllUsers(): Promise<User[]> {
     try {
-      const users = await this.axiosService.get(this.endpoint);
+      const users = await this.axiosService.get<User[]>(this.endpoint);
       return users;
     } catch (error) {
       console.error('Errore durante il recupero degli utenti:', error);
@@ -25,7 +25,7 @@ export class UserService {
   // Ottieni un utente per ID
   async getUserById(id: number): Promise<User> {
     try {
-      const user = await this.axiosService.get(`${this.endpoint}/utente/${id}`);
+      const user = await this.axiosService.get<User>(`${this.endpoint}/utente/${id}`);
       return user;
     } catch (error) {
       console.error('Errore durante il recupero dell\'utente per ID:', error);
@@ -36,7 +36,7 @@ export class UserService {
   // Ottieni un utente per email
   async getUserByEmail(email: string): Promise<User> {
     try {
-      const user = await this.axiosService.get(`${this.endpoint}/utente/email/${email}`);
+      const user = await this.axiosService.get<User>(`${this.endpoint}/utente/email/${email}`);
       return user;
     } catch (error) {
       console.error('Errore durante il recupero dell\'utente per email:', error);
@@ -47,7 +47,7 @@ export class UserService {
   // Crea un nuovo utente
   async registerUser(user: User): Promise<User> {
     try {
-      const newUser = await this.axiosService.post(`${this.endpoint}/creaUtente`, user);
+      const newUser = await this.axiosService.post<User>(`${this.endpoint}/creaUtente`, user);
       return newUser;
     } catch (error) {
       console.error('Errore durante la registrazione dell\'utente:', error);
@@ -58,7 +58,7 @@ export class UserService {
   // Aggiorna un utente
   async updateUser(id: number, updates: Partial<User>): Promise<User> {
     try {
-      const updatedUser = await this.axiosService.put(`${this.endpoint}/utente/${id}`, updates);
+      const updatedUser = await this.axiosService.put<User>(`${this.endpoint}/utente/${id}`, updates);
       return updatedUser;
     } catch (error) {
       console.error('Errore durante l\'aggiornamento dell\'utente:', error);

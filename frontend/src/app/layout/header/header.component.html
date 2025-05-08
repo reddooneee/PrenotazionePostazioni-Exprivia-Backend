@@ -1,11 +1,35 @@
 <header class="w-full bg-white sticky top-0 z-50 shadow-md">
-    <div class="mx-auto container flex h-24 items-center justify-between">
+    <div class="mx-auto container px-4 flex h-16 md:h-20 items-center justify-between">
         <div class="cursor-pointer" [routerLink]="['']">
-            <img class="max-w-[100px] md:max-w-[150px]" src="LogoExprivia.svg" alt="">
+            <img class="h-8 md:h-10 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo">
         </div>
-        <div class="flex gap-4">
-            <button [routerLink]="['/accedi']" type="button" class="text-white bg-expriviaOrange hover:bg-expriviaOrange400 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Accedi</button>
-            <button [routerLink]="['/registrazione']" type="button" class="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-expriviaBlue focus:z-10 focus:ring-4 focus:ring-gray-100">Registrati</button>
+        
+        <!-- Not Authenticated -->
+        <div *ngIf="!isAuthenticated" class="flex items-center gap-3">
+            <button [routerLink]="['/accedi']" type="button" 
+                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-colors duration-200">
+                Accedi
+            </button>
+            <button [routerLink]="['/registrazione']" type="button" 
+                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-expriviaBlue focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaBlue transition-colors duration-200">
+                Registrati
+            </button>
+        </div>
+
+        <!-- Authenticated -->
+        <div *ngIf="isAuthenticated" class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-gray-700">
+                    <lucide-icon [name]="User" class="w-5 h-5" />
+                    <span class="font-medium">{{currentUser?.nome}} {{currentUser?.cognome}}</span>
+                </div>
+                <button 
+                    (click)="logout()" 
+                    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors duration-200">
+                    <lucide-icon [name]="LogOut" class="w-5 h-5" />
+                    <span>Logout</span>
+                </button>
+            </div>
         </div>
     </div>
 </header>

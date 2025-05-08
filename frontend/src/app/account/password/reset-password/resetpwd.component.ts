@@ -3,10 +3,10 @@ import { FormGroup, ReactiveFormsModule, Validators, FormControl } from "@angula
 import { CommonModule } from "@angular/common";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { AuthService } from "../../../core/auth/auth.service";
 import { RouterModule, ActivatedRoute } from "@angular/router";
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-import { MatIcon, MatIconModule } from "@angular/material/icon";
+import { MatIconModule } from "@angular/material/icon";
+import { ResetPasswordService } from "./resetpwd.service";
 
 
 // Validator corretto
@@ -19,7 +19,7 @@ export function passwordMatchValidator(control: AbstractControl): ValidationErro
 @Component({
   selector: 'app-resetpwd',
   standalone: true,
-  imports: [ 
+  imports: [
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -27,12 +27,13 @@ export function passwordMatchValidator(control: AbstractControl): ValidationErro
     CommonModule,
     MatIconModule
   ],
-  templateUrl: './resetpwd.component.html',
-  styleUrl: './resetpwd.component.css'
+  templateUrl: './resetpwd.component.html'
 })
+
+
 export class ResetpwdComponent implements OnInit {
   private token = '';
-  private authService = inject(AuthService);
+  private resetPwd = inject(ResetPasswordService);
   isLoading: boolean = false;
 
   hideNewPwd = true;
@@ -43,7 +44,7 @@ export class ResetpwdComponent implements OnInit {
     confirmPassword: new FormControl('', [Validators.required])
   }, { validators: passwordMatchValidator });
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -55,7 +56,7 @@ export class ResetpwdComponent implements OnInit {
     if (this.resetPwdForm.valid) {
       this.isLoading = true;
       const password = this.resetPwdForm.value.password!;
-      this.authService.resetPassword(this.token, password).subscribe({
+      this.resetPwd.resetPassword(this.token, password).subscribe({
         next: () => {
           this.isLoading = false;
           alert('Password cambiata con successo!');
