@@ -7,7 +7,6 @@ import { LucideAngularModule } from 'lucide-angular';
   selector: 'app-home',
   imports: [MatButtonModule, RouterLink, LucideAngularModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
 })
 export class HomeComponent {
 

@@ -19,6 +19,17 @@
       </a>
       <!-- Add more links as needed -->
     </nav>
+    <div *ngIf="isAuthenticated" class="flex items-center gap-4">
+      <!-- User Info and Logout -->
+      <div class="">
+          <button 
+              (click)="logout()" 
+              class="cursor-pointer inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg">
+              <lucide-icon name="log-out" class="w-5 h-5" />
+              <span>Logout</span>
+          </button>
+      </div>
+  </div>
   </aside>
 
   <!-- Main Content -->
@@ -26,7 +37,7 @@
 
     <!-- Dashboard Widgets -->
     <div class="flex-1 p-6 md:p-10">
-      <h2 class="text-2xl font-semibold mb-6">Good afternoon, {{ user?.nome || user?.email }}!</h2>
+      <h2 class="text-2xl font-semibold mb-6">Buon Pomeriggio, {{currentUser?.nome}} {{currentUser?.cognome}}!</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Left Column -->
         <div class="space-y-6">
