@@ -17,7 +17,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: User | null = null;
   private authSubscription: Subscription | null = null;
-  private routeSubscription: Subscription | null = null;
   activeRoute: string = '';
 
   constructor(
@@ -29,7 +28,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Set initial route
     this.activeRoute = this.router.url;
-    console.log('Initial route:', this.activeRoute);
 
     // Check initial auth state
     this.updateAuthState();
@@ -47,22 +45,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       }
     );
-
-    // Subscribe to route changes
-    this.routeSubscription = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.activeRoute = event.urlAfterRedirects;
-      console.log('Route changed to:', this.activeRoute);
-    });
   }
 
   ngOnDestroy() {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
-    }
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
     }
   }
 

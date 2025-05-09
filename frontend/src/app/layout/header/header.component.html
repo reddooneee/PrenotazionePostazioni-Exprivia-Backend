@@ -25,33 +25,10 @@
 
         <!-- Authenticated -->
         <div *ngIf="isAuthenticated" class="flex items-center gap-4">
-            <!-- Navigation Menu -->
-            <nav class="hidden md:flex items-center gap-6">
-                <a [routerLink]="['/dashboard']" 
-                   class="text-sm font-medium transition-colors duration-200 relative"
-                   [class.text-expriviaOrange]="isRouteActive('/dashboard')"
-                   [class.text-gray-600]="!isRouteActive('/dashboard')"
-                   [class.hover:text-expriviaOrange]="!isRouteActive('/dashboard')">
-                    Dashboard
-                    <span *ngIf="isRouteActive('/dashboard')" 
-                          class="absolute -bottom-1 left-0 w-full h-0.5 bg-expriviaOrange"></span>
-                </a>
-                <a *ngIf="currentUser?.authorities?.includes('ROLE_ADMIN')"
-                   [routerLink]="['/dashboard/user-management']" 
-                   class="text-sm font-medium transition-colors duration-200 relative"
-                   [class.text-expriviaOrange]="isRouteActive('/dashboard/user-management')"
-                   [class.text-gray-600]="!isRouteActive('/dashboard/user-management')"
-                   [class.hover:text-expriviaOrange]="!isRouteActive('/dashboard/user-management')">
-                    Gestione Utenti
-                    <span *ngIf="isRouteActive('/dashboard/user-management')" 
-                          class="absolute -bottom-1 left-0 w-full h-0.5 bg-expriviaOrange"></span>
-                </a>
-            </nav>
-
             <!-- User Info and Logout -->
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 text-gray-700">
-                    <lucide-icon name="user" class="w-5 h-5" />
+                    <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
                     <span class="font-medium">{{currentUser?.nome}} {{currentUser?.cognome}}</span>
                 </div>
                 <button 

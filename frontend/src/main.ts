@@ -20,6 +20,8 @@ import {
   Clock,
   Search,
   ArrowRight,
+  User,
+  LogOut,
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
@@ -45,7 +47,7 @@ bootstrapApplication(AppComponent, {
       MatSelectModule,
       MatTabsModule,
       MatNativeDateModule,
-      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search, ArrowRight })
+      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search, ArrowRight, User, LogOut })
     ),
     AxiosService,
     UserService,

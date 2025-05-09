@@ -41,8 +41,7 @@ export const routes: Routes = [
   {
     path: "dashboard",
     loadChildren: () => import('./pages/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
-    canActivate: [AuthGuard],
-    data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] }
+    canActivate: [AuthGuard]
   },
   { 
     path: "forgot-password", 

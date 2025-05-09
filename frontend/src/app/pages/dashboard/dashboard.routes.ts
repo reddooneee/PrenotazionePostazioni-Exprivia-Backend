@@ -8,16 +8,15 @@ export const DASHBOARD_ROUTES: Routes = [
     children: [
       {
         path: 'user-management',
-        loadComponent: () => import('./user-management/user-management.component')
-          .then(m => m.UserManagementComponent),
+        loadComponent: () => import('./user-management/user-management.component').then(m => m.UserManagementComponent),
         data: { authorities: ['ROLE_ADMIN'] }
       },
       {
         path: 'bookings',
-        loadComponent: () => import('./user-bookings/user-bookings.component')
-          .then(m => m.UserBookingsComponent),
-        data: { authorities: ['ROLE_USER'] }
+        loadComponent: () => import('./user-bookings/user-bookings.component').then(m => m.UserBookingsComponent),
+        data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] }
       }
+      // No redirect, dashboard widgets are default
     ]
   }
 ]; 

@@ -8,6 +8,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { RegisterService } from './register.service';
+import { authAnimations } from '../../shared/animations/auth.animations';
+
 
 @Component({
   selector: 'app-register',
@@ -19,101 +23,65 @@ import { MatIconModule } from '@angular/material/icon';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    RouterModule
+    RouterModule,
+    LoadingComponent
   ],
-  template: `
-    <main class="flex min-h-screen items-center justify-center px-4 py-12">
-      <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
-        <div class="space-y-2.5 mb-8">
-          <h1 class="text-2xl font-bold">Registrazione</h1>
-          <p class="text-gray-400">
-            Crea il tuo account per accedere al sistema di prenotazione
-          </p>
-        </div>
-
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-          <!-- Nome -->
-          <mat-form-field class="example-full-width">
-            <mat-label>Nome</mat-label>
-            <input matInput formControlName="nome" placeholder="Inserisci il tuo nome" />
-            <mat-error *ngIf="registerForm.get('nome')?.hasError('required')">
-              Nome <strong>richiesto</strong>
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Cognome -->
-          <mat-form-field class="example-full-width">
-            <mat-label>Cognome</mat-label>
-            <input matInput formControlName="cognome" placeholder="Inserisci il tuo cognome" />
-            <mat-error *ngIf="registerForm.get('cognome')?.hasError('required')">
-              Cognome <strong>richiesto</strong>
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Email -->
-          <mat-form-field class="example-full-width">
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" placeholder="nome.cognome@exprivia.com" />
-            <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-              Email <strong>richiesta</strong>
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-              Inserisci una mail valida
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Password -->
-          <mat-form-field class="example-full-width">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password" placeholder="Inserisci la password" />
-            <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-              Password <strong>richiesta</strong>
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-              La password deve essere di almeno 6 caratteri
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Submit Button -->
-          <button type="submit" [disabled]="registerForm.invalid"
-            class="bg-expriviaOrange font-medium rounded-lg text-white text-sm px-5 py-4 text-center me-2 mb-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            Registrati
-          </button>
-
-          <!-- Login Link -->
-          <div class="text-center text-sm mt-4">
-            Hai già un account?
-            <a [routerLink]="['/accedi']" class="text-expriviaOrange underline-offset-4 hover:underline">
-              Accedi
-            </a>
-          </div>
-        </form>
-      </div>
-    </main>
-  `
+  templateUrl: './register.component.html',
+  animations: [
+    authAnimations.fadeIn,
+    authAnimations.slideUp,
+    authAnimations.shake,
+    authAnimations.scaleIn
+  ]
 })
 export class RegisterComponent {
   registerForm: FormGroup;
-  private userService = inject(UserService);
+  private registerService = inject(RegisterService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+
+  hidePwd = true;
+  hideConfirmPwd = true;
+  isLoading = false;
+  errorMessage: string | null = null;
 
   constructor() {
     this.registerForm = this.fb.group({
       nome: ['', Validators.required],
       cognome: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required]
+    }, { validators: this.passwordsMatchValidator });
+  }
+
+  passwordsMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  get emailInvalid() {
+    const control = this.registerForm.get('email');
+    return control && control.invalid && (control.dirty || control.touched);
+  }
+  get passwordInvalid() {
+    const control = this.registerForm.get('password');
+    return control && control.invalid && (control.dirty || control.touched);
+  }
+  get confirmPasswordInvalid() {
+    const control = this.registerForm.get('confirmPassword');
+    return (control && control.invalid && (control.dirty || control.touched)) ||
+      (this.registerForm.errors && this.registerForm.errors['passwordMismatch'] && (control?.dirty || control?.touched));
   }
 
   async onSubmit() {
     if (this.registerForm.valid) {
       try {
-        const userData: User = this.registerForm.value;
-        await this.userService.registerUser(userData);
-        
+        const { nome, cognome, email, password } = this.registerForm.value;
+        const userData: User = { nome, cognome, email, password, authorities: ['ROLE_USER'] };
+        await this.registerService.registerUser(userData);
         // Show success message
         this.snackBar.open('Registrazione completata con successo! Ora puoi effettuare il login.', 'Chiudi', {
           duration: 5000,
@@ -121,7 +89,6 @@ export class RegisterComponent {
           verticalPosition: 'top',
           panelClass: ['success-snackbar']
         });
-
         // Redirect to login page
         this.router.navigate(['/accedi']);
       } catch (error: any) {

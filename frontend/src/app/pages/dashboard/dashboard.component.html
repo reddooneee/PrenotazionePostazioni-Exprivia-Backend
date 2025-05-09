@@ -1,95 +1,72 @@
-<!-- Stato di caricamento iniziale -->
-<app-loading 
-  *ngIf="isLoading"
-  message="Caricamento dashboard..."
-  size="md"
-  color="primary"
-  containerClass="min-h-[60vh]">
-</app-loading>
-
-<!-- Stato di errore -->
-<div *ngIf="error && !isLoading" class="container mx-auto px-4 py-8">
-  <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center animate-fade-in">
-    <div class="text-red-600 mb-4">
-      <lucide-icon name="alert-circle" class="w-12 h-12 mx-auto"></lucide-icon>
+<!-- Dashboard Layout -->
+<div class="flex min-h-screen bg-slate-50">
+  <!-- Sidebar -->
+  <aside class="w-20 md:w-56 bg-white border-r border-slate-200 flex flex-col items-center py-6 space-y-8">
+    <!-- Logo -->
+    <div class="mb-8">
+      <img src="LogoExprivia.svg" alt="Exprivia Logo" class="h-10 w-auto mx-auto" />
     </div>
-    <h3 class="text-lg font-semibold text-red-800 mb-2">Errore</h3>
-    <p class="text-red-600 mb-4">{{error}}</p>
-    <button 
-      (click)="retryInitialization()"
-      class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md">
-      <lucide-icon name="refresh-cw" class="w-4 h-4 mr-2"></lucide-icon>
-      Riprova
-    </button>
-  </div>
-</div>
+    <!-- Navigation -->
+    <nav class="flex flex-col space-y-6 w-full items-center">
+      <a routerLink="/dashboard" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-100 transition">
+        <span class="hidden md:inline text-sm font-medium">Dashboard</span>
+      </a>
+      <a routerLink="/dashboard/user-management" *ngIf="isAdmin" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-100 transition">
+        <span class="hidden md:inline text-sm font-medium">Utenti</span>
+      </a>
+      <a routerLink="/dashboard/bookings" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-slate-100 transition">
+        <span class="hidden md:inline text-sm font-medium">Prenotazioni</span>
+      </a>
+      <!-- Add more links as needed -->
+    </nav>
+  </aside>
 
-<!-- Contenuto del Dashboard -->
-<div *ngIf="!isLoading && !error" class="container mx-auto px-4 py-8">
-  <!-- Sezione di benvenuto -->
-  <div class="mb-8 animate-fade-in">
-    <h2 class="text-3xl font-bold text-gray-800">
-      Benvenuto, {{currentUser?.nome}} {{currentUser?.cognome}}
-    </h2>
-    <p class="text-gray-600 mt-2">
-      {{isAdmin ? 'Pannello di controllo amministratore' : 'Gestisci le tue prenotazioni'}}
-    </p>
-  </div>
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col">
 
-  <!-- Dashboard Amministratore -->
-  <div *ngIf="isAdmin" class="admin-dashboard animate-fade-in">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div *ngFor="let card of adminCards" class="card transform hover:scale-105 transition-all duration-300">
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl">
-          <div class="flex items-center gap-3 mb-4">
-            <lucide-icon [name]="card.icon" class="w-6 h-6 text-expriviaOrange"></lucide-icon>
-            <h5 class="text-xl font-semibold text-gray-700">{{card.title}}</h5>
+    <!-- Dashboard Widgets -->
+    <div class="flex-1 p-6 md:p-10">
+      <h2 class="text-2xl font-semibold mb-6">Good afternoon, {{ user?.nome || user?.email }}!</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Left Column -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-semibold">Live Elevator Status</span>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Space available</span>
+            </div>
+            <!-- Add your elevator status widget here -->
+            <div class="text-slate-500 text-sm mt-2">More than half the space is occupied</div>
           </div>
-          <p class="text-gray-600 mb-4">{{card.description}}</p>
-          <button 
-            class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            (click)="navigateTo(card.route)">
-            {{card.action}}
-            <lucide-icon name="arrow-right" class="w-4 h-4"></lucide-icon>
-          </button>
+          <div class="bg-white rounded-xl shadow p-6">
+            <span class="font-semibold">Meeting rooms</span>
+            <!-- Add your meeting rooms widget here -->
+            <div class="text-slate-500 text-sm mt-2">Room booking table (placeholder)</div>
+          </div>
+        </div>
+        <!-- Center Column -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-xl shadow p-6">
+            <span class="font-semibold">Elevator slot booked</span>
+            <!-- Add your chart here -->
+            <div class="text-slate-500 text-sm mt-2">Chart (placeholder)</div>
+          </div>
+        </div>
+        <!-- Right Column -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-xl shadow p-6">
+            <span class="font-semibold">Lunch time</span>
+            <div class="mt-2 text-red-600 text-xs font-bold">Not Booked</div>
+            <div class="mt-4 text-slate-700">Rush hour!<br>You haven't booked your lunch slot!</div>
+            <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">Book Now</button>
+          </div>
+          <div class="bg-white rounded-xl shadow p-6">
+            <span class="font-semibold">Use Stairs. Win Rewards.</span>
+            <div class="mt-2 text-slate-700 text-sm">Use stairs. Stay fit. Win rewards. Link your fitness app to participate.</div>
+            <button class="mt-4 w-full bg-blue-50 text-blue-700 py-2 rounded-lg font-semibold hover:bg-blue-100 transition">Link your Fitness App!</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Dashboard Utente -->
-  <div *ngIf="!isAdmin" class="user-dashboard animate-fade-in">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div *ngFor="let card of userCards" class="card transform hover:scale-105 transition-all duration-300">
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl">
-          <div class="flex items-center gap-3 mb-4">
-            <lucide-icon [name]="card.icon" class="w-6 h-6 text-expriviaOrange"></lucide-icon>
-            <h5 class="text-xl font-semibold text-gray-700">{{card.title}}</h5>
-          </div>
-          <p class="text-gray-600 mb-4">{{card.description}}</p>
-          <button 
-            class="cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-expriviaOrange hover:bg-expriviaOrange400 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-expriviaOrange transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            (click)="navigateTo(card.route)">
-            {{card.action}}
-            <lucide-icon name="arrow-right" class="w-4 h-4"></lucide-icon>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stato di caricamento per le route figlie -->
-  <div *ngIf="isChildRouteLoading" class="mt-8">
-    <app-loading 
-      message="Caricamento contenuto..."
-      size="sm"
-      color="primary"
-      containerClass="min-h-[200px]">
-    </app-loading>
-  </div>
-
-  <!-- Router Outlet per le route annidate -->
-  <div class="mt-8 animate-fade-in" *ngIf="hasActiveChildRoute() && !isChildRouteLoading">
-    <router-outlet></router-outlet>
-  </div>
-</div>
+  </main>
+</div> 
