@@ -6,8 +6,6 @@ import { User } from '../../core/auth/user.model';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { RegisterService } from './register.service';
 import { authAnimations } from '../../shared/animations/auth.animations';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -15,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-register',
+  templateUrl: './register.component.html',
   standalone: true,
   imports: [
     CommonModule,
@@ -22,11 +21,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatSnackBarModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule,
     RouterModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './register.component.html',
   animations: [
     authAnimations.fadeIn,
     authAnimations.slideUp,

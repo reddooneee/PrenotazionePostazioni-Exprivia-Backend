@@ -50,10 +50,8 @@
           <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
             <button type="button" (click)="hidePwd = !hidePwd"
               class="text-gray-400 hover:text-expriviaOrange transition-colors duration-200">
-              <lucide-icon
-              [name]="iconName"
-              (click)="togglePasswordIcon()">
-            </lucide-icon>            
+              <lucide-icon [name]="iconName" (click)="togglePasswordIcon()">
+              </lucide-icon>
             </button>
           </div>
         </div>
@@ -87,7 +85,7 @@
           </div>
           <div class="relative flex items-center justify-center gap-2">
             <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
-            <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Accedi</span>
+            <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Login</span>
           </div>
         </button>
       </div>

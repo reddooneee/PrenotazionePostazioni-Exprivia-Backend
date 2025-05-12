@@ -1,0 +1,60 @@
+<div class="w-64 h-full bg-white border-r border-slate-200 flex flex-col">
+  <!-- Logo -->
+  <div class="p-4 border-b border-slate-200 flex items-center justify-center">
+    <img src="LogoExprivia.svg" alt="Exprivia Logo" class="h-10 w-auto" />
+  </div>
+
+  <!-- Navigation Expansion Panel -->
+  <mat-accordion class="flex-grow overflow-auto" [multi]="false">
+    <ng-container *ngFor="let navItem of navItems">
+      <!-- Top-level items without children -->
+      <ng-container *ngIf="!navItem.children && isNavItemVisible(navItem)">
+        <a [routerLink]="navItem.route" class="px-4 py-3 hover:bg-slate-100 transition flex items-center gap-3"
+          [class.bg-slate-100]="isRouteActive(navItem.route)">
+          <lucide-icon [name]="navItem.icon" class="w-5 h-5 text-gray-600" />
+          <span class="text-sm font-medium text-gray-700">{{ navItem.label }}</span>
+        </a>
+      </ng-container>
+
+      <!-- Items with children (expansion panel) -->
+      <mat-expansion-panel *ngIf="navItem.children && (!navItem.adminOnly || isAdmin)" [class.mat-elevation-z0]="true"
+        class="border-b border-slate-200">
+        <mat-expansion-panel-header class="hover:bg-slate-100 transition"
+          [ngClass]="{'bg-slate-100': isRouteActive(navItem.route)}">
+          <mat-panel-title class="flex items-center gap-3">
+            <lucide-icon [name]="navItem.icon" class="w-5 h-5 text-gray-600" />
+            <span class="text-sm font-medium text-gray-700">{{ navItem.label }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <!-- Nested navigation items -->
+        <ng-container *ngIf="navItem.children">
+          <ng-container *ngFor="let childItem of navItem.children">
+            <a *ngIf="isNavItemVisible(childItem)" [routerLink]="childItem.route"
+              class="px-4 py-2 hover:bg-slate-100 transition flex items-center gap-3"
+              [class.bg-slate-100]="isRouteActive(childItem.route)">
+              <lucide-icon [name]="childItem.icon" class="w-4 h-4 text-gray-500" />
+              <span class="text-sm text-gray-700">{{ childItem.label }}</span>
+            </a>
+          </ng-container>
+        </ng-container>
+      </mat-expansion-panel>
+    </ng-container>
+  </mat-accordion>
+  <!-- Logout Section -->
+  <div *ngIf="isAuthenticated" class="p-4 flex flex-col items-center justify-center gap-2">
+    <div class="flex flex-col items-center gap-2 text-gray-700">
+      <div class="flex gap-2">
+        <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
+        <span class="font-medium">{{currentUser?.nome}} {{currentUser?.cognome}}</span>
+      </div>
+      <span class="text-sm text-gray-500">{{ getRoleDisplayName(currentUser?.authorities) }}</span>
+    </div>
+    <button (click)="logout()"
+      class="w-full cursor-pointer inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-lg"
+      aria-label="Logout">
+      <lucide-icon name="log-out" class="w-5 h-5" />
+      <span>Log out</span>
+    </button>
+  </div>
+</div>

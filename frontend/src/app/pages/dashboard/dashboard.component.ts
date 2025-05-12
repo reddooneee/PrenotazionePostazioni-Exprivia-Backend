@@ -6,20 +6,19 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { LoginService } from '../../login/login.service';
 import { LucideAngularModule } from 'lucide-angular';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule]
+  imports: [CommonModule, RouterModule, LucideAngularModule, SidebarComponent]
 
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
   isUser = false;
-
-
 
   isAuthenticated = false;
   currentUser: User | null = null;

@@ -59,7 +59,7 @@
         </div>
         <div class="flex gap-4">
           <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
-          class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
+            class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
             <!-- Password -->
             <label class="block text-sm font-medium mb-1">Password *</label>
             <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
@@ -71,8 +71,8 @@
             </div>
           </div>
           <!-- Conferma password -->
-          <div  [@slideUp]="{ value: '', params: { delay: '300ms' } }"
-          class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
+          <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
+            class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
             <label class="block text-sm font-medium mb-1">Conferma password *</label>
             <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword"
               placeholder="Conferma password"
@@ -85,21 +85,8 @@
           </div>
         </div>
 
+
         <!-- Bottone Registrati -->
-        <!-- <button type="submit" [disabled]="registerForm.invalid"
-          class="w-full py-3 rounded-lg bg-expriviaOrange text-white font-semibold text-lg shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
-          Registrati
-        </button>
-        <button mat-raised-button
-          class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-          type="submit" [disabled]="registerForm.invalid || isLoading">
-          <div class="relative flex items-center justify-center gap-2">
-            <app-loading *ngIf="isLoading" diameter="20" class="mr-2"></app-loading>
-          </div>
-        </button> -->
-
-
-        <!-- Bottone Login -->
         <div [@slideUp]="{ value: '', params: { delay: '400ms' } }">
           <button mat-raised-button
             class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
