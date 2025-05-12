@@ -10,20 +10,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { RegisterService } from './register.service';
 import { authAnimations } from '../../shared/animations/auth.animations';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
+    CommonModule,
+    ReactiveFormsModule,
     MatSnackBarModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     RouterModule,
-    LoadingComponent
+    MatProgressSpinnerModule
   ],
   templateUrl: './register.component.html',
   animations: [
@@ -75,12 +76,12 @@ export class RegisterComponent {
       (this.registerForm.errors && this.registerForm.errors['passwordMismatch'] && (control?.dirty || control?.touched));
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.registerForm.valid) {
       try {
         const { nome, cognome, email, password } = this.registerForm.value;
-        const userData: User = { nome, cognome, email, password, authorities: ['ROLE_USER'] };
-        await this.registerService.registerUser(userData);
+        const userData: User = { nome, cognome, email, password };
+        this.registerService.registerUser(userData);
         // Show success message
         this.snackBar.open('Registrazione completata con successo! Ora puoi effettuare il login.', 'Chiudi', {
           duration: 5000,

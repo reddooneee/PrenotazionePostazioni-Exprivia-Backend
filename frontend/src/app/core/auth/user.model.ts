@@ -4,6 +4,6 @@ export interface User {
     cognome: string;
     email: string;
     password: string;
-    authorities: string[]; 
+    authorities?: string[]; 
     enabled?: boolean | null;     // facoltativo
 }

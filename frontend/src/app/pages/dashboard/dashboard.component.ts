@@ -30,7 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private loginService: LoginService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Set initial route
@@ -85,8 +85,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Handle dashboard routes
     if (checkRoute === '/dashboard') {
-      return currentRoute === '/dashboard' || 
-             currentRoute.startsWith('/dashboard/');
+      return currentRoute === '/dashboard' ||
+        currentRoute.startsWith('/dashboard/');
     }
 
     // Handle specific routes
@@ -104,7 +104,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     // Default case: exact match or starts with
-    return currentRoute === checkRoute || 
-           (checkRoute !== '/' && currentRoute.startsWith(checkRoute));
+    return currentRoute === checkRoute ||
+      (checkRoute !== '/' && currentRoute.startsWith(checkRoute));
   }
 }

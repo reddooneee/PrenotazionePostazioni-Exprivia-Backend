@@ -1,78 +1,122 @@
-<div class="min-h-screen flex items-center justify-center">
+<div class="min-h-screen flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl flex w-full max-w-4xl overflow-hidden">
     <!-- Sinistra: Form di registrazione -->
     <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
       <div class="text-center">
         <h1
-        class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
-        Crea il tuo account
-      </h1>
+          class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
+          Crea il tuo account
+        </h1>
         <p class="text-gray-600 mb-8">Compila il modulo per registrarti.</p>
       </div>
+
+      <!-- Form di registrazione -->
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
         <div class="flex gap-4">
+          <!-- Nome -->
           <div class="w-1/2">
-            <label class="block text-sm font-medium mb-1">Nome*</label>
-            <input matInput formControlName="nome" placeholder="Nome"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div *ngIf="registerForm.get('nome')?.invalid && (registerForm.get('nome')?.dirty || registerForm.get('nome')?.touched)" class="text-xs text-red-600 mt-1">
-              Il nome è obbligatorio.
+            <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
+              class="transform hover:scale-[1.02] transition-transform duration-300">
+              <label class="block text-sm font-medium mb-1">Nome *</label>
+              <input matInput formControlName="nome" placeholder="Nome"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              <div
+                *ngIf="registerForm.get('nome')?.invalid && (registerForm.get('nome')?.dirty || registerForm.get('nome')?.touched)"
+                class="text-xs text-red-600 mt-1">
+                Il nome è obbligatorio.
+              </div>
             </div>
+
           </div>
+          <!-- Cognome -->
           <div class="w-1/2">
-            <label class="block text-sm font-medium mb-1">Cognome*</label>
-            <input matInput formControlName="cognome" placeholder="Cognome"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div *ngIf="registerForm.get('cognome')?.invalid && (registerForm.get('cognome')?.dirty || registerForm.get('cognome')?.touched)" class="text-xs text-red-600 mt-1">
-              Il cognome è obbligatorio.
+            <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
+              class="transform hover:scale-[1.02] transition-transform duration-300">
+              <label class="block text-sm font-medium mb-1">Cognome *</label>
+              <input matInput formControlName="cognome" placeholder="Cognome"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              <div
+                *ngIf="registerForm.get('cognome')?.invalid && (registerForm.get('cognome')?.dirty || registerForm.get('cognome')?.touched)"
+                class="text-xs text-red-600 mt-1">
+                Il cognome è obbligatorio.
+              </div>
             </div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Email*</label>
+
+        <!-- Email -->
+
+        <div [@slideUp]="{ value: '', params: { delay: '200ms' } }"
+          class="transform hover:scale-[1.02] transition-transform duration-300">
+          <label class="block text-sm font-medium mb-1">Email *</label>
           <input matInput formControlName="email" placeholder="Email"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)" class="text-xs text-red-600 mt-1">
-              L'email è obbligatoria.
-            </div>
+          <div
+            *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)"
+            class="text-xs text-red-600 mt-1">
+            L'email è obbligatoria.
+          </div>
         </div>
         <div class="flex gap-4">
-          <div class="w-1/2">
-            <label class="block text-sm font-medium mb-1">Password*</label>
+          <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
+          class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
+            <!-- Password -->
+            <label class="block text-sm font-medium mb-1">Password *</label>
             <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)" class="text-xs text-red-600 mt-1">
+            <div
+              *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)"
+              class="text-xs text-red-600 mt-1">
               La password è obbligatoria.
             </div>
           </div>
-          <div class="w-1/2">
-            <label class="block text-sm font-medium mb-1">Conferma password*</label>
-            <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword" placeholder="Conferma password"
+          <!-- Conferma password -->
+          <div  [@slideUp]="{ value: '', params: { delay: '300ms' } }"
+          class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
+            <label class="block text-sm font-medium mb-1">Conferma password *</label>
+            <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword"
+              placeholder="Conferma password"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div *ngIf="registerForm.get('confirmPassword')?.invalid && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)" class="text-xs text-red-600 mt-1">
+            <div
+              *ngIf="registerForm.get('confirmPassword')?.invalid && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)"
+              class="text-xs text-red-600 mt-1">
               La conferma password è obbligatoria.
             </div>
           </div>
         </div>
 
-        <button type="submit"
-          [disabled]="registerForm.invalid"
+        <!-- Bottone Registrati -->
+        <!-- <button type="submit" [disabled]="registerForm.invalid"
           class="w-full py-3 rounded-lg bg-expriviaOrange text-white font-semibold text-lg shadow transition disabled:opacity-50 disabled:cursor-not-allowed">
           Registrati
         </button>
         <button mat-raised-button
-        class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-        type="submit" [disabled]="registerForm.invalid || isLoading">
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-expriviaOrange400 to-expriviaOrange opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+          type="submit" [disabled]="registerForm.invalid || isLoading">
+          <div class="relative flex items-center justify-center gap-2">
+            <app-loading *ngIf="isLoading" diameter="20" class="mr-2"></app-loading>
+          </div>
+        </button> -->
+
+
+        <!-- Bottone Login -->
+        <div [@slideUp]="{ value: '', params: { delay: '400ms' } }">
+          <button mat-raised-button
+            class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+            type="submit" [disabled]="registerForm.invalid || isLoading">
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-expriviaOrange400 to-expriviaOrange opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+            <div class="relative flex items-center justify-center gap-2">
+              <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
+              <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Registrati</span>
+            </div>
+          </button>
         </div>
-        <div class="relative flex items-center justify-center gap-2">
-          <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
-          <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Accedi</span>
-        </div>
-      </button>
+
       </form>
     </div>
+
     <!-- Destra: Immagine -->
     <div class="hidden md:block w-1/2">
       <img src="registration.avif" alt="Appartamenti moderni" class="w-full h-full object-cover" />
