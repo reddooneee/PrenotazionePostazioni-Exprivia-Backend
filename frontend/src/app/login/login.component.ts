@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LoginService } from './login.service';
 import { authAnimations } from '../shared/animations/auth.animations';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
@@ -21,9 +22,10 @@ import { authAnimations } from '../shared/animations/auth.animations';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
     MatProgressSpinnerModule,
-    RouterLink
+    RouterLink,
+    LucideAngularModule,
+    MatIconModule
   ],
   animations: [
     authAnimations.fadeIn,
@@ -34,9 +36,11 @@ import { authAnimations } from '../shared/animations/auth.animations';
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
-  hidePwd = true;
-  isLoading = false;
+  hidePwd: boolean = true;
+  isLoading: boolean = false;
   errorMessage: string | null = null;
+  iconName: string = 'eye-off';
+
 
   constructor(
     private formBuilder: FormBuilder,
@@ -49,13 +53,13 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = null;
-      
+
       this.loginService.login(this.loginForm.value).subscribe({
         next: () => {
           this.isLoading = false;
@@ -67,6 +71,11 @@ export class LoginComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Funzione per cambiare l'icona della password
+  togglePasswordIcon() {
+    this.iconName = this.iconName === 'eye' ? 'eye-off' : 'eye';
   }
 
   get emailInvalid(): boolean {

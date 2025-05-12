@@ -24,7 +24,7 @@
         class="transform hover:scale-[1.02] transition-transform duration-300">
         <div class="relative">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
-            <mat-icon class="text-gray-400">mail</mat-icon>
+            <lucide-icon name="mail" class="text-gray-400"></lucide-icon>
           </div>
           <input matInput formControlName="email" placeholder="Email" type="email"
             class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" />
@@ -42,7 +42,7 @@
         class="transform hover:scale-[1.02] transition-transform duration-300">
         <div class="relative">
           <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
-            <mat-icon class="text-gray-400">lock</mat-icon>
+            <lucide-icon name="lock" class="text-gray-400">lock</lucide-icon>
           </div>
           <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
             autocomplete="current-password"
@@ -50,7 +50,10 @@
           <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6">
             <button type="button" (click)="hidePwd = !hidePwd"
               class="text-gray-400 hover:text-expriviaOrange transition-colors duration-200">
-              <mat-icon>{{ hidePwd ? "visibility" : "visibility_off" }}</mat-icon>
+              <lucide-icon
+              [name]="iconName"
+              (click)="togglePasswordIcon()">
+            </lucide-icon>            
             </button>
           </div>
         </div>

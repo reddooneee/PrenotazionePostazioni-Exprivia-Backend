@@ -22,6 +22,10 @@ import {
   ArrowRight,
   User,
   LogOut,
+  Mail,
+  Eye,
+  EyeOff,
+  Lock,
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
@@ -47,7 +51,7 @@ bootstrapApplication(AppComponent, {
       MatSelectModule,
       MatTabsModule,
       MatNativeDateModule,
-      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search, ArrowRight, User, LogOut })
+      LucideAngularModule.pick({ Calendar, MapPin, Clock, Search, ArrowRight, User, LogOut, Mail, Eye, EyeOff, Lock })
     ),
     AxiosService,
     UserService,
