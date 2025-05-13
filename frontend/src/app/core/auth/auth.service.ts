@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { AuthJwtService } from './auth-jwt.service';
 import { AxiosService } from '../../service/axios.service';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
 import { User } from './user.model';
 
 @Injectable({
@@ -30,6 +30,8 @@ export class AuthService {
       if (cachedAccount) {
         this.userIdentity.next(cachedAccount);
         this.authenticationState.next(true);
+        // Verify cached account in background
+        this.identity(true).subscribe();
       } else {
         this.identity(true).subscribe();
       }
@@ -44,20 +46,25 @@ export class AuthService {
       return this.userIdentity$;
     }
 
-    return new Observable<User | null>((observer) => {
-      if (!this.authJwtService.isAuthenticated()) {
-        this.authenticate(null);
-        observer.next(null);
-        observer.complete();
-        return;
-      }
+    if (!this.authJwtService.isAuthenticated()) {
+      this.authenticate(null);
+      return of(null);
+    }
 
+    return new Observable<User | null>((observer) => {
       this.axiosService.get<User>(this.accountUrl)
         .then((response: any) => {
           const user = response as User;
-          this.authenticate(user);
-          this.cacheAccount(user);
-          observer.next(user);
+          // Verify user has required fields
+          if (this.isValidUser(user)) {
+            this.authenticate(user);
+            this.cacheAccount(user);
+            observer.next(user);
+          } else {
+            console.error('Invalid user data received:', user);
+            this.authenticate(null);
+            observer.next(null);
+          }
           observer.complete();
         })
         .catch((error) => {
@@ -66,7 +73,22 @@ export class AuthService {
           observer.next(null);
           observer.complete();
         });
-    });
+    }).pipe(
+      catchError(error => {
+        console.error('AuthService: Error in identity observable:', error);
+        this.authenticate(null);
+        return of(null);
+      })
+    );
+  }
+
+  // Verifica se l'oggetto utente è valido
+  private isValidUser(user: any): user is User {
+    return user &&
+           typeof user.nome === 'string' &&
+           typeof user.cognome === 'string' &&
+           typeof user.email === 'string' &&
+           Array.isArray(user.authorities);
   }
 
   // Autentica l'utente con i dati dell'account
@@ -109,16 +131,32 @@ export class AuthService {
   // Gestione della cache dell'account
   private cacheAccount(account: User): void {
     if (account) {
-      localStorage.setItem(this.accountCacheKey, JSON.stringify(account));
+      try {
+        localStorage.setItem(this.accountCacheKey, JSON.stringify(account));
+      } catch (error) {
+        console.error('Error caching account:', error);
+      }
     }
   }
 
   private getCachedAccount(): User | null {
-    const cachedAccount = localStorage.getItem(this.accountCacheKey);
-    return cachedAccount ? JSON.parse(cachedAccount) : null;
+    try {
+      const cachedAccount = localStorage.getItem(this.accountCacheKey);
+      if (!cachedAccount) return null;
+      
+      const account = JSON.parse(cachedAccount) as User;
+      return this.isValidUser(account) ? account : null;
+    } catch (error) {
+      console.error('Error reading cached account:', error);
+      return null;
+    }
   }
 
   private clearAccountCache(): void {
-    localStorage.removeItem(this.accountCacheKey);
+    try {
+      localStorage.removeItem(this.accountCacheKey);
+    } catch (error) {
+      console.error('Error clearing account cache:', error);
+    }
   }
 }

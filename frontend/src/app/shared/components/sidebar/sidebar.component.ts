@@ -1,155 +1,191 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { LucideAngularModule } from 'lucide-angular';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, OnDestroy, OnInit, HostListener } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { LucideAngularModule } from "lucide-angular";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { Subject, takeUntil, catchError } from "rxjs";
+import { User } from "../../../core/auth/user.model";
+import { AuthService } from "../../../core/auth/auth.service";
+import { LoginService } from "../../../login/login.service";
+import { NavigationService, NavItem } from "../../services/navigation.service";
+import { animate, state, style, transition, trigger } from '@angular/animations';
 
-import { User } from '../../../core/auth/user.model';
-import { AuthService } from '../../../core/auth/auth.service';
-import { LoginService } from '../../../login/login.service';
-import { Subscription } from 'rxjs';
-
-interface NavItem {
-  label: string;
-  icon: string;
-  route: string;
-  adminOnly?: boolean;
-  children?: NavItem[];
-}
+const SIDEBAR_STATE_KEY = 'sidebarCollapsed';
 
 @Component({
-  selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html',
+  selector: "app-sidebar",
+  templateUrl: "./sidebar.component.html",
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
+    CommonModule,
+    RouterModule,
     MatExpansionModule,
     MatIconModule,
-    LucideAngularModule
+    MatTooltipModule,
+    LucideAngularModule,
+  ],
+  animations: [
+    trigger('sidebarWidth', [
+      state('expanded', style({
+        width: '256px'
+      })),
+      state('collapsed', style({
+        width: '72px'
+      })),
+      transition('expanded <=> collapsed', [
+        animate('200ms ease-in-out')
+      ])
+    ])
   ]
 })
 export class SidebarComponent implements OnInit, OnDestroy {
+  // Stato dell'utente e dell'autenticazione
   isAdmin = false;
   isAuthenticated = false;
   currentUser: User | null = null;
-  private authSubscription: Subscription | null = null;
+  isCollapsed = false;
 
-  navItems: NavItem[] = [
-    {
-      label: 'Dashboard',
-      icon: 'home',
-      route: '/dashboard'
-    },
-    {
-      label: 'Gestione',
-      icon: 'folder',
-      route: '/dashboard/management',
-      children: [
-        {
-          label: 'Utenti',
-          icon: 'users',
-          route: '/dashboard/user-management',
-          adminOnly: true
-        },
-        {
-          label: 'Prenotazioni',
-          icon: 'calendar',
-          route: '/dashboard/bookings'
-        }
-      ]
-    }
-  ];
+  // Elementi di navigazione
+  navItems: NavItem[] = [];
+
+  // Subject per la gestione della pulizia delle sottoscrizioni
+  private destroy$ = new Subject<void>();
+
+  // Screen width threshold for automatic collapse (in pixels)
+  private readonly COLLAPSE_WIDTH = 768;
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkWindowSize();
+  }
+
+  private checkWindowSize(): void {
+    this.isCollapsed = window.innerWidth < this.COLLAPSE_WIDTH;
+  }
 
   constructor(
     private authService: AuthService,
-    private loginService: LoginService
-  ) {}
+    private loginService: LoginService,
+    private navigationService: NavigationService
+  ) {
+    // Check window size immediately
+    this.checkWindowSize();
+  }
 
+  // Toggle sidebar collapse
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
+  }
 
-// Aggiungi questo metodo per mappare i ruoli
-getRoleDisplayName(authorities: string[] | undefined): string {
-    if (!authorities || authorities.length === 0) {
-      return 'Ruolo sconosciuto';
+  // Metodo per convertire i ruoli in nomi visualizzabili
+  getRoleDisplayName(authorities: string[] | undefined): string {
+    if (!authorities?.length) {
+      return "Ruolo sconosciuto";
     }
-  
-    // Check the first role, or use the first matching role
-    const primaryRole = authorities.find(role => 
-      role === 'ROLE_ADMIN' || role === 'ROLE_USER'
-    );
-  
-    switch (primaryRole) {
-      case 'ROLE_ADMIN':
-        return 'Admin';
-      case 'ROLE_USER':
-        return 'Dipendente';
-      default:
-        return 'Ruolo sconosciuto';
-    }
+
+    const roleMap: { [key: string]: string } = {
+      ROLE_ADMIN: "Amministratore",
+      ROLE_USER: "Dipendente",
+    };
+
+    const primaryRole = authorities.find((role) => role in roleMap);
+    return roleMap[primaryRole || ""] || "Ruolo sconosciuto";
   }
 
   ngOnInit(): void {
-    this.authSubscription = this.authService.getAuthenticationState().subscribe({
-      next: (isAuthenticated) => {
+    // Check initial window size
+    this.checkWindowSize();
+
+    // Sottoscrizione allo stato di autenticazione
+    this.authService
+      .getAuthenticationState()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => {
+          this.resetAuthState();
+          return [];
+        })
+      )
+      .subscribe((isAuthenticated) => {
         this.isAuthenticated = isAuthenticated;
         if (isAuthenticated) {
-          this.authService.getIdentity().subscribe({
-            next: (user) => {
-              this.currentUser = user;
-              // Assuming roles are part of the user object
-              this.isAdmin = user?.authorities?.includes('ROLE_ADMIN') || false;
-            },
-            error: (error) => {
-              console.error('Error fetching user identity', error);
-              this.resetAuthState();
-            }
-          });
+          this.loadUserIdentity();
         } else {
           this.resetAuthState();
         }
-      },
-      error: (error) => {
-        console.error('Authentication state error', error);
-        this.resetAuthState();
-      }
-    });
+      });
+
+    // Sottoscrizione agli elementi di navigazione
+    this.navigationService
+      .getNavigationItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((items) => (this.navItems = items));
   }
 
-  ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
-    }
+  // Carica l'identità dell'utente
+  private loadUserIdentity(): void {
+    this.authService
+      .getIdentity()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => {
+          this.resetAuthState();
+          return [];
+        })
+      )
+      .subscribe((user) => {
+        this.currentUser = user;
+        this.isAdmin = user?.authorities?.includes("ROLE_ADMIN") || false;
+
+        // Aggiorna gli elementi di navigazione in base alle autorizzazioni
+        if (user?.authorities) {
+          this.navigationService.updateNavigationItems(user.authorities);
+        }
+      });
   }
 
+  // Reset dello stato di autenticazione
   private resetAuthState(): void {
     this.isAuthenticated = false;
     this.currentUser = null;
     this.isAdmin = false;
+    this.navigationService.updateNavigationItems([]);
   }
 
+  // Gestione del logout
   logout(): void {
     this.loginService.logout();
+    this.resetAuthState();
   }
 
+  // Verifica se una route è attiva
   isRouteActive(route: string): boolean {
-    const currentRoute = window.location.pathname.replace(/\/$/, '');
-    const checkRoute = route.replace(/\/$/, '');
-
-    const routeMap: { [key: string]: (route: string) => boolean } = {
-      '': () => currentRoute === '' || currentRoute === '/',
-      '/dashboard': () => currentRoute.startsWith('/dashboard'),
-      '/dashboard/user-management': () => currentRoute === '/dashboard/user-management',
-      '/dashboard/bookings': () => currentRoute === '/dashboard/bookings',
-      '/dashboard/management': () => currentRoute.startsWith('/dashboard/management')
-    };
-
-    return routeMap[checkRoute] 
-      ? routeMap[checkRoute](currentRoute)
-      : currentRoute === checkRoute || currentRoute.startsWith(checkRoute);
+    return this.navigationService.isRouteActive(route);
   }
 
+  // Verifica se un elemento di navigazione deve essere visualizzato
   isNavItemVisible(item: NavItem): boolean {
-    return !item.adminOnly || this.isAdmin;
+    if (!this.currentUser?.authorities) {
+      return false;
+    }
+
+    if (item.adminOnly && !this.isAdmin) {
+      return false;
+    }
+
+    return (
+      !item.authorities ||
+      item.authorities.some((auth) =>
+        this.currentUser?.authorities?.includes(auth)
+      )
+    );
+  }
+
+  ngOnDestroy(): void {
+    // Pulizia delle sottoscrizioni
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

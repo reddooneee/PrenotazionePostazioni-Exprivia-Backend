@@ -7,14 +7,26 @@ import { AuthService } from '../../core/auth/auth.service';
 import { LoginService } from '../../login/login.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
-
+import { interval } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { UserService } from '../../service/user.service';
+import { DeskService } from '../../service/desk.service';
+import { BookingService } from '../../service/booking.service';
+import { AxiosService } from '../../service/axios.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, SidebarComponent]
-
+  imports: [CommonModule, RouterModule, LucideAngularModule, SidebarComponent],
+  providers: [
+    AuthService,
+    LoginService,
+    UserService,
+    DeskService,
+    BookingService,
+    AxiosService
+  ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
@@ -25,10 +37,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private authSubscription: Subscription | null = null;
   activeRoute: string = '';
 
+  // Date and time
+  currentDate = new Date();
+  currentTime = new Date().toLocaleTimeString();
+  private timeSubscription?: Subscription;
+
+  // Dashboard data
+  notificationCount = 0;
+  todayBookings = 0;
+  availableDesks = 0;
+  totalDesks = 0;
+
   constructor(
     private authService: AuthService,
     private loginService: LoginService,
-    private router: Router
+    private router: Router,
+    private userService: UserService,
+    private deskService: DeskService,
+    private bookingService: BookingService
   ) { }
 
   ngOnInit() {
@@ -45,17 +71,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (isAuthenticated) {
           this.authService.getIdentity().subscribe(user => {
             this.currentUser = user;
+            this.isAdmin = user?.authorities?.includes('ROLE_ADMIN') ?? false;
           });
         } else {
           this.currentUser = null;
         }
       }
     );
+
+    // Update time every second
+    this.timeSubscription = interval(1000)
+      .pipe(
+        map(() => new Date().toLocaleTimeString())
+      )
+      .subscribe(time => {
+        this.currentTime = time;
+      });
+
+    // Load dashboard data
+    this.loadDashboardData();
   }
 
   ngOnDestroy() {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
+    }
+    if (this.timeSubscription) {
+      this.timeSubscription.unsubscribe();
     }
   }
 
@@ -106,4 +148,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return currentRoute === checkRoute ||
       (checkRoute !== '/' && currentRoute.startsWith(checkRoute));
   }
+
+  // Check if we're on the dashboard home route
+  isHomeRoute(): boolean {
+    return this.router.url === '/dashboard' || this.router.url === '/dashboard/';
+  }
+
+  private async loadDashboardData(): Promise<void> {
+    try {
+      // Load desk statistics
+      const desks = await this.deskService.getDesks();
+      this.totalDesks = desks.length;
+      this.availableDesks = desks.filter(desk => desk.isAvailable).length;
+
+      // Load today's bookings
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  }
+
+  getAvailableDesksPercentage(): string {
+    if (this.totalDesks === 0) return '0%';
+    return `${(this.availableDesks / this.totalDesks * 100)}%`;
+  }
 }
+
