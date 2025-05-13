@@ -60,8 +60,15 @@ export class LoginComponent implements OnInit {
       this.errorMessage = null;
 
       this.loginService.login(this.loginForm.value).subscribe({
-        next: () => {
+        next: (user) => {
           this.isLoading = false;
+          if (user) {
+            // Successful login, navigate to dashboard
+            const returnUrl = this.router.routerState.snapshot.root.queryParams['returnUrl'] || '/dashboard';
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            this.errorMessage = 'Errore durante il login. Riprova.';
+          }
         },
         error: (error) => {
           this.isLoading = false;

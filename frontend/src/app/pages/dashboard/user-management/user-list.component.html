@@ -1,9 +1,51 @@
 <!-- Contenitore principale con sfondo e padding appropriati -->
-<div class="min-h-screen bg-gray-50/50 p-6 md:p-8">
+<div class="min-h-screen p-6 md:p-8">
   <!-- Header Section -->
   <div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900 mb-2">Gestione Utenti</h1>
-    <p class="text-gray-600">Gestisci gli utenti del sistema e i loro ruoli</p>
+    <h1 class="text-2xl font-bold text-white mb-2">Gestione Utenti</h1>
+    <p class="text-white">Gestisci gli utenti del sistema e i loro ruoli</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Total Users -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Utenti Totali</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ getTotalUsers() }}</h3>
+        </div>
+        <div class="p-3 bg-blue-50 rounded-lg">
+          <lucide-icon name="users" class="w-6 h-6 text-blue-600"></lucide-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Users -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Amministratori</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ getAdminCount() }}</h3>
+        </div>
+        <div class="p-3 bg-purple-50 rounded-lg">
+          <lucide-icon name="shield" class="w-6 h-6 text-purple-600"></lucide-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Regular Users -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Dipendenti</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ getUserCount() }}</h3>
+        </div>
+        <div class="p-3 bg-green-50 rounded-lg">
+          <lucide-icon name="user" class="w-6 h-6 text-green-600"></lucide-icon>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Card contenente la tabella e i controlli -->
@@ -11,20 +53,42 @@
     <!-- Toolbar Section -->
     <div class="p-6 border-b border-gray-100">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <!-- Search Field -->
-        <mat-form-field class="w-full md:w-96" appearance="outline">
-          <mat-label>Cerca utente</mat-label>
-          <div class="flex items-center">
-            <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter($event)"
-              placeholder="Cerca per nome, email..." class="flex-1" />
-            <lucide-icon name="search" class="w-5 h-5 text-gray-400" matSuffix></lucide-icon>
+        <!-- Search and Filter Section -->
+        <div class="flex flex-col md:flex-row gap-4 flex-1">
+          <!-- Search Field -->
+          <mat-form-field class="w-full md:w-96">
+            <mat-label>Cerca utente</mat-label>
+            <div class="flex items-center">
+              <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter($event)"
+                placeholder="Cerca per nome, email..." class="flex-1" />
+              <lucide-icon name="search" class="w-5 h-5 text-gray-400" matSuffix></lucide-icon>
+            </div>
+          </mat-form-field>
+
+          <!-- Role Filter -->
+          <div class="flex gap-2">
+            <button [class.bg-blue-50]="currentFilter === 'all'" (click)="filterByRole('all')"
+              class="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              <lucide-icon name="users" class="w-4 h-4"></lucide-icon>
+              Tutti
+            </button>
+            <button [class.bg-purple-50]="currentFilter === 'admin'" (click)="filterByRole('admin')"
+              class="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              <lucide-icon name="shield" class="w-4 h-4"></lucide-icon>
+              Amministratori
+            </button>
+            <button [class.bg-green-50]="currentFilter === 'user'" (click)="filterByRole('user')"
+              class="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors">
+              <lucide-icon name="user" class="w-4 h-4"></lucide-icon>
+              Dipendenti
+            </button>
           </div>
-        </mat-form-field>
+        </div>
 
         <!-- Add User Button -->
-        <button mat-flat-button color="primary" (click)="createUser()"
-          class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2 shadow-sm">
-          <lucide-icon name="plus" class="w-5 h-5"></lucide-icon>
+        <button (click)="createUser()"
+          class="bg-expriviaOrange text-white px-6 py-2.5 rounded-lg hover:bg-expriviaOrange/80 transition-colors duration-200 flex items-center gap-2 shadow-sm">
+          <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
           <span>Nuovo Utente</span>
         </button>
       </div>
@@ -118,8 +182,8 @@
         <h3 class="text-lg font-medium text-gray-900 mb-1">Nessun utente trovato</h3>
         <p class="text-gray-500 mb-4">Non ci sono utenti che corrispondono ai criteri di ricerca.</p>
         <button mat-flat-button color="primary" (click)="createUser()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
-          <lucide-icon name="plus" class="w-5 h-5"></lucide-icon>
+          class="bg-expriviaOrange text-white px-4 py-2 rounded-lg hover:bg-expriviaOrange/80 transition-colors duration-200 flex items-center gap-2">
+          <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
           <span>Aggiungi Utente</span>
         </button>
       </div>

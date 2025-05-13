@@ -32,7 +32,7 @@ interface DialogData {
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
         <div class="grid grid-cols-2 gap-4 mb-4">
           <!-- Nome -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field class="w-full">
             <mat-label>Nome</mat-label>
             <input matInput formControlName="nome" placeholder="Inserisci il nome" required>
             <mat-error *ngIf="userForm.get('nome')?.errors?.['required']">
@@ -41,7 +41,7 @@ interface DialogData {
           </mat-form-field>
 
           <!-- Cognome -->
-          <mat-form-field appearance="outline" class="w-full">
+          <mat-form-field  class="w-full">
             <mat-label>Cognome</mat-label>
             <input matInput formControlName="cognome" placeholder="Inserisci il cognome" required>
             <mat-error *ngIf="userForm.get('cognome')?.errors?.['required']">
@@ -51,7 +51,7 @@ interface DialogData {
         </div>
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="w-full mb-4">
+        <mat-form-field  class="w-full mb-4">
           <mat-label>Email</mat-label>
           <input matInput formControlName="email" placeholder="Inserisci l'email" required type="email">
           <mat-error *ngIf="userForm.get('email')?.errors?.['required']">
@@ -63,7 +63,7 @@ interface DialogData {
         </mat-form-field>
 
         <!-- Password (solo per nuovi utenti) -->
-        <mat-form-field *ngIf="!data.user.id_user" appearance="outline" class="w-full mb-4">
+        <mat-form-field *ngIf="!data.user.id_user" class="w-full mb-4">
           <mat-label>Password</mat-label>
           <input matInput formControlName="password" type="password" placeholder="Inserisci la password" required>
           <mat-error *ngIf="userForm.get('password')?.errors?.['required']">
@@ -75,7 +75,7 @@ interface DialogData {
         </mat-form-field>
 
         <!-- Ruolo -->
-        <mat-form-field appearance="outline" class="w-full mb-6">
+        <mat-form-field class="w-full mb-6">
           <mat-label>Ruolo</mat-label>
           <mat-select formControlName="authorities" required>
             <mat-option [value]="['ROLE_USER']">Dipendente</mat-option>

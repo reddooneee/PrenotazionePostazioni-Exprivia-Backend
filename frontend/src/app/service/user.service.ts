@@ -1,77 +1,56 @@
 import { Injectable } from "@angular/core";
-import { AxiosService } from "./axios.service"; // Assicurati di importare correttamente AxiosService
-import { User } from "../core/auth/user.model"; // Assicurati che il tuo modello utente sia correttamente importato
+import { AxiosService } from "./axios.service";
+import { User } from "../core/auth/user.model";
 
 @Injectable({
   providedIn: "root",
 })
 export class UserService {
-  private endpoint = "/api/admin/utenti";
+  private readonly endpoint = "/api/admin";
 
   constructor(private axiosService: AxiosService) {}
 
   // Ottieni tutti gli utenti
   async getAllUsers(): Promise<User[]> {
     try {
-      const users = await this.axiosService.get<User[]>(this.endpoint);
+      const users = await this.axiosService.get<User[]>(`${this.endpoint}/utenti`);
       return users;
     } catch (error) {
       console.error("Errore durante il recupero degli utenti:", error);
-      throw error; // Rilancia l'errore per gestirlo nel componente
+      throw new Error("Impossibile recuperare la lista degli utenti");
     }
   }
 
   // Ottieni un utente per ID
   async getUserById(id: number): Promise<User> {
     try {
-      const user = await this.axiosService.get<User>(
-        `${this.endpoint}/utente/${id}`
-      );
+      const user = await this.axiosService.get<User>(`${this.endpoint}/utente/${id}`);
       return user;
     } catch (error) {
-      console.error("Errore durante il recupero dell'utente per ID:", error);
-      throw error;
+      console.error("Errore durante il recupero dell'utente:", error);
+      throw new Error(`Impossibile trovare l'utente con ID ${id}`);
     }
   }
 
   // Ottieni un utente per email
   async getUserByEmail(email: string): Promise<User> {
     try {
-      const user = await this.axiosService.get<User>(
-        `${this.endpoint}/utente/email/${email}`
-      );
+      const user = await this.axiosService.get<User>(`${this.endpoint}/utente/email/${email}`);
       return user;
     } catch (error) {
-      console.error("Errore durante il recupero dell'utente per email:", error);
-      throw error;
-    }
-  }
-
-  // Crea un nuovo utente
-  async registerUser(user: User): Promise<User> {
-    try {
-      const newUser = await this.axiosService.post<User>(
-        `${this.endpoint}/creaUtente`,
-        user
-      );
-      return newUser;
-    } catch (error) {
-      console.error("Errore durante la registrazione dell'utente:", error);
-      throw error;
+      console.error("Errore durante il recupero dell'utente:", error);
+      throw new Error(`Impossibile trovare l'utente con email ${email}`);
     }
   }
 
   // Aggiorna un utente
   async updateUser(id: number, updates: Partial<User>): Promise<User> {
     try {
-      const updatedUser = await this.axiosService.put<User>(
-        `${this.endpoint}/utente/${id}`,
-        updates
-      );
+      const updatedUser = await this.axiosService.put<User>(`${this.endpoint}/utente/${id}`, updates);
       return updatedUser;
     } catch (error) {
       console.error("Errore durante l'aggiornamento dell'utente:", error);
-      throw error;
+      throw new Error("Impossibile aggiornare l'utente");
     }
   }
 
@@ -80,8 +59,19 @@ export class UserService {
     try {
       await this.axiosService.delete(`${this.endpoint}/utente/${id}`);
     } catch (error) {
-      console.error("Errore durante la cancellazione dell'utente:", error);
-      throw error;
+      console.error("Errore durante l'eliminazione dell'utente:", error);
+      throw new Error("Impossibile eliminare l'utente");
+    }
+  }
+
+  // Registra un nuovo utente
+  async registerUser(userData: Partial<User>): Promise<User> {
+    try {
+      const newUser = await this.axiosService.post<User>(`/api/auth/register`, userData);
+      return newUser;
+    } catch (error) {
+      console.error("Errore durante la registrazione dell'utente:", error);
+      throw new Error("Impossibile registrare il nuovo utente");
     }
   }
 }

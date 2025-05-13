@@ -1,5 +1,6 @@
 <!-- Dashboard Layout -->
-<div class="flex min-h-screen bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70 relative z-0">
+<div class="flex min-h-screen bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
+  
   <!-- Sidebar -->
   <app-sidebar></app-sidebar>
 
@@ -27,7 +28,7 @@
     </div>
 
     <!-- Dashboard Content -->
-    <div class="flex-1 p-6 space-y-6 bg-gray-50 overflow-auto">
+    <div class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
       <!-- Only show dashboard content on home route -->
       <ng-container *ngIf="isHomeRoute()">
         <!-- KPI Stats Grid -->

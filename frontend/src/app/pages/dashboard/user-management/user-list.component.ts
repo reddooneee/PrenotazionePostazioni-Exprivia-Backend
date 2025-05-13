@@ -50,6 +50,7 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
   loading$: Observable<boolean>;
   searchTerm = "";
   private destroy$ = new Subject<void>();
+  currentFilter: 'all' | 'admin' | 'user' = 'all';
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -90,7 +91,13 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.userManagementService.setSearchTerm(filterValue);
+    this.searchTerm = filterValue;
+    
+    // First apply role filter
+    this.filterByRole(this.currentFilter);
+    
+    // Then apply search filter
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   async createUser(): Promise<void> {
@@ -165,5 +172,40 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // User counting methods
+  getTotalUsers(): number {
+    return this.dataSource.data.length;
+  }
+
+  getAdminCount(): number {
+    return this.dataSource.data.filter(user => 
+      user.authorities?.includes('ROLE_ADMIN')
+    ).length;
+  }
+
+  getUserCount(): number {
+    return this.dataSource.data.filter(user => 
+      !user.authorities?.includes('ROLE_ADMIN')
+    ).length;
+  }
+
+  // Role filtering
+  filterByRole(role: 'all' | 'admin' | 'user'): void {
+    this.currentFilter = role;
+    
+    if (role === 'all') {
+      this.dataSource.data = this.userManagementService.getOriginalUsers();
+    } else {
+      const isAdmin = role === 'admin';
+      this.dataSource.data = this.userManagementService.getOriginalUsers().filter(user =>
+        isAdmin ? user.authorities?.includes('ROLE_ADMIN') : !user.authorities?.includes('ROLE_ADMIN')
+      );
+    }
+
+    if (this.searchTerm) {
+      this.applyFilter({ target: { value: this.searchTerm } } as any);
+    }
   }
 }

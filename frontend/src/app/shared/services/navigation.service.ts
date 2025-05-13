@@ -36,6 +36,12 @@ export class NavigationService {
       icon: 'calendar',
       route: '/dashboard/bookings',
       authorities: ['ROLE_USER', 'ROLE_ADMIN']
+    },
+    {
+      label: 'Prenota Postazione',
+      icon: 'layout-dashboard',
+      route: '/dashboard/prenotazione-posizione',
+      authorities: ['ROLE_USER', 'ROLE_ADMIN']
     }
   ];
 
@@ -59,6 +65,7 @@ export class NavigationService {
       '/dashboard': () => currentRoute.startsWith('/dashboard'),
       '/dashboard/user-management': () => currentRoute === '/dashboard/user-management',
       '/dashboard/bookings': () => currentRoute === '/dashboard/bookings',
+      '/dashboard/prenotazione-posizione': () => currentRoute === '/dashboard/prenotazione-posizione',
       '/dashboard/management': () => currentRoute.startsWith('/dashboard/management')
     };
 

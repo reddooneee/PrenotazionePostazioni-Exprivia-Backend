@@ -36,7 +36,8 @@ import {
   Trash,
   PanelLeftClose,
   PanelLeftOpen,
-  Bell
+  Bell,
+  Shield
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
@@ -85,7 +86,8 @@ bootstrapApplication(AppComponent, {
         Trash,
         PanelLeftClose,
         PanelLeftOpen,
-        Bell
+        Bell,
+        Shield
       })
     ),
     AxiosService,

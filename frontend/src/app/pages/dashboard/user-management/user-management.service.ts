@@ -2,17 +2,19 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
 import { User } from '../../../core/auth/user.model';
 import { UserService } from '../../../service/user.service';
+import { AxiosService } from '../../../service/axios.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserManagementService {
-  private usersSubject = new BehaviorSubject<User[]>([]);
+  private users: User[] = [];
+  private filteredUsers = new BehaviorSubject<User[]>([]);
   private loadingSubject = new BehaviorSubject<boolean>(false);
   private searchTermSubject = new BehaviorSubject<string>('');
 
   private filteredUsers$ = combineLatest([
-    this.usersSubject.asObservable(),
+    this.filteredUsers.asObservable(),
     this.searchTermSubject.asObservable()
   ]).pipe(
     map(([users, searchTerm]) => {
@@ -28,19 +30,24 @@ export class UserManagementService {
     })
   );
 
-  loading$ = this.loadingSubject.asObservable();
+  loading$: Observable<boolean> = this.loadingSubject.asObservable();
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private axiosService: AxiosService) {}
+
+  getOriginalUsers(): User[] {
+    return [...this.users];
+  }
 
   // Carica tutti gli utenti
   async loadUsers(): Promise<void> {
     try {
       this.loadingSubject.next(true);
       const users = await this.userService.getAllUsers();
-      this.usersSubject.next(users);
+      this.users = users;
+      this.filteredUsers.next(users);
     } catch (error) {
       console.error('Errore nel caricamento degli utenti:', error);
-      this.usersSubject.next([]);
+      this.filteredUsers.next([]);
     } finally {
       this.loadingSubject.next(false);
     }
@@ -58,7 +65,7 @@ export class UserManagementService {
 
   // Ottieni tutti gli utenti non filtrati
   getAllUsers(): Observable<User[]> {
-    return this.usersSubject.asObservable();
+    return this.filteredUsers.asObservable();
   }
 
   // Crea un nuovo utente
