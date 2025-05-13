@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { mergeMap, Observable, tap, finalize } from 'rxjs';
+import { mergeMap, Observable, tap, finalize, catchError, of } from 'rxjs';
 import { AuthJwtService } from '../core/auth/auth-jwt.service';
 import { User } from '../core/auth/user.model';
 import { AuthService } from '../core/auth/auth.service';
@@ -25,10 +25,9 @@ export class LoginService {
           this.authService.authenticate(user);
         }
       }),
-      finalize(() => {
-        if (this.authService.isAuthenticated()) {
-          this.router.navigate(['/dashboard']);
-        }
+      catchError(error => {
+        console.error('Login error:', error);
+        return of(null);
       })
     );
   }

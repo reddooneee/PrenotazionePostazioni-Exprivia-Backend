@@ -22,20 +22,49 @@ export class TokenService {
 
   isTokenValid(): boolean {
     const token = this.getToken();
-    return token != null && !this.jwtHelper.isTokenExpired(token);
+    if (!token) {
+      return false;
+    }
+    try {
+      return !this.jwtHelper.isTokenExpired(token);
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
   }
 
   getRoles(): string[] {
     const token = this.getToken();
-    if (token) {
-      try {
-        const decodedToken = this.jwtHelper.decodeToken(token);
-        const rolesString = decodedToken?.roles;
-        return rolesString ? rolesString.split(',') : [];
-      } catch (error) {
-        return [];
-      }
+    if (!token) {
+      return [];
     }
-    return [];
+    try {
+      const decodedToken = this.jwtHelper.decodeToken(token);
+      // Check both common JWT role claim formats
+      const roles = decodedToken?.roles || decodedToken?.authorities || [];
+      if (Array.isArray(roles)) {
+        return roles;
+      }
+      if (typeof roles === 'string') {
+        return roles.split(',').map(role => role.trim());
+      }
+      return [];
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return [];
+    }
+  }
+
+  getTokenExpirationDate(): Date | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    try {
+      return this.jwtHelper.getTokenExpirationDate(token) || null;
+    } catch (error) {
+      console.error('Error getting token expiration:', error);
+      return null;
+    }
   }
 } 
