@@ -22,8 +22,8 @@ public class AdminService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private UserDTO userDTO;
+    // @Autowired
+    // private UserDTO userDTO;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -34,10 +34,10 @@ public class AdminService {
     public AdminService() {
     }
 
-    public AdminService(UserRepository userRepository, UserDTO userDTO,
+    public AdminService(UserRepository userRepository,
             PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository) {
         this.userRepository = userRepository;
-        this.userDTO = userDTO;
+        // this.userDTO = userDTO;
 
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
@@ -68,24 +68,24 @@ public class AdminService {
      * @return UserDTO dell'utente creato
      * @throws IllegalArgumentException se ci sono problemi di validazione
      */
-    public AdminDTO creaUtenteAdmin(AdminDTO adminDTO) {
+    public AdminDTO creaUtenteAdmin(UserDTO userDTO) {
         validateUserData(userDTO);
 
         // Verifica che l'email non sia già in uso
-        if (userRepository.findByEmail(adminDTO.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Esiste già un utente con questa email!");
         }
 
         // Crea un nuovo Users
         Users user = new Users();
-        user.setNome(adminDTO.getNome());
-        user.setCognome(adminDTO.getCognome());
-        user.setEmail(adminDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(adminDTO.getPassword()));
+        user.setNome(userDTO.getNome());
+        user.setCognome(userDTO.getCognome());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         // Verifica e assegna i ruoli specificati dall'admin
         Set<Authority> authorities = new HashSet<>();
-        for (String roleName : adminDTO.getAuthorities()) {
+        for (String roleName : userDTO.getAuthorities()) {
             Authority authority = authorityRepository.findByName(roleName)
                     .orElseThrow(() -> new RuntimeException("Ruolo " + roleName + " non trovato"));
             authorities.add(authority);

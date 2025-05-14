@@ -21,9 +21,7 @@ import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
 import com.prenotazioni.exprivia.exprv.service.AdminService;
-import com.prenotazioni.exprivia.exprv.service.AuthService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -31,9 +29,6 @@ import com.prenotazioni.exprivia.exprv.service.AuthService;
 public class AdminController {
 
     private final UserService userService;
-
-    @Autowired
-    private AdminDTO adminDTO;
 
     @Autowired
     private AdminService adminService;
@@ -90,9 +85,9 @@ public class AdminController {
     }
 
     @PostMapping("/crea_utente")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> register(@RequestBody UserDTO userDto) {
         try {
-            AdminDTO newUser = adminService.creaUtenteAdmin(adminDTO);
+            AdminDTO newUser = adminService.creaUtenteAdmin(userDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
