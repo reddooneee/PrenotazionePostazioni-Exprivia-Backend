@@ -34,8 +34,9 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, AdminService adminService) {
         this.userService = userService;
+        this.adminService = adminService;
     }
 
     @GetMapping("/utenti")

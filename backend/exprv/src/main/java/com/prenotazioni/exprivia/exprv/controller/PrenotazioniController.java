@@ -34,13 +34,14 @@ public class PrenotazioniController {
         this.PrenotazioniService = PrenotazioniService;
     }
 
-    @GetMapping()
+    @GetMapping("/lista")
     public List<PrenotazioniDTO> getPrenotazioni() {
         return PrenotazioniService.cercaTutti();
     }
 
     @GetMapping("/{idPrenotazioni}")
-    public ResponseEntity<PrenotazioniDTO> getPrenotazioniByID(@PathVariable("id_prenotazioni") Integer id_prenotazioni) {
+    public ResponseEntity<PrenotazioniDTO> getPrenotazioniByID(
+            @PathVariable("id_prenotazioni") Integer id_prenotazioni) {
         try {
             PrenotazioniDTO prenotazioniDTO = PrenotazioniService.cercaSingolo(id_prenotazioni);
             return ResponseEntity.ok(prenotazioniDTO);
