@@ -13,6 +13,7 @@ import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.EmailDTO;
 import com.prenotazioni.exprivia.exprv.dto.ResetPasswordRequest;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.service.AuthService;
 
 @RestController
@@ -30,9 +31,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> register(@RequestBody UserRegistrationDTO registrationDTO) {
         try {
-            UserDTO newUser = authService.creaUtente(userDTO);
+            UserDTO newUser = authService.creaUtente(registrationDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

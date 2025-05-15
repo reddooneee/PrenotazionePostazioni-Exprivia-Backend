@@ -15,14 +15,8 @@ public class AdminDTO {
     private Boolean enabled;
     private Set<String> authorities;
     private LocalDateTime creatoIl;
-    private String password;
+    private LocalDateTime aggiornatoIl;
 
-    public Integer getId_user() {
-        return id_user;
-    }
-
-    public AdminDTO() {
-    }
 
     public AdminDTO(Users user) {
         this.id_user = user.getId_user();
@@ -37,6 +31,10 @@ public class AdminDTO {
                 .stream()
                 .map(Authority::getName)
                 .collect(Collectors.toSet());
+    }
+
+    public Integer getId_user() {
+        return id_user;
     }
 
     public void setId_user(Integer id_user) {
@@ -98,15 +96,4 @@ public class AdminDTO {
     public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
         this.aggiornatoIl = aggiornatoIl;
     }
-
-    private LocalDateTime aggiornatoIl;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
 }

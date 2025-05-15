@@ -193,4 +193,9 @@ public class PrenotazioniService {
         }
     }
 
+    public List<PrenotazioniDTO> cercaPrenotazioniUtente(String email) {
+        List<Prenotazioni> prenotazioni = prenotazioniRepository.findByUserEmail(email);
+        return prenotazioniMapper.toDtoList(prenotazioni);
+    }
+
 }
