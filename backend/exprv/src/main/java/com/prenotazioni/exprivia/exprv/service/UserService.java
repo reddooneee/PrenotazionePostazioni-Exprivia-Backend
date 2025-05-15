@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
@@ -93,7 +93,7 @@ public class UserService {
     /**
      * Aggiorna un utente esistente con i valori specificati
      *
-     * @param id ID dell'utente da aggiornare
+     * @param id      ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -151,7 +151,7 @@ public class UserService {
     /**
      * Aggiorna un utente con i dati forniti in un DTO
      *
-     * @param id ID dell'utente da aggiornare
+     * @param id      ID dell'utente da aggiornare
      * @param userDTO dati aggiornati dell'utente
      * @return UserDTO dell'utente aggiornato
      */
@@ -166,21 +166,8 @@ public class UserService {
                 throw new IllegalArgumentException("Email già in uso");
             }
         }
-
-        // Gestisci la password separatamente per l'hashing
-        String password = null;
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            password = passwordEncoder.encode(userDTO.getPassword());
-            userDTO.setPassword(null); // Rimuovi la password dal DTO per evitare che sovrascriva quella hashata
-        }
-
         // Aggiorna l'utente con i dati del DTO
         userMapper.updateUserFromDto(userDTO, existingUser);
-
-        // Imposta la password hashata se necessario
-        if (password != null) {
-            existingUser.setPassword(password);
-        }
 
         // Salva le modifiche
         Users updatedUser = userRepository.save(existingUser);
@@ -206,52 +193,39 @@ public class UserService {
 
     public UserDTO getDetailsForAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();  // Ottieni l'email dell'utente autenticato
-    
+        String email = authentication.getName(); // Ottieni l'email dell'utente autenticato
+
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
-    
-        return userMapper.toDto(user);  // Restituisci il DTO dell'utente
+
+        return userMapper.toDto(user); // Restituisci il DTO dell'utente
     }
-    
+
     public UserDTO findByEmail(String email) {
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
         return userMapper.toDto(user);
     }
 
-    public UserDTO creaUser(UserDTO userDTO) {
-        // Validate user data
-        if (userDTO.getEmail() == null || userDTO.getEmail().trim().isEmpty()) {
+    public UserDTO creaUser(UserRegistrationDTO userRegistrationDTO) {
+        if (userRegistrationDTO.email() == null || userRegistrationDTO.email().trim().isEmpty()) {
             throw new IllegalArgumentException("L'email è obbligatoria");
         }
-        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+
+        if (userRegistrationDTO.password() == null || userRegistrationDTO.password().trim().isEmpty()) {
             throw new IllegalArgumentException("La password è obbligatoria");
         }
-        
-        // Check if email already exists
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+
+        if (userRepository.findByEmail(userRegistrationDTO.email()).isPresent()) {
             throw new IllegalArgumentException("Email già registrata");
         }
 
-        // Create new user
         Users user = new Users();
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        user.setNome(userDTO.getNome());
-        user.setCognome(userDTO.getCognome());
-        
-        // Convert string authorities to Authority objects
-        Set<Authority> authorities = userDTO.getAuthorities().stream()
-            .map(auth -> {
-                Authority authority = new Authority();
-                authority.setName(auth);
-                return authority;
-            })
-            .collect(Collectors.toSet());
-        user.setAuthorities(authorities);
+        user.setEmail(userRegistrationDTO.email());
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.password()));
+        user.setNome(userRegistrationDTO.nome());
+        user.setCognome(userRegistrationDTO.cognome());
 
-        // Save and return
         Users savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
     }

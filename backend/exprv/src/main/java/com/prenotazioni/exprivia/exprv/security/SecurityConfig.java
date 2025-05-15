@@ -37,18 +37,33 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(handling -> handling
-                .authenticationEntryPoint(authenticationEntryPoint))
+                        .authenticationEntryPoint(authenticationEntryPoint))
                 .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login**", "/auth/register**").permitAll()
-                .requestMatchers("/auth/forgot-password", "/auth/reset-password**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/utenti/current").authenticated()
-                .requestMatchers("/api/utenti/**").hasAuthority(AuthoritiesConstants.ADMIN) // solo admin
-                .requestMatchers("/api/prenotazioni/**")
-                .hasAnyAuthority(AuthoritiesConstants.USER, AuthoritiesConstants.ADMIN) // anche user
-                .anyRequest().authenticated());
+
+                        /* Swagger */
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        /* Autenticazione */
+                        .requestMatchers("/auth/**").permitAll()
+
+                        /* Utenti */
+                        .requestMatchers("/api/utenti/current").authenticated()
+
+                        /* Postazioni */
+                        .requestMatchers("/api/postazioni/**").authenticated()
+
+                        /* Admin SOLO UTENTI ADMIN */
+                        .requestMatchers("/api/utenti/**").hasAuthority(AuthoritiesConstants.ADMIN)
+
+                        /* Stanze */
+                        .requestMatchers("/api/stanze/**").authenticated()
+
+                        /* Prenotazioni */
+                        .requestMatchers("/api/prenotazioni/**").authenticated()
+
+                        .anyRequest().authenticated());
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

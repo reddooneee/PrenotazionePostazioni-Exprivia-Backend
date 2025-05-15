@@ -47,7 +47,7 @@ public class PrenotazioniService {
 
     ;
 
-    //Costruttore PrenotazioniService
+    // Costruttore PrenotazioniService
     public PrenotazioniService(PrenotazioniRepository prenotazioniRepository,
             PostazioniRepository postazioniRepository,
             StanzeRepository stanzeRepository,
@@ -116,20 +116,20 @@ public class PrenotazioniService {
                     + prenotazioniDTO.getId_prenotazioni() + " esiste già.");
         }
 
-        //Conversione DTO in entity
+        // Conversione DTO in entity
         Prenotazioni prenotazioni = prenotazioniMapper.toEntity(prenotazioniDTO);
 
-        //Salva L'utente
+        // Salva L'utente
         Prenotazioni savedPrenotazioni = prenotazioniRepository.save(prenotazioni);
 
-        //Restituisci il DTO dell'utente Salvato
+        // Restituisci il DTO dell'utente Salvato
         return prenotazioniMapper.toDto(savedPrenotazioni);
     }
 
     /**
      * Aggiorna una Prenotazione esistente con i valori specificati
      *
-     * @param id ID dell'utente da aggiornare
+     * @param id      ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
@@ -161,7 +161,7 @@ public class PrenotazioniService {
                     Integer idPostazione = (Integer) value;
                     Postazioni postazione = postazioniRepository.findById(idPostazione)
                             .orElseThrow(() -> new EntityNotFoundException(
-                            "Postazione con ID " + idPostazione + " non trovata"));
+                                    "Postazione con ID " + idPostazione + " non trovata"));
                     existingPrenotazioni.setPostazione(postazione);
                     break;
                 case "user":
@@ -191,6 +191,11 @@ public class PrenotazioniService {
         } else {
             prenotazioniRepository.deleteById(id);
         }
+    }
+
+    public List<PrenotazioniDTO> cercaPrenotazioniUtente(String email) {
+        List<Prenotazioni> prenotazioni = prenotazioniRepository.findByUserEmail(email);
+        return prenotazioniMapper.toDtoList(prenotazioni);
     }
 
 }

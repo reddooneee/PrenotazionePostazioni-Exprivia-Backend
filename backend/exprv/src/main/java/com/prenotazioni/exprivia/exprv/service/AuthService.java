@@ -12,10 +12,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.AuthResponseDTO;
@@ -23,6 +21,7 @@ import com.prenotazioni.exprivia.exprv.dto.CredentialsDto;
 import com.prenotazioni.exprivia.exprv.dto.EmailDTO;
 import com.prenotazioni.exprivia.exprv.dto.ResetPasswordRequest;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.exceptions.AppException;
@@ -34,14 +33,14 @@ import com.prenotazioni.exprivia.exprv.security.jwt.JwtTokenProvider;
 @Service
 public class AuthService {
 
-    private UserRepository userRepository; // Repo User
-    private AuthorityRepository authorityRepository;
-    private PasswordEncoder passwordEncoder;
-    private UserMapper userMapper; // User Mapper
-    private JwtTokenProvider jwtTokenProvider;
-    private AuthenticationManager authenticationManager;
-    private PasswordResetService passwordResetService;
-    private EmailService emailService;
+    private final UserRepository userRepository;
+    private final AuthorityRepository authorityRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordResetService passwordResetService;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository, AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder, UserMapper userMapper, JwtTokenProvider jwtTokenProvider,
@@ -58,26 +57,18 @@ public class AuthService {
 
     /**
      * Autenticazione dell'utente
-     *
-     * @param credentialsDto credenziali di accesso
-     * @return AuthResponseDTO contenente il token JWT e i dati dell'utente
-     * @throws AppException se le credenziali sono invalide
      */
     public AuthResponseDTO login(CredentialsDto credentialsDto) {
         try {
-            // Autenticazione dell'utente con il AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(credentialsDto.email(), credentialsDto.password()));
 
-            // Se l'autenticazione è riuscita, otteniamo l'utente
             SecurityContextHolder.getContext().setAuthentication(authentication);
             Users user = userRepository.findByEmail(credentialsDto.email())
                     .orElseThrow(() -> new AppException("Utente sconosciuto", HttpStatus.NOT_FOUND));
 
-            // Generazione del token JWT
             String jwt = jwtTokenProvider.generateToken(authentication);
 
-            // Verifica se l'utente ha il ruolo di ADMIN
             boolean isAdmin = user.getAuthorities().stream()
                     .anyMatch(auth -> auth.getName().equals("ROLE_ADMIN"));
 
@@ -95,46 +86,35 @@ public class AuthService {
         }
     }
 
-
-    /*
- * Validazione Dati Dell'utente
+    /**
+     * Validazione dati di registrazione
      */
-    private void validateUserData(UserDTO userDTO) {
-        if (userDTO.getNome() == null || userDTO.getNome().isEmpty()) {
+    private void validateRegistrationData(UserRegistrationDTO registrationDTO) {
+        if (registrationDTO.nome() == null || registrationDTO.nome().isEmpty()) {
             throw new IllegalArgumentException("Il nome non può essere nullo!");
         }
-        if (userDTO.getCognome() == null || userDTO.getCognome().isEmpty()) {
+        if (registrationDTO.cognome() == null || registrationDTO.cognome().isEmpty()) {
             throw new IllegalArgumentException("Il cognome non può essere nullo!");
         }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
+        if (registrationDTO.email() == null || registrationDTO.email().isEmpty()) {
             throw new IllegalArgumentException("La mail non può essere nulla!");
         }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+        if (registrationDTO.password() == null || registrationDTO.password().isEmpty()) {
             throw new IllegalArgumentException("La password non può essere nulla!");
         }
     }
 
     /**
      * Crea un nuovo utente
-     *
-     * @param userDTO dati del nuovo utente
-     * @return UserDTO dell'utente creato
-     * @throws IllegalArgumentException se ci sono problemi di validazione
      */
-    public UserDTO creaUtente(UserDTO userDTO) {
-        // Validazione dei dati
-        validateUserData(userDTO);
+    public UserDTO creaUtente(UserRegistrationDTO registrationDTO) {
+        validateRegistrationData(registrationDTO);
 
-        // Verifica che l'email non sia già in uso
-        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(registrationDTO.email()).isPresent()) {
             throw new IllegalArgumentException("Esiste già un utente con questa email!");
         }
 
-        // Converti DTO in entity
-        Users user = userMapper.toEntity(userDTO);
-
-        // Hash della password
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        Users user = userMapper.toEntity(registrationDTO);
 
         // Assegna il ruolo predefinito "ROLE_USER"
         Authority userAuthority = authorityRepository.findByName("ROLE_USER")
@@ -144,44 +124,35 @@ public class AuthService {
         authorities.add(userAuthority);
         user.setAuthorities(authorities);
 
-        // Imposta altri campi necessari
         user.setEnabled(true);
         user.setCreatoIl(LocalDateTime.now());
 
-        // Salva l'utente
         user = userRepository.save(user);
-
-        // Restituisci il DTO dell'utente salvato
         return userMapper.toDto(user);
     }
 
-
-    /*
-     * Forgot Password
+    /**
+     * Gestione password dimenticata
      */
-    public ResponseEntity<?> forgotPassword(@RequestBody EmailDTO emailDTO) {
-
-        String email = emailDTO.getEmail().trim();
-        // Verifica prima se l'utente esiste
+    public ResponseEntity<?> forgotPassword(EmailDTO emailDTO) {
+        String email = emailDTO.email().trim();
         Optional<Users> userOpt = userRepository.findByEmailIgnoreCase(email);
 
-        //Se non viene trovato l'utente viene stampato il messaggio sotto
         if (userOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Email Non Trovata Nel Sistema");
         }
-        //Generazione TokenUUID Di Reset
-        String token = passwordResetService.createResetToken(emailDTO.getEmail());
 
-        //Invio Email Con URL + TokenUUID
+        String token = passwordResetService.createResetToken(email);
         emailService.sendPasswordResetEmail(email, token);
 
         return ResponseEntity.ok("Email Inviata, Controlla la Posta elettronica");
     }
 
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
-
-        //Verifica il token e ottieni l'utente
-        Optional<Users> userOpt = passwordResetService.validateToken(resetPasswordRequest.getToken());
+    /**
+     * Reset della password
+     */
+    public ResponseEntity<?> resetPassword(ResetPasswordRequest resetRequest) {
+        Optional<Users> userOpt = passwordResetService.validateToken(resetRequest.token());
 
         if (userOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Token non valido o scaduto");
@@ -189,26 +160,16 @@ public class AuthService {
 
         Users user = userOpt.get();
 
-        //Verifica che la nuova password non sia null o vuota
-        if (resetPasswordRequest.getNewPassword().isEmpty()) {
+        if (resetRequest.newPassword() == null || resetRequest.newPassword().isEmpty()) {
             return ResponseEntity.badRequest().body("La password non può essere vuota");
         }
 
-        //BCrypt per fare l'hash della password
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode(resetPasswordRequest.getNewPassword());
-
-        // Imposta la password hashata sull'utente
+        String hashedPassword = passwordEncoder.encode(resetRequest.newPassword());
         user.setPassword(hashedPassword);
-
-        //Salva l'utente con la nuova password
         userRepository.save(user);
 
-        // Invalida il token dopo averlo usato
-        passwordResetService.invalidateToken(resetPasswordRequest.getToken());
+        passwordResetService.invalidateToken(resetRequest.token());
 
         return ResponseEntity.ok("Password aggiornata con successo");
-
     }
-
 }

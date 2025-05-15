@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -33,8 +34,9 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, AdminService adminService) {
         this.userService = userService;
+        this.adminService = adminService;
     }
 
     @GetMapping("/utenti")
@@ -52,10 +54,10 @@ public class AdminController {
         return ResponseEntity.ok(userService.cercaPerEmail(email));
     }
 
-    @PostMapping("/utente")
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO registrationDTO) {
         try {
-            UserDTO newUser = userService.creaUser(userDTO);
+            UserDTO newUser = userService.creaUser(registrationDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
