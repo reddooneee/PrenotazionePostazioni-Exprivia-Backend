@@ -47,10 +47,10 @@ public class AdminController {
         return ResponseEntity.ok(userService.cercaPerEmail(email));
     }
 
-    @PostMapping("/utente")
-    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+    @PostMapping("/users")
+    public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO registrationDTO) {
         try {
-            UserDTO newUser = userService.creaUser(userDTO);
+            UserDTO newUser = userService.creaUser(registrationDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

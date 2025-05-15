@@ -13,11 +13,12 @@ import org.mapstruct.ReportingPolicy;
 
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 
 /**
- * Mapper per la conversione tra l'entità Users e i DTO UserDTO e AdminDTO.
+ * Mapper per la conversione tra l'entità Users e i vari DTO.
  */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
@@ -25,18 +26,14 @@ public interface UserMapper {
     /**
      * Converte un'entità Users in UserDTO.
      */
-    @Mapping(target = "id_user", source = "id_user")
     @Mapping(target = "nome", source = "nome")
     @Mapping(target = "cognome", source = "cognome")
     @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
     @Mapping(target = "authorities", source = "authorities", qualifiedByName = "authoritiesToStrings")
     UserDTO toDto(Users user);
 
     /**
      * Converte un'entità Users in AdminDTO.
-     * Dato che AdminDTO ha un costruttore che accetta Users,
-     * possiamo implementare questo metodo direttamente
      */
     default AdminDTO toAdminDto(Users user) {
         if (user == null) {
@@ -48,16 +45,30 @@ public interface UserMapper {
     /**
      * Converte un UserDTO in entità Users.
      */
-    @Mapping(target = "id_user", source = "id_user")
+    @Mapping(target = "id_user", ignore = true)
+    @Mapping(target = "nome", source = "nome")
+    @Mapping(target = "cognome", source = "cognome")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "enabled", constant = "true")
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "creatoIl", ignore = true)
+    @Mapping(target = "aggiornatoIl", ignore = true)
+    Users toEntity(UserDTO userDTO);
+
+    /**
+     * Converte un UserRegistrationDTO in entità Users.
+     */
+    @Mapping(target = "id_user", ignore = true)
     @Mapping(target = "nome", source = "nome")
     @Mapping(target = "cognome", source = "cognome")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "password", source = "password")
+    @Mapping(target = "enabled", constant = "true")
     @Mapping(target = "authorities", ignore = true)
-    @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "creatoIl", ignore = true)
     @Mapping(target = "aggiornatoIl", ignore = true)
-    Users toEntity(UserDTO userDTO);
+    Users toEntity(UserRegistrationDTO registrationDTO);
 
     /**
      * Aggiorna un'entità Users esistente con i dati del DTO.
@@ -65,9 +76,9 @@ public interface UserMapper {
     @Mapping(target = "nome", source = "nome")
     @Mapping(target = "cognome", source = "cognome")
     @Mapping(target = "email", source = "email")
-    @Mapping(target = "password", source = "password")
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "enabled", ignore = true)
     @Mapping(target = "authorities", ignore = true)
-    @Mapping(target = "enabled", source = "enabled")
     @Mapping(target = "creatoIl", ignore = true)
     @Mapping(target = "aggiornatoIl", ignore = true)
     void updateUserFromDto(UserDTO userDTO, @MappingTarget Users user);

@@ -19,13 +19,12 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class StanzeService {
 
-    private StanzeRepository stanzeRepository;
-    private StanzeMapper stanzeMapper;
+    private final StanzeRepository stanzeRepository;
+    private final StanzeMapper stanzeMapper;
 
     public StanzeService(StanzeRepository stanzeRepository, StanzeMapper stanzeMapper) {
         this.stanzeRepository = stanzeRepository;
         this.stanzeMapper = stanzeMapper;
-
     }
 
     /**
