@@ -26,6 +26,7 @@ public class AdminDTO {
         this.enabled = user.getEnabled();
         this.creatoIl = user.getCreatoIl();
         this.aggiornatoIl = user.getAggiornatoIl();
+        this.password = user.getPassword();
         this.authorities = user.getAuthorities()
                 .stream()
                 .map(Authority::getName)

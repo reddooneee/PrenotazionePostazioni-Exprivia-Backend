@@ -26,21 +26,19 @@ public class Stanze {
     @Id
     private Integer id_stanza;
 
-    //@Column(length = 50)
+    // @Column(length = 50)
     private String nome;
 
     @OneToMany(mappedBy = "stanze", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Postazioni> postazioni = new ArrayList<>();
 
-    //Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
+    // Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
     @Enumerated(EnumType.STRING)
     private tipo_stanza tipo_stanza;
 
     private Integer capacita_stanza;
 
-    //Enum per tipo_stanza
-    //private 
     @CreationTimestamp
     @Column(name = "creatoil")
     private LocalDateTime creatoIl;
@@ -48,10 +46,11 @@ public class Stanze {
     @CreationTimestamp
     @Column(name = "aggiornatoil")
     private LocalDateTime aggiornatoIl;
-//Creato Il, Aggioranto il (TIMESTAMP)
+    // Creato Il, Aggioranto il (TIMESTAMP)
 
-//JPA richiede un costruttore senza argomenti affinché possa creare istanze delle entità tramite reflection
-//Costruttore Vuoto - Per Jpa
+    // JPA richiede un costruttore senza argomenti affinché possa creare istanze
+    // delle entità tramite reflection
+    // Costruttore Vuoto - Per Jpa
     public Stanze() {
     }
 
@@ -59,8 +58,9 @@ public class Stanze {
         this.id_stanza = id_stanza;
     }
 
-    //Costruttore Con Argomenti
-    public Stanze(Integer id_stanza, String nome, tipo_stanza tipo_stanza, Integer capacita_stanza, LocalDateTime creatoIl,
+    // Costruttore Con Argomenti
+    public Stanze(Integer id_stanza, String nome, tipo_stanza tipo_stanza, Integer capacita_stanza,
+            LocalDateTime creatoIl,
             LocalDateTime aggiornatoIl) {
         this.id_stanza = id_stanza;
         this.nome = nome;
