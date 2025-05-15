@@ -41,33 +41,25 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        /* Swagger */
+                        // Public endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-
-                        /* Autenticazione */
                         .requestMatchers("/auth/**").permitAll()
 
-                        /* Utenti */
-                        .requestMatchers("/api/utenti/current").authenticated()
+                        // Admin only endpoints
+                        .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
-                        /* Postazioni */
+                        // Authenticated user endpoints
+                        .requestMatchers("/api/utenti/**").authenticated()
                         .requestMatchers("/api/postazioni/**").authenticated()
-
-                        /* Admin SOLO UTENTI ADMIN */
-                        .requestMatchers("/api/utenti/**").hasAuthority(AuthoritiesConstants.ADMIN)
-
-                        /* Stanze */
                         .requestMatchers("/api/stanze/**").authenticated()
-
-                        /* Prenotazioni */
                         .requestMatchers("/api/prenotazioni/**").authenticated()
 
+                        // Any other request needs authentication
                         .anyRequest().authenticated());
 
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
 }

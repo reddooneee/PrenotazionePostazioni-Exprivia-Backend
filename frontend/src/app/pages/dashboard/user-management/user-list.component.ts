@@ -20,7 +20,7 @@ import { LucideAngularModule } from "lucide-angular";
 import { FormsModule } from "@angular/forms";
 import { Subject, takeUntil, Observable } from "rxjs";
 
-import { User } from "../../../core/auth/user.model";
+import { User } from "@core/models";
 import { UserManagementService } from "./user-management.service";
 import { UserFormDialogComponent } from "./user-form-dialog.component";
 

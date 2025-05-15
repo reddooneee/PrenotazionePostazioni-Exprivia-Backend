@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import { AxiosService } from "../../service/axios.service";
+import { AxiosService } from "../../core/services/axios.service";
 import { Login } from "../../login/login.model";
 import { Observable } from "rxjs";
 import { TokenService } from "./token.service";

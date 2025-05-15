@@ -1,28 +1,28 @@
-import { inject, Injectable } from '@angular/core';
-import { AuthJwtService } from './auth-jwt.service';
-import { AxiosService } from '../../service/axios.service';
-import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
-import { User } from './user.model';
-import { AxiosResponse } from 'axios';
+import { inject, Injectable } from "@angular/core";
+import { AuthJwtService } from "./auth-jwt.service";
+import { AxiosService } from "../../core/services/axios.service";
+import { BehaviorSubject, Observable, tap, catchError, of } from "rxjs";
+import { User } from "../models";
+import { AxiosResponse } from "axios";
 
 interface AuthResponse {
   token: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class AuthService {
   private userIdentity = new BehaviorSubject<User | null>(null);
   private authenticationState = new BehaviorSubject<boolean>(false);
-  private accountCacheKey = 'account-cache';
+  private accountCacheKey = "account-cache";
   private userIdentity$ = this.userIdentity.asObservable();
   private authenticationState$ = this.authenticationState.asObservable();
   private currentUser: User | null = null;
 
   private authJwtService = inject(AuthJwtService);
   private axiosService = inject(AxiosService);
-  private accountUrl = '/api/utenti/current'; // URL per ottenere i dettagli dell'account corrente
+  private accountUrl = "/api/utenti/current"; // URL per ottenere i dettagli dell'account corrente
 
   constructor() {
     // Initialize authentication state on service creation
@@ -50,7 +50,8 @@ export class AuthService {
     }
 
     return new Observable<User | null>((observer) => {
-      this.axiosService.get<User>(this.accountUrl)
+      this.axiosService
+        .get<User>(this.accountUrl)
         .then((response: any) => {
           const user = response as User;
           // Verify user has required fields
@@ -59,21 +60,21 @@ export class AuthService {
             this.cacheAccount(user);
             observer.next(user);
           } else {
-            console.error('Invalid user data received:', user);
+            console.error("Invalid user data received:", user);
             this.authenticate(null);
             observer.next(null);
           }
           observer.complete();
         })
         .catch((error) => {
-          console.error('AuthService: Error fetching user identity:', error);
+          console.error("AuthService: Error fetching user identity:", error);
           this.authenticate(null);
           observer.next(null);
           observer.complete();
         });
     }).pipe(
-      catchError(error => {
-        console.error('AuthService: Error in identity observable:', error);
+      catchError((error) => {
+        console.error("AuthService: Error in identity observable:", error);
         this.authenticate(null);
         return of(null);
       })
@@ -82,16 +83,18 @@ export class AuthService {
 
   // Verifica se l'oggetto utente è valido
   private isValidUser(user: any): user is User {
-    return user &&
-           typeof user.nome === 'string' &&
-           typeof user.cognome === 'string' &&
-           typeof user.email === 'string' &&
-           Array.isArray(user.authorities);
+    return (
+      user &&
+      typeof user.nome === "string" &&
+      typeof user.cognome === "string" &&
+      typeof user.email === "string" &&
+      Array.isArray(user.authorities)
+    );
   }
 
   // Autentica l'utente con i dati dell'account
   authenticate(identity: User | null): void {
-    console.log('AuthService: Authenticating user:', identity?.email);
+    console.log("AuthService: Authenticating user:", identity?.email);
     this.userIdentity.next(identity);
     this.authenticationState.next(identity !== null);
     this.currentUser = identity;
@@ -105,12 +108,14 @@ export class AuthService {
   // Verifica se l'utente ha l'autorità specificata
   hasAnyAuthority(authorities: string[]): boolean {
     const account = this.userIdentity.value;
-    
+
     if (!account || !account.authorities) {
       return false;
     }
 
-    return authorities.some(authority => account.authorities?.includes(authority));
+    return authorities.some((authority) =>
+      account.authorities?.includes(authority)
+    );
   }
 
   // Verifica se l'utente è autenticato
@@ -134,7 +139,7 @@ export class AuthService {
       try {
         localStorage.setItem(this.accountCacheKey, JSON.stringify(account));
       } catch (error) {
-        console.error('Error caching account:', error);
+        console.error("Error caching account:", error);
       }
     }
   }
@@ -143,11 +148,11 @@ export class AuthService {
     try {
       const cachedAccount = localStorage.getItem(this.accountCacheKey);
       if (!cachedAccount) return null;
-      
+
       const account = JSON.parse(cachedAccount) as User;
       return this.isValidUser(account) ? account : null;
     } catch (error) {
-      console.error('Error reading cached account:', error);
+      console.error("Error reading cached account:", error);
       return null;
     }
   }
@@ -156,7 +161,7 @@ export class AuthService {
     try {
       localStorage.removeItem(this.accountCacheKey);
     } catch (error) {
-      console.error('Error clearing account cache:', error);
+      console.error("Error clearing account cache:", error);
     }
   }
 
@@ -166,29 +171,34 @@ export class AuthService {
     }
 
     try {
-      const response = await this.axiosService.get('/api/auth/user') as AxiosResponse<User>;
+      const response = (await this.axiosService.get(
+        this.accountUrl
+      )) as AxiosResponse<User>;
       this.currentUser = response.data;
       return this.currentUser;
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error("Error fetching user:", error);
       return null;
     }
   }
 
   async login(email: string, password: string): Promise<boolean> {
     try {
-      const response = await this.axiosService.post('/api/auth/login', { email, password }) as AxiosResponse<AuthResponse>;
+      const response = (await this.axiosService.post("/api/auth/login", {
+        email,
+        password,
+      })) as AxiosResponse<AuthResponse>;
       const token = response.data.token;
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       return false;
     }
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     this.currentUser = null;
   }
 }

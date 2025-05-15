@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
 import com.prenotazioni.exprivia.exprv.service.StanzeService;
@@ -24,20 +25,17 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/api/stanze")
 public class StanzeController {
 
-    private StanzeService StanzeService;
+    private final StanzeService stanzeService;
 
-    public StanzeController() {
-    }
-
-    //Costruttore Per Iniettare Il Servizio
-    public StanzeController(StanzeService StanzeService) {
-        this.StanzeService = StanzeService;
+    @Autowired
+    public StanzeController(StanzeService stanzeService) {
+        this.stanzeService = stanzeService;
     }
 
     //Gestione Richieste Get Per Ottenere Tutte Le Stanze
     @GetMapping()
     public List<StanzeDTO> getStanzeTotali() {
-        return StanzeService.cercaStanze();
+        return stanzeService.cercaStanze();
         // Chiama Il Servizio Scritto in precedenza per ottenere tutte le stanze   
     }
 
@@ -45,7 +43,7 @@ public class StanzeController {
     @GetMapping("/{id_stanza}")
     public ResponseEntity<StanzeDTO> getStanzeByID(@PathVariable("id_stanza") Integer id_stanza) {
         try {
-            StanzeDTO stanzeDTO = StanzeService.cercaStanzaSingola(id_stanza);
+            StanzeDTO stanzeDTO = stanzeService.cercaStanzaSingola(id_stanza);
             return ResponseEntity.ok(stanzeDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -57,7 +55,7 @@ public class StanzeController {
     @PostMapping("/creaStanza")
     public ResponseEntity<?> creaStanza(@RequestBody StanzeDTO stanzeDTO) {
         try {
-            StanzeDTO newStanza = StanzeService.creaStanze(stanzeDTO);
+            StanzeDTO newStanza = stanzeService.creaStanze(stanzeDTO);
             return ResponseEntity.ok(newStanza);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -78,7 +76,7 @@ public class StanzeController {
     @PutMapping("/aggiornastanza/{id}")
     public ResponseEntity<?> aggiornaStanza(@PathVariable("id") Integer id_stanza, @RequestBody Map<String, Object> updates) {
         try {
-            StanzeDTO updatedStanza = StanzeService.aggiornaStanze(id_stanza, updates);
+            StanzeDTO updatedStanza = stanzeService.aggiornaStanze(id_stanza, updates);
             return ResponseEntity.ok(updatedStanza);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -88,7 +86,7 @@ public class StanzeController {
     @DeleteMapping("/eliminastanza/{id}")
     public ResponseEntity<String> eliminaStanza(@PathVariable Integer id) {
         try {
-            StanzeService.eliminaStanze(id); //Chiama Il Servizio Per eliminare l'utente
+            stanzeService.eliminaStanze(id); //Chiama Il Servizio Per eliminare l'utente
             return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

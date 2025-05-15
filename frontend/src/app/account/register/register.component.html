@@ -26,7 +26,6 @@
                 Il nome è obbligatorio.
               </div>
             </div>
-
           </div>
           <!-- Cognome -->
           <div class="w-1/2">
@@ -45,7 +44,6 @@
         </div>
 
         <!-- Email -->
-
         <div [@slideUp]="{ value: '', params: { delay: '200ms' } }"
           class="transform hover:scale-[1.02] transition-transform duration-300">
           <label class="block text-sm font-medium mb-1">Email *</label>
@@ -54,37 +52,44 @@
           <div
             *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)"
             class="text-xs text-red-600 mt-1">
-            L'email è obbligatoria.
+            L'email è obbligatoria e deve essere valida.
           </div>
         </div>
+
         <div class="flex gap-4">
+          <!-- Password -->
           <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
             class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
-            <!-- Password -->
             <label class="block text-sm font-medium mb-1">Password *</label>
-            <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div
-              *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)"
-              class="text-xs text-red-600 mt-1">
-              La password è obbligatoria.
+            <div class="relative">
+              <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              <button type="button" (click)="hidePwd = !hidePwd" class="absolute right-2 top-2.5 text-gray-500">
+                <mat-icon>{{hidePwd ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="passwordInvalid" class="text-xs text-red-600 mt-1">
+              {{getPasswordErrorMessage()}}
             </div>
           </div>
+
           <!-- Conferma password -->
           <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
             class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
             <label class="block text-sm font-medium mb-1">Conferma password *</label>
-            <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword"
-              placeholder="Conferma password"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-            <div
-              *ngIf="registerForm.get('confirmPassword')?.invalid && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)"
-              class="text-xs text-red-600 mt-1">
-              La conferma password è obbligatoria.
+            <div class="relative">
+              <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword"
+                placeholder="Conferma password"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              <button type="button" (click)="hideConfirmPwd = !hideConfirmPwd" class="absolute right-2 top-2.5 text-gray-500">
+                <mat-icon>{{hideConfirmPwd ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="confirmPasswordInvalid" class="text-xs text-red-600 mt-1">
+              {{getConfirmPasswordErrorMessage()}}
             </div>
           </div>
         </div>
-
 
         <!-- Bottone Registrati -->
         <div [@slideUp]="{ value: '', params: { delay: '400ms' } }">
@@ -100,7 +105,6 @@
             </div>
           </button>
         </div>
-
       </form>
     </div>
 

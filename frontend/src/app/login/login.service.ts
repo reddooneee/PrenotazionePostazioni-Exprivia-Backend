@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { mergeMap, Observable, tap, finalize, catchError, of } from 'rxjs';
 import { AuthJwtService } from '../core/auth/auth-jwt.service';
-import { User } from '../core/auth/user.model';
-import { AuthService } from '../core/auth/auth.service';
+import { User } from '@core/models';
+import { AuthService } from '@core/auth/auth.service';
 import { Login } from './login.model';
 import { Router } from '@angular/router';
 

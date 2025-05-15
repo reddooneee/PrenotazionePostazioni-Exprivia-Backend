@@ -41,8 +41,8 @@ import {
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
-import { AxiosService } from "./app/service/axios.service";
-import { UserService } from "./app/service/user.service";
+import { AxiosService } from "./app/core/services/axios.service";
+import { UserService } from "./app/core/services/user.service";
 import { AuthService } from "./app/core/auth/auth.service";
 
 // Importa la configurazione delle rotte

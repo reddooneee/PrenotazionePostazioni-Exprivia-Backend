@@ -6,10 +6,10 @@ import { LucideAngularModule } from "lucide-angular";
 import { MatIconModule } from "@angular/material/icon";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { Subject, takeUntil, catchError } from "rxjs";
-import { User } from "../../../core/auth/user.model";
+import { User } from "../../../core/models";
 import { AuthService } from "../../../core/auth/auth.service";
 import { LoginService } from "../../../login/login.service";
-import { NavigationService, NavItem } from "../../services/navigation.service";
+import { NavigationService, NavItem } from "../../../core/services/navigation.service";
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 const SIDEBAR_STATE_KEY = 'sidebarCollapsed';

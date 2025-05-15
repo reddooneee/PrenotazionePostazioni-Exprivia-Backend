@@ -42,7 +42,8 @@ export class NavigationService {
       icon: 'layout-dashboard',
       route: '/dashboard/prenotazione-posizione',
       authorities: ['ROLE_USER', 'ROLE_ADMIN']
-    }
+    },
+    
   ];
 
   // Subject per gestire gli aggiornamenti della navigazione

@@ -12,7 +12,7 @@
         <div class="bg-white rounded-lg shadow-md p-6 mt-6">
             <h1 class="text-2xl font-bold mb-6">Nuova prenotazione</h1>
 
-            <div *ngIf="isQuickBookMode" class="mb-6 p-4 bg-blue-50 rounded-lg">
+            <div  class="mb-6 p-4 bg-blue-50 rounded-lg">
                 <div class="flex items-center">
                     <mat-icon class="text-blue-500 mr-2">info</mat-icon>
                     <span>Modalità prenotazione rapida: ti aiuteremo a trovare un desk disponibile</span>
@@ -103,11 +103,11 @@
                         <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <mat-card *ngFor="let room of filteredRooms"
                                 class="cursor-pointer hover:shadow-lg transition-shadow"
-                                [ngClass]="{'border-2 border-primary': selectedRoom?.id === room.id}"
+                                [ngClass]="{'border-2 border-primary': selectedRoom?.id_stanza === room.id_stanza}"
                                 (click)="selectRoom(room)">
                                 <mat-card-content class="p-4">
-                                    <h3 class="font-medium">{{ room.name }}</h3>
-                                    <p class="text-sm text-gray-600">Capacità: {{ room.capacity }} persone</p>
+                                    <h3 class="font-medium">{{ room.nome }}</h3>
+                                    <p class="text-sm text-gray-600">Capacità: {{ room.capacita_stanza }} persone</p>
                                 </mat-card-content>
                             </mat-card>
                         </div>
@@ -140,10 +140,10 @@
                         <div *ngIf="!isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <mat-card *ngFor="let desk of availableDesks"
                                 class="cursor-pointer hover:shadow-lg transition-shadow"
-                                [ngClass]="{'border-2 border-primary': selectedDesk?.id === desk.id}"
+                                [ngClass]="{'border-2 border-primary': selectedDesk?.id_postazione === desk.id_postazione}"
                                 (click)="selectDesk(desk)">
                                 <mat-card-content class="p-4">
-                                    <h3 class="font-medium">{{ desk.name }}</h3>
+                                    <h3 class="font-medium">{{ desk.stanza?.nome }}</h3>
                                     <p class="text-sm text-gray-600">
                                         <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
                                         Disponibile
@@ -232,11 +232,11 @@
                                 <div>
                                     <p class="text-sm text-gray-500">{{ bookingType === 'desk' ? 'Stanza' : 'Sala' }}
                                     </p>
-                                    <p class="font-medium">{{ selectedRoom?.name }}</p>
+                                    <p class="font-medium">{{ selectedRoom?.nome }}</p>
                                 </div>
                                 <div *ngIf="bookingType === 'desk'">
                                     <p class="text-sm text-gray-500">Postazione</p>
-                                    <p class="font-medium">{{ selectedDesk?.name }}</p>
+                                    <p class="font-medium">{{ selectedDesk?.stanza?.id_stanza }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Durata</p>

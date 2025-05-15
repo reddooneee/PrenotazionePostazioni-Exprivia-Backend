@@ -1,52 +1,89 @@
-import { Component, inject } from "@angular/core";
+import { Component } from "@angular/core";
 import { FormBuilder, Validators, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
-import { RouterModule } from "@angular/router";
+import { RouterModule, Router } from "@angular/router";
+import { MatButtonModule } from "@angular/material/button";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordService } from "./forgotpwd.service";
 
 @Component({
   selector: 'app-forgotpwd',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
-    CommonModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './forgotpwd.component.html'
 })
-
-
 export class ForgotpwdComponent {
-
-  
-  private forgotPasswordService = inject(ForgotPasswordService);
-  private fb = inject(FormBuilder);
-
+  forgotPwdForm: FormGroup;
   isLoading = false;
-  forgotPwdForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]]
-  });
+  errorMessage: string | null = null;
 
-  onSubmit(): void {
-    if (this.forgotPwdForm.invalid) return;
+  constructor(
+    private forgotPasswordService: ForgotPasswordService,
+    private fb: FormBuilder,
+    private router: Router,
+    private snackBar: MatSnackBar
+  ) {
+    this.forgotPwdForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]]
+    });
+  }
 
-    this.isLoading = true;
-    const email = this.forgotPwdForm.value.email;
+  get emailInvalid() {
+    const control = this.forgotPwdForm.get('email');
+    return control && control.invalid && (control.dirty || control.touched);
+  }
 
-    this.forgotPasswordService.forgotPassword(email).subscribe({
-      next: () => {
+  async onSubmit(): Promise<void> {
+    if (this.forgotPwdForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = null;
+
+      try {
+        const email = this.forgotPwdForm.get('email')?.value;
+        if (!email) {
+          throw new Error('Email non valida');
+        }
+
+        await this.forgotPasswordService.forgotPassword(email);
+        
+        this.showSuccess('Controlla la tua email per reimpostare la password.');
+        await this.router.navigate(['/accedi']);
+      } catch (error) {
+        this.errorMessage = error instanceof Error ? error.message : 'Errore durante l\'invio della richiesta';
+        this.showError(this.errorMessage);
+      } finally {
         this.isLoading = false;
-        // Potresti usare una snackbar o un messaggio UI più elegante
-        alert('Controlla la tua email per reimpostare la password.');
-      },
-      error: () => {
-        this.isLoading = false;
-        alert('Errore durante l\'invio della richiesta. Riprova più tardi.');
       }
+    }
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Chiudi', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Chiudi', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
     });
   }
 }

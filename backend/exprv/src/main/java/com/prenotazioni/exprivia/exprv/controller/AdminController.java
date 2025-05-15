@@ -3,7 +3,6 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,20 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
+import com.prenotazioni.exprivia.exprv.service.AdminService;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
-import com.prenotazioni.exprivia.exprv.service.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserService userService;
-
-    @Autowired
-    private AdminService adminService;
+    private final AdminService adminService;
 
     public AdminController(UserService userService, AdminService adminService) {
         this.userService = userService;

@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
-import { TokenService } from "../core/auth/token.service";
+import { TokenService } from "../auth/token.service";
 import { Router } from "@angular/router";
 
 @Injectable({

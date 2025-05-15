@@ -1,9 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  DateAvailability,
-  AvailabilityStatus,
-} from "../interfaces/booking.interface";
-
+import { DateAvailability, AvailabilityStatus } from "../interfaces/booking.interface";
 @Injectable({
   providedIn: "root",
 })
@@ -74,7 +70,7 @@ export class AvailabilityService {
   calculateAvailabilityStatus(dates: Date[]): AvailabilityStatus {
     if (dates.length === 0) {
       return {
-        level: "none",
+        level: "nessuna",
         text: "Nessuna data selezionata",
         description: "",
         dotClass: "none",

@@ -15,7 +15,7 @@ export const DASHBOARD_ROUTES: Routes = [
       },
       {
         path: 'bookings',
-        loadComponent: () => import('./user-bookings/user-bookings.component').then(m => m.UserBookingsComponent),
+        loadComponent: () => import('../booking/booking.component').then(m => m.BookingComponent),
         data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] },
         canActivate: [UserRouteAccessService]
       },
@@ -25,7 +25,6 @@ export const DASHBOARD_ROUTES: Routes = [
         data: { authorities: ['ROLE_USER', 'ROLE_ADMIN'] },
         canActivate: [UserRouteAccessService]
       }
-      // No redirect, dashboard widgets are default
     ]
   }
 ]; 

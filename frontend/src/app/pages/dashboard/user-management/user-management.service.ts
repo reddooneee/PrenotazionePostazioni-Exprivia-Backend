@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
-import { User } from '../../../core/auth/user.model';
-import { UserService } from '../../../service/user.service';
-import { AxiosService } from '../../../service/axios.service';
+import { BehaviorSubject, Observable, combineLatest, map, firstValueFrom } from 'rxjs';
+import { User } from '@core/models';
+import { AdminService } from '@core/services';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +31,7 @@ export class UserManagementService {
 
   loading$: Observable<boolean> = this.loadingSubject.asObservable();
 
-  constructor(private userService: UserService, private axiosService: AxiosService) {}
+  constructor(private adminService: AdminService) {}
 
   getOriginalUsers(): User[] {
     return [...this.users];
@@ -42,7 +41,7 @@ export class UserManagementService {
   async loadUsers(): Promise<void> {
     try {
       this.loadingSubject.next(true);
-      const users = await this.userService.getAllUsers();
+      const users = await firstValueFrom(this.adminService.getAllUsers());
       this.users = users;
       this.filteredUsers.next(users);
     } catch (error) {
@@ -69,10 +68,10 @@ export class UserManagementService {
   }
 
   // Crea un nuovo utente
-  async createUser(userData: User): Promise<User> {
+  async createUser(userData: Partial<User>): Promise<User> {
     try {
       this.loadingSubject.next(true);
-      const newUser = await this.userService.registerUser(userData);
+      const newUser = await firstValueFrom(this.adminService.createUser(userData));
       await this.loadUsers(); // Ricarica la lista dopo la creazione
       return newUser;
     } catch (error) {
@@ -87,7 +86,7 @@ export class UserManagementService {
   async updateUser(userId: number, userData: Partial<User>): Promise<User> {
     try {
       this.loadingSubject.next(true);
-      const updatedUser = await this.userService.updateUser(userId, userData);
+      const updatedUser = await firstValueFrom(this.adminService.updateUser(userId, userData));
       await this.loadUsers(); // Ricarica la lista dopo l'aggiornamento
       return updatedUser;
     } catch (error) {
@@ -102,7 +101,7 @@ export class UserManagementService {
   async deleteUser(userId: number): Promise<void> {
     try {
       this.loadingSubject.next(true);
-      await this.userService.deleteUser(userId);
+      await firstValueFrom(this.adminService.deleteUser(userId));
       await this.loadUsers(); // Ricarica la lista dopo l'eliminazione
     } catch (error) {
       console.error('Errore durante l\'eliminazione dell\'utente:', error);
@@ -116,7 +115,7 @@ export class UserManagementService {
   async getUserById(userId: number): Promise<User> {
     try {
       this.loadingSubject.next(true);
-      return await this.userService.getUserById(userId);
+      return await firstValueFrom(this.adminService.getUserById(userId));
     } catch (error) {
       console.error('Errore durante il recupero dell\'utente:', error);
       throw error;

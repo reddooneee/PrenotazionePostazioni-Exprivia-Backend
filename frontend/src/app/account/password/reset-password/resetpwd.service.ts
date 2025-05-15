@@ -1,34 +1,40 @@
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { AxiosService } from '../../../service/axios.service';
+import { Injectable } from "@angular/core";
+import { AxiosService } from "@core/services/axios.service";
+import { AxiosError } from "axios";
+
+interface ResetPasswordRequest {
+    token: string;
+    newPassword: string;
+}
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ResetPasswordService {
+    private readonly baseUrl = '/api/auth';
 
-  private readonly resetPwdEndpoint = '/auth/reset-password';
-  private axiosService = inject(AxiosService);
+    constructor(private axiosService: AxiosService) {}
 
-  /**
-   * Reset della password
-   * @param token Il token di reset
-   * @param newPassword La nuova password
-   * @returns Observable con la risposta del server
-   */
-  resetPassword(token: string, newPassword: string): Observable<any> {
-    return new Observable((observer) => {
-      this.axiosService.post(this.resetPwdEndpoint, {
-        token,
-        newPassword
-      })
-      .then((response) => {
-        observer.next(response);
-        observer.complete();
-      })
-      .catch((error) => {
-        observer.error(error);
-      });
-    });
-  }
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+        try {
+            const request: ResetPasswordRequest = {
+                token,
+                newPassword
+            };
+
+            await this.axiosService.post(
+                `${this.baseUrl}/reset-password`,
+                request
+            );
+        } catch (error: unknown) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 400) {
+                    throw new Error('Token non valido o scaduto');
+                } else if (error.response?.status === 404) {
+                    throw new Error('Token non trovato');
+                }
+            }
+            throw new Error('Errore durante il reset della password');
+        }
+    }
 }
