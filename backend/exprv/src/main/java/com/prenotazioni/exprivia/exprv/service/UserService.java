@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -201,6 +202,58 @@ public class UserService {
 
     public UserDetails loadUserByUsername(String email) {
         throw new UnsupportedOperationException("Unimplemented method 'loadUserByUsername'");
+    }
+
+    public UserDTO getDetailsForAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();  // Ottieni l'email dell'utente autenticato
+    
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
+    
+        return userMapper.toDto(user);  // Restituisci il DTO dell'utente
+    }
+    
+    public UserDTO findByEmail(String email) {
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente con email " + email + " non trovato"));
+        return userMapper.toDto(user);
+    }
+
+    public UserDTO creaUser(UserDTO userDTO) {
+        // Validate user data
+        if (userDTO.getEmail() == null || userDTO.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("L'email è obbligatoria");
+        }
+        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("La password è obbligatoria");
+        }
+        
+        // Check if email already exists
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email già registrata");
+        }
+
+        // Create new user
+        Users user = new Users();
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setNome(userDTO.getNome());
+        user.setCognome(userDTO.getCognome());
+        
+        // Convert string authorities to Authority objects
+        Set<Authority> authorities = userDTO.getAuthorities().stream()
+            .map(auth -> {
+                Authority authority = new Authority();
+                authority.setName(auth);
+                return authority;
+            })
+            .collect(Collectors.toSet());
+        user.setAuthorities(authorities);
+
+        // Save and return
+        Users savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
     }
 
 }

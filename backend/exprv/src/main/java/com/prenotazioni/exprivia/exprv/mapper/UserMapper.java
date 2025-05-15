@@ -30,6 +30,7 @@ public interface UserMapper {
     @Mapping(target = "cognome", source = "cognome")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "password", source = "password")
+    @Mapping(target = "authorities", source = "authorities", qualifiedByName = "authoritiesToStrings")
     UserDTO toDto(Users user);
 
     /**

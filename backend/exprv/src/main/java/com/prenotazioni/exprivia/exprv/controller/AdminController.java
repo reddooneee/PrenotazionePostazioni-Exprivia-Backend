@@ -3,12 +3,14 @@ package com.prenotazioni.exprivia.exprv.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,7 @@ import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
-
+import com.prenotazioni.exprivia.exprv.service.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -27,6 +29,9 @@ import jakarta.persistence.EntityNotFoundException;
 public class AdminController {
 
     private final UserService userService;
+
+    @Autowired
+    private AdminService adminService;
 
     public AdminController(UserService userService) {
         this.userService = userService;
@@ -45,6 +50,16 @@ public class AdminController {
     @GetMapping("/utente/email/{email}")
     public ResponseEntity<AdminDTO> getUserByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.cercaPerEmail(email));
+    }
+
+    @PostMapping("/utente")
+    public ResponseEntity<?> createUser(@RequestBody UserDTO userDTO) {
+        try {
+            UserDTO newUser = userService.creaUser(userDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/utente/{id}")
@@ -68,4 +83,15 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");
         }
     }
+
+    @PostMapping("/crea_utente")
+    public ResponseEntity<?> register(@RequestBody UserDTO userDto) {
+        try {
+            AdminDTO newUser = adminService.creaUtenteAdmin(userDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

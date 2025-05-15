@@ -1,59 +1,175 @@
-import { Component, inject } from "@angular/core";
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
-import { AuthService } from "../../core/auth/auth.service";
-import { CommonModule } from "@angular/common";
-import { MatError, MatFormField, MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
-import { Router, RouterModule } from "@angular/router";
-import { MatCardModule } from "@angular/material/card";
-import { MatInputModule } from "@angular/material/input";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { User } from '../../core/auth/user.model';
+import { Subscription } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { LoginService } from '../../login/login.service';
+import { LucideAngularModule } from 'lucide-angular';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
+import { interval } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { UserService } from '../../service/user.service';
+import { DeskService } from '../../service/desk.service';
+import { BookingService } from '../../service/booking.service';
+import { AxiosService } from '../../service/axios.service';
 
 @Component({
-  selector: "app-dashboard",
-  templateUrl: "./dashboard.component.html",
-  imports: [MatCardModule,
-      MatFormFieldModule,
-      MatInputModule,
-      FormsModule,
-      ReactiveFormsModule,
-      CommonModule,
-      RouterModule]
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  standalone: true,
+  imports: [CommonModule, RouterModule, LucideAngularModule, SidebarComponent],
+  providers: [
+    AuthService,
+    LoginService,
+    UserService,
+    DeskService,
+    BookingService,
+    AxiosService
+  ]
 })
-export class DashBoardComponent {
-  loginForm: FormGroup;
-  isLoading: boolean = false;
-  errorMessage: string = '';
-  private authService = inject(AuthService); // Inietta il servizio utente
-  private router = inject(Router)
+export class DashboardComponent implements OnInit, OnDestroy {
+  isAdmin = false;
+  isUser = false;
 
-  constructor(private fb: FormBuilder) {
-    this.loginForm = this.fb.group({
-      email: ["", [Validators.required, Validators.email]],
-      password: ["", Validators.required],
-    });
+  isAuthenticated = false;
+  currentUser: User | null = null;
+  private authSubscription: Subscription | null = null;
+  activeRoute: string = '';
+
+  // Date and time
+  currentDate = new Date();
+  currentTime = new Date().toLocaleTimeString();
+  private timeSubscription?: Subscription;
+
+  // Dashboard data
+  notificationCount = 0;
+  todayBookings = 0;
+  availableDesks = 0;
+  totalDesks = 0;
+
+  constructor(
+    private authService: AuthService,
+    private loginService: LoginService,
+    private router: Router,
+    private userService: UserService,
+    private deskService: DeskService,
+    private bookingService: BookingService
+  ) { }
+
+  ngOnInit() {
+    // Set initial route
+    this.activeRoute = this.router.url;
+
+    // Check initial auth state
+    this.updateAuthState();
+
+    // Subscribe to auth state changes
+    this.authSubscription = this.authService.getAuthenticationState().subscribe(
+      isAuthenticated => {
+        this.isAuthenticated = isAuthenticated;
+        if (isAuthenticated) {
+          this.authService.getIdentity().subscribe(user => {
+            this.currentUser = user;
+            this.isAdmin = user?.authorities?.includes('ROLE_ADMIN') ?? false;
+          });
+        } else {
+          this.currentUser = null;
+        }
+      }
+    );
+
+    // Update time every second
+    this.timeSubscription = interval(1000)
+      .pipe(
+        map(() => new Date().toLocaleTimeString())
+      )
+      .subscribe(time => {
+        this.currentTime = time;
+      });
+
+    // Load dashboard data
+    this.loadDashboardData();
   }
 
-  // Metodo per il login
-  onSubmit() {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      this.isLoading = true;
-      this.errorMessage = '';
-  
-      this.authService.loginUser(email, password).subscribe({
-        next: (res) => {
-          localStorage.setItem('jwt_token', res.token);
-          this.isLoading = false;
-          this.loginForm.reset();
-          // Reindirizzamento
-          this.router.navigate(['/dashboard']);  // oppure this.router.navigate(...) se lo hai iniettato
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.errorMessage = 'Credenziali errate, riprova.';
-          console.error(err);
-        }
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
+    if (this.timeSubscription) {
+      this.timeSubscription.unsubscribe();
+    }
+  }
+
+  private updateAuthState() {
+    this.isAuthenticated = this.authService.isAuthenticated();
+    if (this.isAuthenticated) {
+      this.authService.getIdentity().subscribe(user => {
+        this.currentUser = user;
       });
     }
   }
-  
+
+  logout() {
+    this.loginService.logout();
+  }
+
+  isRouteActive(route: string): boolean {
+    // Remove trailing slashes for consistent comparison
+    const currentRoute = this.activeRoute.replace(/\/$/, '');
+    const checkRoute = route.replace(/\/$/, '');
+
+    // Handle home route
+    if (checkRoute === '') {
+      return currentRoute === '' || currentRoute === '/';
+    }
+
+    // Handle dashboard routes
+    if (checkRoute === '/dashboard') {
+      return currentRoute === '/dashboard' ||
+        currentRoute.startsWith('/dashboard/');
+    }
+
+    // Handle specific routes
+    if (checkRoute === '/accedi') {
+      return currentRoute === '/accedi';
+    }
+
+    if (checkRoute === '/registrazione') {
+      return currentRoute === '/registrazione';
+    }
+
+    // Handle user management route
+    if (checkRoute === '/dashboard/user-management') {
+      return currentRoute === '/dashboard/user-management';
+    }
+
+    // Default case: exact match or starts with
+    return currentRoute === checkRoute ||
+      (checkRoute !== '/' && currentRoute.startsWith(checkRoute));
+  }
+
+  // Check if we're on the dashboard home route
+  isHomeRoute(): boolean {
+    return this.router.url === '/dashboard' || this.router.url === '/dashboard/';
+  }
+
+  private async loadDashboardData(): Promise<void> {
+    try {
+      // Load desk statistics
+      const desks = await this.deskService.getDesks();
+      this.totalDesks = desks.length;
+      this.availableDesks = desks.filter(desk => desk.isAvailable).length;
+
+      // Load today's bookings
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  }
+
+  getAvailableDesksPercentage(): string {
+    if (this.totalDesks === 0) return '0%';
+    return `${(this.availableDesks / this.totalDesks * 100)}%`;
+  }
 }
+

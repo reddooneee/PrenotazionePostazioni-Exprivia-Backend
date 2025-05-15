@@ -1,0 +1,86 @@
+<!-- Contenitore principale della sidebar -->
+<div [@sidebarWidth]="isCollapsed ? 'collapsed' : 'expanded'"
+  class="h-full bg-white border-r border-slate-200 flex flex-col relative overflow-hidden">
+
+  <!-- Sezione logo -->
+  <div class="py-4 px-4 border-b border-slate-200 flex items-center justify-between relative z-20">
+    <img [src]="isCollapsed ? 'favicon.png' : 'LogoExprivia.svg'" [alt]="isCollapsed ? 'Logo Icon' : 'Logo Exprivia'"
+      [class.h-8]="isCollapsed" [class.h-10]="!isCollapsed" class="w-auto" />
+    <!-- Toggle Button -->
+    <button (click)="toggleSidebar()"
+      class="bg-white border border-slate-200 absolute right-4 z-10 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
+      <lucide-icon [name]="isCollapsed ? 'panel-left-close' : 'panel-left-open'" class="w-4 h-4 text-gray-600" />
+    </button>
+  </div>
+
+  <!-- Pannello di navigazione con espansione -->
+  <mat-accordion class="flex-grow overflow-y-auto" [multi]="false" displayMode="flat">
+    <ng-container *ngFor="let navItem of navItems">
+      <!-- Elementi di primo livello senza figli -->
+      <ng-container *ngIf="!navItem.children && isNavItemVisible(navItem)">
+        <a [routerLink]="navItem.route"
+          class="px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-slate-100 transition-colors duration-200 ease-in-out"
+          [class.bg-slate-100]="isRouteActive(navItem.route)" [matTooltip]="isCollapsed ? navItem.label : ''"
+          [matTooltipPosition]="'right'">
+          <lucide-icon [name]="navItem.icon" class="w-5 h-5 text-gray-600 flex-shrink-0" />
+          <span class="text-sm font-medium transition-opacity duration-200 whitespace-nowrap"
+            [class.opacity-0]="isCollapsed" [class.hidden]="isCollapsed">{{ navItem.label }}</span>
+        </a>
+      </ng-container>
+
+      <!-- Elementi con figli (pannello espandibile) - Nascosto quando la sidebar è collassata -->
+      <mat-expansion-panel *ngIf="navItem.children && (!navItem.adminOnly || isAdmin) && !isCollapsed"
+        [class.mat-elevation-z0]="true" class="border-b border-slate-200 !bg-transparent"
+        [expanded]="isRouteActive(navItem.route)">
+        <mat-expansion-panel-header [class.bg-slate-100]="isRouteActive(navItem.route)"
+          class="hover:bg-slate-100 transition-colors duration-200 ease-in-out py-3 px-4">
+          <mat-panel-title class="flex items-center gap-3 !h-auto">
+            <lucide-icon [name]="navItem.icon" class="w-5 h-5 text-gray-600 flex-shrink-0" />
+            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">{{
+              navItem.label
+              }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <!-- Elementi di navigazione annidati -->
+        <div class="py-1">
+          <ng-container *ngFor="let childItem of navItem.children">
+            <a *ngIf="isNavItemVisible(childItem)" [routerLink]="childItem.route"
+              class="px-4 py-2 flex items-center gap-3 text-gray-700 hover:bg-slate-100 transition-colors duration-200 ease-in-out"
+              [class.bg-slate-100]="isRouteActive(childItem.route)">
+              <lucide-icon [name]="childItem.icon" class="w-4 h-4 text-gray-500 flex-shrink-0" />
+              <span class="text-sm whitespace-nowrap">{{ childItem.label }}</span>
+            </a>
+          </ng-container>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Versione collassata per elementi con figli -->
+      <a *ngIf="navItem.children && (!navItem.adminOnly || isAdmin) && isCollapsed" [routerLink]="navItem.route"
+        class="px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-slate-100 transition-colors duration-200 ease-in-out"
+        [class.bg-slate-100]="isRouteActive(navItem.route)" [matTooltip]="navItem.label" [matTooltipPosition]="'right'">
+        <lucide-icon [name]="navItem.icon" class="w-5 h-5 text-gray-600 flex-shrink-0" />
+      </a>
+    </ng-container>
+  </mat-accordion>
+
+  <!-- Sezione profilo utente e logout -->
+  <div *ngIf="isAuthenticated" class="p-4 flex flex-col items-center justify-center gap-2 border-t border-slate-200"
+    [class.py-3]="isCollapsed">
+    <div *ngIf="!isCollapsed" class="flex flex-col items-center gap-2 text-gray-700">
+      <div class="flex items-center gap-2">
+        <lucide-icon name="user" class="w-5 h-5 text-gray-600 flex-shrink-0"></lucide-icon>
+        <span class="font-medium whitespace-nowrap">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
+      </div>
+      <span class="text-sm text-gray-500 whitespace-nowrap">{{
+        getRoleDisplayName(currentUser?.authorities)
+        }}</span>
+    </div>
+    <button (click)="logout()" [class.w-full]="!isCollapsed"
+      class="px-3 py-2 flex items-center justify-center gap-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+      [matTooltip]="isCollapsed ? 'Disconnetti' : ''" [matTooltipPosition]="'right'" aria-label="Logout">
+      <lucide-icon name="log-out" class="w-5 h-5 flex-shrink-0" />
+      <span [class.hidden]="isCollapsed" class="whitespace-nowrap">Disconnetti</span>
+    </button>
+  </div>
+</div>

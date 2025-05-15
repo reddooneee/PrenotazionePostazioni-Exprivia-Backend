@@ -15,9 +15,13 @@ public class AdminDTO {
     private Boolean enabled;
     private Set<String> authorities;
     private LocalDateTime creatoIl;
+    private String password;
 
     public Integer getId_user() {
         return id_user;
+    }
+
+    public AdminDTO() {
     }
 
     public AdminDTO(Users user) {
@@ -28,6 +32,7 @@ public class AdminDTO {
         this.enabled = user.getEnabled();
         this.creatoIl = user.getCreatoIl();
         this.aggiornatoIl = user.getAggiornatoIl();
+        this.password = user.getPassword();
         this.authorities = user.getAuthorities()
                 .stream()
                 .map(Authority::getName)
@@ -95,5 +100,13 @@ public class AdminDTO {
     }
 
     private LocalDateTime aggiornatoIl;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

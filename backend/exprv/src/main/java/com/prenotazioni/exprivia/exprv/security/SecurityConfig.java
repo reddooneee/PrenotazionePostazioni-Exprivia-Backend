@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/login**", "/auth/register**").permitAll()
                 .requestMatchers("/auth/forgot-password", "/auth/reset-password**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/utenti/current").authenticated()
                 .requestMatchers("/api/utenti/**").hasAuthority(AuthoritiesConstants.ADMIN) // solo admin
                 .requestMatchers("/api/prenotazioni/**")
                 .hasAnyAuthority(AuthoritiesConstants.USER, AuthoritiesConstants.ADMIN) // anche user

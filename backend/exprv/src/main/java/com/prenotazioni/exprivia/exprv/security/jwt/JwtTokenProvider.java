@@ -7,10 +7,12 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -21,14 +23,15 @@ public class JwtTokenProvider {
     @Value("${app.jwt-expiration-milliseconds:86400000}")
     private long jwtExpirationInMs;
 
-    // Genera token JWT dall'autenticazione
+    // Genera token JWT dall'autenticazione (inclusi i ruoli)
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
-        return generateToken(username);
-    }
 
-    // Genera token JWT dal nome utente
-    public String generateToken(String username) {
+        // Estrai i ruoli dall'oggetto Authentication
+        String roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(",")); // es: "ROLE_USER,ROLE_ADMIN"
+
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationInMs);
 
@@ -36,6 +39,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles) // 👈 aggiunto il claim con i ruoli
                 .setIssuedAt(currentDate)
                 .setExpiration(expireDate)
                 .signWith(key, SignatureAlgorithm.HS512)
@@ -55,13 +59,17 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    public String refreshToken(String token) {
-        if (!validateToken(token)) {
-            throw new IllegalArgumentException("Invalid JWT token");
-        }
+    // Estrae i ruoli dal token JWT
+    public String getRolesFromToken(String token) {
+        Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
-        String username = getUsernameFromToken(token);
-        return generateToken(username);  // genera un nuovo token con lo stesso nome utente
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("roles", String.class); // es: "ROLE_USER,ROLE_ADMIN"
     }
 
     // Valida il token JWT
@@ -76,10 +84,8 @@ public class JwtTokenProvider {
 
             return true;
         } catch (SignatureException e) {
-            // Firma non valida
             return false;
         } catch (Exception e) {
-            // Token scaduto o altri errori
             return false;
         }
     }

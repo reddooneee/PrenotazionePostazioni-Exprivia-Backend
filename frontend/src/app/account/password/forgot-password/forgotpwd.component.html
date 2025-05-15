@@ -1,0 +1,48 @@
+<main class="flex min-h-screen items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
+    <h1 class="text-2xl font-bold text-gray-900">Recupero Password</h1>
+    <p class="text-gray-500 mt-2">
+      Inserisci l'email associata al tuo account per ricevere il link di reimpostazione.
+    </p>
+
+    <form
+      class="flex flex-col gap-6 mt-6"
+      [formGroup]="forgotPwdForm"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+      <!-- Campo email -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          formControlName="email"
+          type="email"
+          placeholder="nome.cognome@exprivia.com"
+          autocomplete="email"
+        />
+        <mat-error *ngIf="forgotPwdForm.get('email')?.hasError('required')">
+          L'email è obbligatoria
+        </mat-error>
+        <mat-error *ngIf="forgotPwdForm.get('email')?.hasError('email')">
+          Inserisci un indirizzo email valido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Pulsante -->
+      <button
+        class="bg-expriviaOrange hover:bg-orange-600 transition font-semibold rounded-lg text-white text-sm px-5 py-3 text-center disabled:opacity-50"
+        type="submit"
+        [disabled]="forgotPwdForm.invalid || isLoading"
+      >
+        <ng-container *ngIf="!isLoading">Invia Email</ng-container>
+        <ng-container *ngIf="isLoading">
+          <div class="flex justify-center items-center gap-2">
+            <img src="https://cdn3.emoji.gg/emojis/1420-walking.gif" alt="Caricamento..." class="h-6 w-6" />
+            <span>Invio in corso...</span>
+          </div>
+        </ng-container>
+      </button>
+    </form>
+  </div>
+</main>

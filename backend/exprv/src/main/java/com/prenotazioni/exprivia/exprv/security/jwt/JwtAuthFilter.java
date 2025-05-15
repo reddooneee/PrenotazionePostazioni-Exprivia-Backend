@@ -15,9 +15,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -33,17 +36,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                // Ottieni username dal token
-                String username = tokenProvider.getUsernameFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            logger.debug("Processing request to: {}", request.getRequestURI());
+            
+            if (StringUtils.hasText(jwt)) {
+                logger.debug("JWT token found in request");
+                if (tokenProvider.validateToken(jwt)) {
+                    logger.debug("JWT token is valid");
+                    String username = tokenProvider.getUsernameFromToken(jwt);
+                    logger.debug("Username from token: {}", username);
+                    
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.debug("Authentication set in SecurityContext for user: {}", username);
+                } else {
+                    logger.warn("Invalid JWT token");
+                }
+            } else {
+                logger.debug("No JWT token found in request");
             }
         } catch (Exception e) {
-            logger.warn("Autenticazione fallita: {}");
+            logger.error("Cannot set user authentication: {}", e.getMessage(), e);
         }
         filterChain.doFilter(request, response);
     }

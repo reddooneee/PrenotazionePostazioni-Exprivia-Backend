@@ -1,34 +1,58 @@
 import { Routes } from "@angular/router";
 import { HomeComponent } from "./pages/home/home.component";
-import { RegisterComponent } from "./pages/register/register.component";
-import { LoginComponent } from "./pages/login/login.component";
-import { DashBoardComponent } from "./pages/dashboard/dashboard.component";
-import { ForgotpwdComponent } from "./pages/password/forgotpwd/forgotpwd.component";
-import { ResetpwdComponent } from "./pages/password/resetpwd/resetpwd.component";
-import { AdminDashboardComponent } from "./pages/admin-dashboard/admin-dashboard.component";
+import { LoginComponent } from "./login/login.component";
+import { ForgotpwdComponent } from "./account/password/forgot-password/forgotpwd.component";
+import { ResetpwdComponent } from "./account/password/reset-password/resetpwd.component";
 import { AuthGuard } from "./core/auth/auth.guard";
-import { PrenotazionePosizioneComponent } from "./pages/prenotazione-posizione/prenotazione-posizione.component";
+import { ForbiddenComponent } from "./pages/forbidden/forbidden.component";
+import { inject } from "@angular/core";
+import { AuthService } from "./core/auth/auth.service";
+import { Router } from "@angular/router";
+import { RegisterComponent } from "./account/register/register.component";
 
+// Guard to redirect authenticated users to dashboard
+const redirectAuthenticatedToDashboard = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  
+  if (authService.isAuthenticated()) {
+    return router.createUrlTree(['/dashboard']);
+  }
+  return true;
+};
 
 // Definisci le rotte
 export const routes: Routes = [
-    { path: "", component: HomeComponent },
-    { path: "registrazione", component: RegisterComponent },
-    { path: "accedi", component: LoginComponent },
-    { 
-      path: "dashboard", 
-      component: DashBoardComponent, 
-      canActivate: [AuthGuard],
-      data: { role: 'user' }  // Ruolo "user" per la dashboard generica
-    },
-    { 
-      path: "admin-dashboard", 
-      component: AdminDashboardComponent, 
-      canActivate: [AuthGuard],
-      data: { role: 'admin' }  // Ruolo "admin" per la dashboard dell'amministratore
-    },
-    { path: "forgot-password", component: ForgotpwdComponent },
-    { path: "reset-password", component: ResetpwdComponent },
-    { path: "prenotazione-posizione", component: PrenotazionePosizioneComponent},
-  ];
-  
+  { 
+    path: "", 
+    component: HomeComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { 
+    path: "registrazione", 
+    component: RegisterComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { 
+    path: "accedi", 
+    component: LoginComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  {
+    path: "dashboard",
+    loadChildren: () => import('./pages/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES),
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: "forgot-password", 
+    component: ForgotpwdComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { 
+    path: "reset-password", 
+    component: ResetpwdComponent,
+    canActivate: [() => redirectAuthenticatedToDashboard()]
+  },
+  { path: "forbidden", component: ForbiddenComponent },
+  { path: "**", redirectTo: "" }
+];

@@ -1,57 +1,74 @@
-import { Observable, of } from "rxjs";
-import { Desk } from "../model/desk.model";
+import { Injectable } from "@angular/core";
+import { AxiosService } from "./axios.service";
+import { Desk } from "../config/desk.model";
 
+@Injectable({
+  providedIn: "root",
+})
 export class DeskService {
-    // Mock data for available desks
-    private desks: Desk[] = [
-        { id: '1', name: 'Desk A1', isAvailable: true },
-        { id: '2', name: 'Desk A2', isAvailable: true },
-        { id: '3', name: 'Desk B1', isAvailable: true },
-        { id: '4', name: 'Desk B2', isAvailable: true },
-        { id: '5', name: 'Desk C1', isAvailable: true },
-        { id: '6', name: 'Desk C2', isAvailable: true },
-    ];
+  private readonly endpoint = "/api/postazioni";
 
-    /**
-     * Gets all available desks
-     */
-    getDesks(): Observable<Desk[]> {
-        return of(this.desks);
+  constructor(private axiosService: AxiosService) {}
+
+  // Ottieni tutte le postazioni
+  async getDesks(): Promise<Desk[]> {
+    try {
+      const desks = await this.axiosService.get<Desk[]>(this.endpoint);
+      return desks;
+    } catch (error) {
+      console.error("Errore durante il recupero delle postazioni:", error);
+      throw error;
     }
+  }
 
-    /**
-     * Books a desk by ID
-     */
-    bookDesk(deskId: string): Observable<Desk> {
-        const deskIndex = this.desks.findIndex(desk => desk.id === deskId);
-
-        if (deskIndex !== -1) {
-            this.desks[deskIndex] = {
-                ...this.desks[deskIndex],
-                isAvailable: false
-            };
-
-            return of(this.desks[deskIndex]);
-        }
-
-        throw new Error('Desk not found');
+  // Ottieni una postazione per ID
+  async getDeskById(id: number): Promise<Desk> {
+    try {
+      const desk = await this.axiosService.get<Desk>(`${this.endpoint}/${id}`);
+      return desk;
+    } catch (error) {
+      console.error("Errore durante il recupero della postazione:", error);
+      throw error;
     }
+  }
 
-    /**
-     * Releases a booked desk
-     */
-    releaseDesk(deskId: string): Observable<Desk> {
-        const deskIndex = this.desks.findIndex(desk => desk.id === deskId);
-
-        if (deskIndex !== -1) {
-            this.desks[deskIndex] = {
-                ...this.desks[deskIndex],
-                isAvailable: true
-            };
-
-            return of(this.desks[deskIndex]);
-        }
-
-        throw new Error('Desk not found');
+  // Crea una nuova postazione
+  async createDesk(desk: Desk): Promise<Desk> {
+    try {
+      const newDesk = await this.axiosService.post<Desk>(
+        `${this.endpoint}/creaPostazione`,
+        desk
+      );
+      return newDesk;
+    } catch (error) {
+      console.error("Errore durante la creazione della postazione:", error);
+      throw error;
     }
+  }
+
+  // Aggiorna una postazione
+  async updateDesk(id: number, updates: Partial<Desk>): Promise<Desk> {
+    try {
+      const updatedDesk = await this.axiosService.put<Desk>(
+        `${this.endpoint}/aggiornaPostazione/${id}`,
+        updates
+      );
+      return updatedDesk;
+    } catch (error) {
+      console.error("Errore durante l'aggiornamento della postazione:", error);
+      throw error;
+    }
+  }
+
+  // Elimina una postazione
+  async deleteDesk(id: number): Promise<void> {
+    try {
+      await this.axiosService.delete(
+        `${this.endpoint}/eliminaPostazione/${id}`
+      );
+    } catch (error) {
+      console.error("Errore durante l'eliminazione della postazione:", error);
+      throw error;
+    }
+  }
 }

@@ -1,15 +1,15 @@
-import { Component } from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import { RouterLink } from '@angular/router';
-
-
+import { Component } from "@angular/core";
+import { RouterModule } from "@angular/router";
+import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'app-header',
-  imports: [MatButtonModule,RouterLink],
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
+  selector: "app-header",
+  templateUrl: "./header.component.html",
+  standalone: true,
+  imports: [CommonModule, RouterModule],
 })
 export class HeaderComponent {
-
+  isRouteActive(route: string): boolean {
+    return window.location.pathname === route;
+  }
 }

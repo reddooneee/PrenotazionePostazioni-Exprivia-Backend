@@ -1,29 +1,42 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { inject } from '@angular/core';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { Observable, map, take } from 'rxjs';
 import { AuthService } from './auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
+export const AuthGuard = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
+): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean> | Promise<boolean> | boolean {
-    const roleRequired = route.data['role']; // Ruolo richiesto dalla rotta
-    if (this.authService.isAuthenticated()) {
-      const userRole = this.authService.getRoles();
-      if (roleRequired && roleRequired !== userRole) {
-        this.router.navigate(['/dashboard']);  // Reindirizza alla dashboard generica se il ruolo non corrisponde
-        return false;
-      }
-      return true;
-    }
-    this.router.navigate(['/']);  
-    return false;
+  if (!authService.isAuthenticated()) {
+    // Store the attempted URL for redirecting
+    return router.createUrlTree(['/accedi'], { 
+      queryParams: { returnUrl: state.url }
+    });
   }
-}
+
+  return authService.getIdentity().pipe(
+    take(1),
+    map(user => {
+      if (!user) {
+        return router.createUrlTree(['/accedi'], { 
+          queryParams: { returnUrl: state.url }
+        });
+      }
+
+      const authorities = route.data['authorities'] as string[];
+      
+      if (!authorities || authorities.length === 0) {
+        return true;
+      }
+
+      if (authService.hasAnyAuthority(authorities)) {
+        return true;
+      }
+
+      return router.createUrlTree(['/forbidden']);
+    })
+  );
+};
