@@ -1,6 +1,97 @@
 <!-- Modifico l'header per migliorare la responsività -->
 <div class="max-w-7xl mx-auto p-6">
-
+  <!-- Header con utente loggato e menu -->
+  <div class="flex justify-between items-center mb-6 bg-white rounded-xl shadow-sm p-4">
+    <div class="flex items-center">
+      <img src="logo.png" alt="Logo" class="h-10 md:h-12">
+    </div>
+    <div class="flex items-center">
+      <!-- Nome utente loggato -->
+      <div class="user-profile mr-4">
+        <div class="flex items-center">
+          <div class="avatar-circle">
+            <span class="initials">
+              <!-- TODO: Backend - Ottenere le iniziali dell'utente loggato -->
+              MB
+            </span>
+          </div>
+          <span class="ml-2 font-medium text-gray-800 hidden sm:inline">
+            <!-- TODO: Backend - Ottenere il nome dell'utente loggato -->
+            Marco Bianchi
+          </span>
+        </div>
+      </div>
+      
+      <!-- Pulsante menu -->
+      <button class="menu-toggle" (click)="toggleUserMenu()" aria-label="Menu utente">
+        <i class="fas" [class.fa-bars]="!isUserMenuOpen" [class.fa-times]="isUserMenuOpen"></i>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Menu a scomparsa -->
+  <div class="user-menu" [class.open]="isUserMenuOpen">
+    <div class="user-menu-header">
+      <h3 class="text-lg font-semibold mb-2">Il tuo account</h3>
+      <p class="text-sm text-gray-600 mb-4">Gestisci le tue prenotazioni</p>
+    </div>
+    
+    <!-- Modifico la visualizzazione dello storico delle prenotazioni -->
+    <div class="user-menu-section">
+      <h4 class="text-md font-medium mb-3 flex items-center">
+        <i class="fas fa-history mr-2 text-blue-600"></i>
+        Storico prenotazioni
+      </h4>
+      
+      <!-- TODO: Backend - Ottenere lo storico delle prenotazioni dell'utente -->
+      <div *ngIf="userBookings.length === 0" class="text-gray-500 text-sm p-4 text-center">
+        Non hai prenotazioni attive
+      </div>
+      
+      <div *ngFor="let booking of userBookings" class="booking-history-item">
+        <div class="booking-history-date">
+          <i class="fas fa-calendar-day text-blue-500"></i>
+          <span>{{ booking.date | date:'fullDate':'it-IT' }}</span>
+        </div>
+        <div class="booking-history-details">
+          <div class="flex items-center text-sm text-gray-700">
+            <i class="fas fa-map-marker-alt mr-1 text-gray-500"></i>
+            <span>{{ booking.location }}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-700">
+            <i class="fas fa-desktop mr-1 text-gray-500"></i>
+            <span>{{ booking.workspace }}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-700">
+            <i class="fas fa-clock mr-1 text-gray-500"></i>
+            <span>{{ booking.time }}</span>
+          </div>
+          
+          <!-- Visualizzazione dei dipendenti con lo stile del secondo step -->
+          <div *ngIf="booking.employees && booking.employees.length > 0" class="flex flex-wrap gap-2 mt-2">
+            <div *ngFor="let dipendente of booking.employees" 
+                 class="flex items-center bg-blue-50 text-blue-700 px-3 py-1 rounded-full dipendente-chip">
+              <i class="fas fa-user-circle mr-2"></i>
+              {{ dipendente }}
+            </div>
+          </div>
+        </div>
+        <div class="booking-history-actions">
+          <!-- TODO: Backend - Implementare la cancellazione della prenotazione -->
+          <button class="cancel-booking-btn" (click)="cancelBooking(booking.id)">
+            <i class="fas fa-times"></i> Disdici
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="user-menu-footer">
+      <!-- TODO: Backend - Implementare il logout -->
+      <button class="logout-btn" (click)="logout()">
+        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+      </button>
+    </div>
+  </div>
   
   <!-- Overlay per chiudere il menu quando si clicca fuori -->
   <div class="menu-overlay" [class.active]="isUserMenuOpen" (click)="closeUserMenu()"></div>
@@ -474,10 +565,10 @@
 <!-- Aggiungi questo codice alla fine del file, prima della chiusura del div principale -->
 
 <!-- Modale Planimetria -->
-<!-- <app-planimetria-modale 
+<app-planimetria-modale 
   *ngIf="mostraPlanimetriaModale"
   [stanzaSelezionata]="bookingDetails[currentDateTab].selectedFloor"
   [postazioniDisponibili]="getPostazioniDisponibiliPerPianoCorrente()"
   (chiudi)="chiudiPlanimetriaModale()"
   (selezionePostazione)="onSelezionePostazioneDaPlanimetria($event)">
-</app-planimetria-modale> -->
+</app-planimetria-modale>

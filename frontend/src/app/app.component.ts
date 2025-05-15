@@ -4,13 +4,14 @@ import { OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from "@angular/router"
 import { FooterComponent } from "./layout/footer/footer.component";
 import { filter } from "rxjs";
+import { PrenotazionePosizioneComponent } from "./pages/dashboard/prenotazione-posizione/prenotazione-posizione.component";
 
 
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule, RouterOutlet, FooterComponent],
+  imports: [CommonModule, RouterOutlet, FooterComponent, PrenotazionePosizioneComponent],
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
