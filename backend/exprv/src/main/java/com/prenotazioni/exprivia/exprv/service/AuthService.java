@@ -44,7 +44,8 @@ public class AuthService {
 
     public AuthService(UserRepository userRepository, AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder, UserMapper userMapper, JwtTokenProvider jwtTokenProvider,
-            AuthenticationManager authenticationManager, PasswordResetService passwordResetService, EmailService emailService) {
+            AuthenticationManager authenticationManager, PasswordResetService passwordResetService,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -115,6 +116,8 @@ public class AuthService {
         }
 
         Users user = userMapper.toEntity(registrationDTO);
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Assegna il ruolo predefinito "ROLE_USER"
         Authority userAuthority = authorityRepository.findByName("ROLE_USER")
