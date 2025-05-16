@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable } from "rxjs";
 
 export interface CalendarDay {
   date: Date;
@@ -12,7 +12,7 @@ export interface CalendarDay {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class CalendarService {
   private currentDate = new BehaviorSubject<Date>(new Date());
@@ -48,15 +48,15 @@ export class CalendarService {
   getCurrentWeek(): Date[] {
     const curr = new Date(this.currentDate.value);
     const week: Date[] = [];
-    
+
     // Starting from Monday
     curr.setDate(curr.getDate() - curr.getDay() + 1);
-    
+
     for (let i = 0; i < 7; i++) {
       week.push(new Date(curr));
       curr.setDate(curr.getDate() + 1);
     }
-    
+
     return week;
   }
 
@@ -64,8 +64,16 @@ export class CalendarService {
     const days: CalendarDay[] = [];
     const currentDate = this.currentDate.value;
     const selectedDates = this.selectedDates.value;
-    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const firstDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const lastDay = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
     const today = new Date();
 
     // Add days from previous month
@@ -78,7 +86,11 @@ export class CalendarService {
 
     // Add days from current month
     for (let i = 1; i <= lastDay.getDate(); i++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        i
+      );
       days.push(this.createCalendarDay(date, true, today, selectedDates));
     }
 
@@ -102,7 +114,9 @@ export class CalendarService {
     selectedDates: Date[]
   ): CalendarDay {
     const isToday = date.toDateString() === today.toDateString();
-    const isSelected = selectedDates.some(d => d.toDateString() === date.toDateString());
+    const isSelected = selectedDates.some(
+      (d) => d.toDateString() === date.toDateString()
+    );
     const isWeekend = this.isWeekend(date);
 
     return {
@@ -111,7 +125,7 @@ export class CalendarService {
       isSelected,
       isToday,
       isWeekend,
-      isDisabled: isWeekend || date < today
+      isDisabled: isWeekend || date < today,
     };
   }
 
@@ -122,15 +136,19 @@ export class CalendarService {
 
   nextMonth(): void {
     const current = this.currentDate.value;
-    this.setCurrentDate(new Date(current.getFullYear(), current.getMonth() + 1, 1));
+    this.setCurrentDate(
+      new Date(current.getFullYear(), current.getMonth() + 1, 1)
+    );
   }
 
   previousMonth(): void {
     const current = this.currentDate.value;
-    this.setCurrentDate(new Date(current.getFullYear(), current.getMonth() - 1, 1));
+    this.setCurrentDate(
+      new Date(current.getFullYear(), current.getMonth() - 1, 1)
+    );
   }
 
   formatMonthYear(date: Date): string {
-    return date.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
   }
-} 
+}

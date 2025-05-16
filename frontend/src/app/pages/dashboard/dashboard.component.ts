@@ -1,16 +1,20 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { User } from "../../core/models";
-import { Subscription } from "rxjs";
+import { Subscription, interval } from "rxjs";
+import { map } from "rxjs/operators";
 import { Router, RouterModule } from "@angular/router";
 import { AuthService } from "../../core/auth/auth.service";
 import { LoginService } from "../../login/login.service";
 import { LucideAngularModule } from "lucide-angular";
 import { SidebarComponent } from "../../shared/components/sidebar/sidebar.component";
-import { interval } from "rxjs";
-import { map } from "rxjs/operators";
-import { UserService, PostazioneService, PrenotazioneService, AxiosService, UtilsService } from "@core/services";
-import { Postazione } from "@core/models";
+import {
+  UserService,
+  PostazioneService,
+  PrenotazioneService,
+  AxiosService,
+  UtilsService,
+} from "@core/services";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatListModule } from "@angular/material/list";
@@ -18,12 +22,25 @@ import { MatIconModule } from "@angular/material/icon";
 import { MatButtonModule } from "@angular/material/button";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatDividerModule } from "@angular/material/divider";
+import { DashboardService } from "./dashboard.service";
 
 @Component({
   selector: "app-dashboard",
   templateUrl: "./dashboard.component.html",
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, SidebarComponent, MatSidenavModule, MatToolbarModule, MatListModule, MatIconModule, MatButtonModule, MatMenuModule, MatDividerModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    LucideAngularModule,
+    SidebarComponent,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatListModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatDividerModule,
+  ],
   providers: [
     AuthService,
     LoginService,
@@ -31,24 +48,23 @@ import { MatDividerModule } from "@angular/material/divider";
     PostazioneService,
     PrenotazioneService,
     AxiosService,
-    UtilsService
+    UtilsService,
   ],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
   isUser = false;
-
   isAuthenticated = false;
   currentUser: User | null = null;
   private authSubscription: Subscription | null = null;
   activeRoute: string = "";
 
-  // Date and time
+  // Data e ora
   currentDate = new Date();
   currentTime = new Date().toLocaleTimeString();
   private timeSubscription?: Subscription;
 
-  // Dashboard data
+  // Dati per la dashboard
   notificationCount = 0;
   todayBookings = 0;
   availableDesks = 0;
@@ -61,17 +77,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private postazioneService: PostazioneService,
     private prenotazioneService: PrenotazioneService,
-    private utilsService: UtilsService
+    private utilsService: UtilsService,
+    private dashboardService: DashboardService
   ) {}
 
   async ngOnInit() {
-    // Set initial route
+    // Set rotta attiva
     this.activeRoute = this.router.url;
 
-    // Check initial auth state
+    // Stato di autenticazione iniziale
     this.updateAuthState();
 
-    // Subscribe to auth state changes
+    // Listener per i cambiamenti di autenticazione
     this.authSubscription = this.authService
       .getAuthenticationState()
       .subscribe((isAuthenticated) => {
@@ -86,15 +103,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Update time every second
+    // Aggiorna l'orario ogni secondo
     this.timeSubscription = interval(1000)
       .pipe(map(() => new Date().toLocaleTimeString()))
       .subscribe((time) => {
         this.currentTime = time;
       });
 
-    // Load dashboard data
-    await this.loadDashboardData();
+    // Recupera le statistiche delle postazioni
+    this.dashboardService.getDashboardDeskStats().subscribe({
+      next: ({ total, available }) => {
+        this.totalDesks = total;
+        this.availableDesks = available;
+      },
+      error: (err) => {
+        console.error("Errore nel caricamento dei dati dashboard:", err);
+      },
+    });
   }
 
   ngOnDestroy() {
@@ -120,23 +145,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   isRouteActive(route: string): boolean {
-    // Remove trailing slashes for consistent comparison
     const currentRoute = this.activeRoute.replace(/\/$/, "");
     const checkRoute = route.replace(/\/$/, "");
 
-    // Handle home route
     if (checkRoute === "") {
       return currentRoute === "" || currentRoute === "/";
     }
 
-    // Handle dashboard routes
     if (checkRoute === "/dashboard") {
       return (
         currentRoute === "/dashboard" || currentRoute.startsWith("/dashboard/")
       );
     }
 
-    // Handle specific routes
     if (checkRoute === "/accedi") {
       return currentRoute === "/accedi";
     }
@@ -145,46 +166,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
       return currentRoute === "/registrazione";
     }
 
-    // Handle user management route
     if (checkRoute === "/dashboard/user-management") {
       return currentRoute === "/dashboard/user-management";
     }
 
-    // Default case: exact match or starts with
     return (
       currentRoute === checkRoute ||
       (checkRoute !== "/" && currentRoute.startsWith(checkRoute))
     );
   }
 
-  // Check if we're on the dashboard home route
   isHomeRoute(): boolean {
     return (
       this.router.url === "/dashboard" || this.router.url === "/dashboard/"
     );
   }
 
-  private async loadDashboardData(): Promise<void> {
-    try {
-      // Get all postazioni
-      const postazioni = await this.utilsService.fromObservable(this.postazioneService.getAllPostazioni());
-      
-      // Calculate totals
-      this.totalDesks = this.utilsService.getArrayLength(postazioni);
-      this.availableDesks = this.utilsService.filterArray(
-        postazioni,
-        (p: Postazione) => p.stato_postazione === 'DISPONIBILE'
-      ).length;
-
-
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      // Handle error appropriately (show error message, etc.)
-    }
-  }
-
   getAvailableDesksPercentage(): string {
     if (this.totalDesks === 0) return "0%";
-    return `${(this.availableDesks / this.totalDesks) * 100}%`;
+    return `${Math.round((this.availableDesks / this.totalDesks) * 100)}%`;
   }
 }
