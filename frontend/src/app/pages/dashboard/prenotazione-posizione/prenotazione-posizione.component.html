@@ -1,4 +1,4 @@
-<!-- Main Container -->
+<!-- <!-- Main Container -->
 <div class="max-w-7xl mx-auto p-6">
   <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -65,35 +65,36 @@
         <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Stanza</label>
         <select [(ngModel)]="bookingForm.tipo_stanza" (ngModelChange)="onTipoStanzaChange()"
           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-          <option value="">Seleziona tipo stanza</option>
-          <option value="OPEN_SPACE">Open Space</option>
-          <option value="MEETING">Sala Meeting</option>
-          <option value="PHONE_BOOTH">Phone Booth</option>
-        </select>
-      </div>
-
-      <!-- Floor Selection -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Piano</label>
-        <select [(ngModel)]="bookingForm.piano" (ngModelChange)="onPianoChange()"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-          <option value="">Seleziona piano</option>
-          <option value="1">Piano 1</option>
-          <option value="2">Piano 2</option>
-          <option value="3">Piano 3</option>
+          <option *ngFor="let tipo of tipiStanza" [value]="tipo">
+            {{ (tipo) }}
+          </option>
         </select>
       </div>
 
       <!-- Workspace Selection -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Postazione</label>
-        <select [(ngModel)]="bookingForm.id_postazione" (ngModelChange)="onPostazioneChange()"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-          <option value="">Seleziona postazione</option>
-          <option *ngFor="let postazione of postazioni" [value]="postazione.id_postazione">
-            {{ postazione.stanza?.id_stanza }} - {{ postazione.stato_postazione }}
-          </option>
-        </select>
+      <div class="mb-6">
+        <label for="tipoStanza" class="block text-sm font-semibold text-gray-800 mb-2">
+          Tipo Stanza
+        </label>
+        <div class="relative">
+          <select
+            id="tipoStanza"
+            [(ngModel)]="bookingForm.tipo_stanza"
+            (ngModelChange)="onTipoStanzaChange()"
+            class="block w-full appearance-none bg-white border border-gray-300 rounded-xl px-4 py-2 pr-10 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"
+          >
+            <option value="" disabled selected>Seleziona tipo stanza</option>
+            <option *ngFor="let tipo of tipiStanza" [value]="tipo">
+              {{ tipo.replace('_', ' ').toLowerCase() | titlecase }}
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       <!-- Time Slot Selection -->
@@ -166,4 +167,4 @@
       </table>
     </div>
   </div>
-</div>
+</div> 

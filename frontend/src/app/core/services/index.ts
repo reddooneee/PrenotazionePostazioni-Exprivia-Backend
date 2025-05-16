@@ -8,6 +8,5 @@ export * from './stanza.service';
 export * from './utils.service';
 export * from './axios.service';
 export * from './availability.service';
-export * from './workspace.service';
 export * from './calendar.service';
 export * from './navigation.service';
