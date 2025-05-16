@@ -1,8 +1,8 @@
 // Enums
 export enum StatoPostazione {
-    DISPONIBILE = 'DISPONIBILE',
-    OCCUPATO = 'OCCUPATO',
-    MANUTENZIONE = 'MANUTENZIONE'
+    DISPONIBILE = 'Disponibile',
+    OCCUPATO = 'Occupato',
+    MANUTENZIONE = 'Manutenzione'
 }
 
 export enum TipoStanza {
