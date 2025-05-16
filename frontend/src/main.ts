@@ -37,7 +37,9 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Bell,
-  Shield
+  Shield,
+  ChartBar,
+  LayoutDashboard
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
@@ -87,7 +89,9 @@ bootstrapApplication(AppComponent, {
         PanelLeftClose,
         PanelLeftOpen,
         Bell,
-        Shield
+        Shield,
+        ChartBar,
+        LayoutDashboard
       })
     ),
     AxiosService,
