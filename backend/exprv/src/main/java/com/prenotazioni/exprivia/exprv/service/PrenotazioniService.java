@@ -1,5 +1,6 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,14 @@ public class PrenotazioniService {
 
         if (prenotazioniDTO.getStato_prenotazione() == null) {
             throw new IllegalArgumentException("Lo stato della Prenotazioni non può essere nullo!");
+        }
+
+        // Validazione orario di inizio
+        LocalDateTime dataInizio = prenotazioniDTO.getData_inizio();
+        if (dataInizio != null) {
+            validateStartTime(dataInizio);
+        } else {
+            throw new IllegalArgumentException("La data di inizio non può essere nulla!");
         }
     }
 
@@ -196,6 +205,54 @@ public class PrenotazioniService {
     public List<PrenotazioniDTO> cercaPrenotazioniUtente(String email) {
         List<Prenotazioni> prenotazioni = prenotazioniRepository.findByUserEmail(email);
         return prenotazioniMapper.toDtoList(prenotazioni);
+    }
+
+    /*
+     * Validazione Della data di inizo e di fine di una prenotazione
+     * 
+     * @param startTime c
+     * 
+     * @return void (metodo per solo controllo)
+     * 
+     * @throw IllegalArgumentException
+     * 
+     */
+    private void validateStartTime(LocalDateTime startTime) {
+        // Verifica che l'orario sia dopo le 8:00
+        int oraInizio = startTime.getHour();
+        if (oraInizio < 8) {
+            throw new IllegalArgumentException("Non è possibile prenotare prima delle 8:00!");
+        }
+
+        // Verifica che l'orario sia prima delle 18:00 (fine giornata lavorativa)
+        if (oraInizio >= 18) {
+            throw new IllegalArgumentException("Non è possibile prenotare dopo le 18:00!");
+        }
+
+        /*
+         * // Verifica che la prenotazione non sia nel passato
+         * if (startTime.isBefore(LocalDateTime.now())) {
+         * throw new
+         * IllegalArgumentException("Non è possibile effettuare prenotazioni nel passato!"
+         * );
+         * }
+         */
+        // Verifica che la prenotazione sia in un giorno lavorativo
+        if (startTime.getDayOfWeek() == DayOfWeek.SATURDAY || startTime.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            throw new IllegalArgumentException("Le prenotazioni sono disponibili solo nei giorni lavorativi!");
+        }
+    }
+
+    public List<PrenotazioniDTO> getPrenotazioniByDay(LocalDateTime data) {
+
+        // Data inizio e fine Giorno
+        LocalDateTime inizioGiornata = data.withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime fineGiornata = data.withHour(23).withMinute(59).withSecond(59);
+
+        List<Prenotazioni> prenotazioniGiornaliere = prenotazioniRepository.findByDataInizioBetween(inizioGiornata,
+                fineGiornata);
+        return prenotazioniMapper.toDtoList(prenotazioniGiornaliere);
+
     }
 
 }
