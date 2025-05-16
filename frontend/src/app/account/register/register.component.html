@@ -3,6 +3,10 @@
     <!-- Sinistra: Form di registrazione -->
     <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
       <div class="text-center">
+        <div class="relative inline-block">
+        <img src="LogoExprivia.svg" alt="Exprivia Logo"
+          class="h-12 mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
+      </div>
         <h1
           class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
           Crea il tuo account
@@ -82,7 +86,6 @@
                 placeholder="Conferma password"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
               <button type="button" (click)="hideConfirmPwd = !hideConfirmPwd" class="absolute right-2 top-2.5 text-gray-500">
-                <mat-icon>{{hideConfirmPwd ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
             </div>
             <div *ngIf="confirmPasswordInvalid" class="text-xs text-red-600 mt-1">

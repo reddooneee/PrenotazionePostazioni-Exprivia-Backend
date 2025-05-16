@@ -8,6 +8,8 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { ForgotPasswordService } from "./forgotpwd.service";
+import { LucideAngularModule } from "lucide-angular";
+import { authAnimations } from "@/app/shared/animations/auth.animations";
 
 @Component({
   selector: 'app-forgotpwd',
@@ -20,8 +22,15 @@ import { ForgotPasswordService } from "./forgotpwd.service";
     RouterModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LucideAngularModule
   ],
+  animations: [
+      authAnimations.fadeIn,
+      authAnimations.slideUp,
+      authAnimations.shake,
+      authAnimations.scaleIn
+    ],
   templateUrl: './forgotpwd.component.html'
 })
 export class ForgotpwdComponent {
