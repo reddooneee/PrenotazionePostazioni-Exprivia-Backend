@@ -43,9 +43,11 @@ public class Prenotazioni {
     @Enumerated(EnumType.STRING)
     private stato_prenotazione stato_prenotazione;
 
+    @Column(name = "data_inizio")
     @CreationTimestamp
     private LocalDateTime dataInizio;
 
+    @Column(name = "data_fine")
     @UpdateTimestamp
     private LocalDateTime dataFine;
 

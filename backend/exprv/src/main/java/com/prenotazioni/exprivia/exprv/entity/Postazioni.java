@@ -26,11 +26,12 @@ public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    //@JsonProperty("id_postazione")
-    //per specificare i nomi esatti che Jackson deve utilizzare durante la deserializzazione:
+    // @JsonProperty("id_postazione")
+    // per specificare i nomi esatti che Jackson deve utilizzare durante la
+    // deserializzazione:
     private Integer id_postazione;
 
-    //@JsonProperty("stanze")
+    // @JsonProperty("stanze")
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     @JsonBackReference
@@ -38,8 +39,11 @@ public class Postazioni {
 
     // enum (Disponibile,Occupato, Manutenzione)
     @Enumerated(EnumType.STRING)
-    //@JsonProperty("stato_postazione")
+    // @JsonProperty("stato_postazione")
     private stato_postazione stato_postazione;
+
+    @Column(name = "nome")
+    private String nomePostazione;
 
     // TimeStamp Per vedere la creazione
     @CreationTimestamp
@@ -64,12 +68,14 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Integer id_postazione, Stanze stanze, stato_postazione stato_postazione, LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
+    public Postazioni(Integer id_postazione, Stanze stanze, stato_postazione stato_postazione, LocalDateTime creatoIl,
+            LocalDateTime aggiornatoIl, String nomePostazione) {
         this.id_postazione = id_postazione;
         this.stanze = stanze;
         this.stato_postazione = stato_postazione;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
+        this.nomePostazione = nomePostazione;
     }
 
     public Integer getId_postazione() {
@@ -96,7 +102,7 @@ public class Postazioni {
         this.stato_postazione = stato_postazione;
     }
 
-//TIMESTAMP
+    // TIMESTAMP
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
@@ -111,6 +117,14 @@ public class Postazioni {
 
     public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
         this.aggiornatoIl = aggiornatoIl;
+    }
+
+    public String getNomePostazione() {
+        return nomePostazione;
+    }
+
+    public void setNomePostazione(String nomePostazione) {
+        this.nomePostazione = nomePostazione;
     }
 
 }

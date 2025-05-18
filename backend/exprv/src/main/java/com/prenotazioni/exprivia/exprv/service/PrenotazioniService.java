@@ -1,11 +1,21 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.io.ByteArrayOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -243,6 +253,16 @@ public class PrenotazioniService {
         }
     }
 
+    /*
+     * 
+     * Metodo per restituire le prenotazioni giornaliere
+     * 
+     * @param data
+     * 
+     * @return PrenotazioniDTO con le prenotazioni giornaliere
+     * 
+     * 
+     */
     public List<PrenotazioniDTO> getPrenotazioniByDay(LocalDateTime data) {
 
         // Data inizio e fine Giorno
@@ -251,8 +271,104 @@ public class PrenotazioniService {
 
         List<Prenotazioni> prenotazioniGiornaliere = prenotazioniRepository.findByDataInizioBetween(inizioGiornata,
                 fineGiornata);
+
         return prenotazioniMapper.toDtoList(prenotazioniGiornaliere);
 
+    }
+
+    public byte[] FileExcDaily(LocalDateTime data) {
+        List<PrenotazioniDTO> prenotazioni = getPrenotazioniByDay(data);
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet fogliocalcSheet = workbook.createSheet("Prenotazioni Giornaliere");
+
+            // Creazione Stile per l'header
+            XSSFCellStyle headerStyle = workbook.createCellStyle();
+            XSSFFont headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            // Creazione Header
+            Row headerRow = fogliocalcSheet.createRow(0);
+            String[] colonne = { "Data", "Ora Inizio", "Ora Fine", "Utente", "Stanza", "Postazione", "Stato" };
+
+            for (int i = 0; i < colonne.length; i++) {
+                Cell cella = headerRow.createCell(i);
+                cella.setCellValue(colonne[i]);
+                cella.setCellStyle(headerStyle);
+                fogliocalcSheet.autoSizeColumn(i);
+            }
+
+            if (!prenotazioni.isEmpty()) {
+                // Formato Data/Ora
+                DateTimeFormatter dataFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                DateTimeFormatter oraFormatter = DateTimeFormatter.ofPattern(" HH:mm");
+
+                int numeroRiga = 1;
+
+                for (PrenotazioniDTO prenotazione : prenotazioni) {
+                    Row row = fogliocalcSheet.createRow(numeroRiga++);
+
+                    // Gestione data e ora separatamente
+                    if (prenotazione.getData_inizio() != null) {
+                        // Colonna Data
+                        row.createCell(0).setCellValue(
+                                prenotazione.getData_inizio().format(dataFormatter));
+                        // Colonna Ora Inizio
+                        row.createCell(1).setCellValue(
+                                prenotazione.getData_inizio().format(oraFormatter));
+                    } else {
+                        row.createCell(0).setCellValue("N/D");
+                        row.createCell(1).setCellValue("N/D");
+                    }
+
+                    // Gestione ora fine
+                    if (prenotazione.getData_fine() != null) {
+                        row.createCell(2).setCellValue(
+                                prenotazione.getData_fine().format(oraFormatter));
+                    } else {
+                        row.createCell(2).setCellValue("N/D");
+                    }
+
+                    // Debug log
+                    System.out.println("Prenotazione processata:");
+
+                    // Altri campi con controlli null "Stanza", "Postazione", "Stato"
+                    row.createCell(3).setCellValue(
+                            prenotazione.getUsers() != null ? prenotazione.getUsers().getEmail() : "N/D");
+                    row.createCell(4).setCellValue(
+                            prenotazione.getStanze() != null ? prenotazione.getStanze().getNome() : "N/D");
+                    row.createCell(5).setCellValue(
+                            prenotazione.getPostazione() != null ? prenotazione.getPostazione().getNomePostazione()
+                                    : "N/D");
+                    row.createCell(6).setCellValue(
+                            prenotazione.getStato_prenotazione() != null
+                                    ? prenotazione.getStato_prenotazione().toString()
+                                    : "N/D");
+                }
+            } else {
+                System.out.println("Nessuna Prenotazione Trovata - Creato file sono con l'header");
+            }
+
+            // Auto Dimensionamento colonne
+            for (int i = 0; i < colonne.length; i++) {
+                fogliocalcSheet.autoSizeColumn(i);
+            }
+
+            // Conversione WorkBook in byte array
+            try {
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                return outputStream.toByteArray();
+            } catch (Exception e) {
+                throw new RuntimeException("Errore nella generazione del file Excel", e);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore Durante La generazione del File Excel" + e.getMessage());
+        }
     }
 
 }

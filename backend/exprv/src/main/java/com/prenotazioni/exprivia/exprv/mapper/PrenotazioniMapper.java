@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
@@ -20,6 +21,8 @@ public interface PrenotazioniMapper {
     /**
      * Converte un'entità Prenotazioni in PrenotazioniDTO.
      */
+    @Mapping(source = "dataInizio", target = "data_inizio")
+    @Mapping(source = "dataFine", target = "data_fine")
     PrenotazioniDTO toDto(Prenotazioni prenotazioni);
 
     /**

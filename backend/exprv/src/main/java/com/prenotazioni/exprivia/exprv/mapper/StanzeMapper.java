@@ -7,11 +7,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
 import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Component
 public interface StanzeMapper {
 
     StanzeDTO toDto(Stanze stanze);

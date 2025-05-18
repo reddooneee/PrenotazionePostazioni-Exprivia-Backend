@@ -15,6 +15,9 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, Inte
     @Query("SELECT p FROM Prenotazioni p WHERE p.users.email = :email")
     List<Prenotazioni> findByUserEmail(@Param("email") String email);
 
-    List<Prenotazioni> findByDataInizioBetween(LocalDateTime inizioGiornata, LocalDateTime fineGiornata);
+    @Query("SELECT p FROM Prenotazioni p WHERE p.dataInizio BETWEEN :startDate AND :endDate")
+    List<Prenotazioni> findByDataInizioBetween(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
 }
