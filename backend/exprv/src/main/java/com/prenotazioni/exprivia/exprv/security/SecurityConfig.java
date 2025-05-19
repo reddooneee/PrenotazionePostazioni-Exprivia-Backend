@@ -44,7 +44,10 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+
+                        // DA CAMBIARE IN AUTHENTICATED
                         .requestMatchers("/api/stats/prenotazioni**").permitAll()
+                        .requestMatchers("/api/stats/stanze**").permitAll()
 
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
