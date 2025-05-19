@@ -8,6 +8,7 @@ import { AuthService } from "../../core/auth/auth.service";
 import { LoginService } from "../../login/login.service";
 import { LucideAngularModule } from "lucide-angular";
 import { SidebarComponent } from "../../shared/components/sidebar/sidebar.component";
+import { HeaderComponent } from "../../layout/header/header.component";
 import {
   UserService,
   PostazioneService,
@@ -23,6 +24,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatDividerModule } from "@angular/material/divider";
 import { DashboardService } from "./dashboard.service";
+import { PrenotazionePosizioneComponent } from "./prenotazione-posizione/prenotazione-posizione.component";
 
 @Component({
   selector: "app-dashboard",
@@ -33,6 +35,7 @@ import { DashboardService } from "./dashboard.service";
     RouterModule,
     LucideAngularModule,
     SidebarComponent,
+    HeaderComponent,
     MatSidenavModule,
     MatToolbarModule,
     MatListModule,
@@ -40,6 +43,7 @@ import { DashboardService } from "./dashboard.service";
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
+    PrenotazionePosizioneComponent
   ],
   providers: [
     AuthService,
@@ -72,8 +76,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private loginService: LoginService,
     private router: Router,
+    private loginService: LoginService,
     private userService: UserService,
     private postazioneService: PostazioneService,
     private prenotazioneService: PrenotazioneService,
@@ -83,10 +87,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     // Set rotta attiva
-    this.activeRoute = this.router.url;
+    // this.activeRoute = this.router.url;
 
     // Stato di autenticazione iniziale
-    this.updateAuthState();
+    // this.updateAuthState();
 
     // Listener per i cambiamenti di autenticazione
     this.authSubscription = this.authService
@@ -131,50 +135,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateAuthState() {
-    this.isAuthenticated = this.authService.isAuthenticated();
-    if (this.isAuthenticated) {
-      this.authService.getIdentity().subscribe((user) => {
-        this.currentUser = user;
-      });
-    }
-  }
+  // private updateAuthState() {
+  //   this.isAuthenticated = this.authService.isAuthenticated();
+  //   if (this.isAuthenticated) {
+  //     this.authService.getIdentity().subscribe((user) => {
+  //       this.currentUser = user;
+  //     });
+  //   }
+  // }
 
-  logout() {
-    this.loginService.logout();
-  }
+  // logout() {
+  //   this.loginService.logout();
+  // }
 
-  isRouteActive(route: string): boolean {
-    const currentRoute = this.activeRoute.replace(/\/$/, "");
-    const checkRoute = route.replace(/\/$/, "");
+  // isRouteActive(route: string): boolean {
+  //   const currentRoute = this.activeRoute.replace(/\/$/, "");
+  //   const checkRoute = route.replace(/\/$/, "");
 
-    if (checkRoute === "") {
-      return currentRoute === "" || currentRoute === "/";
-    }
+  //   if (checkRoute === "") {
+  //     return currentRoute === "" || currentRoute === "/";
+  //   }
 
-    if (checkRoute === "/dashboard") {
-      return (
-        currentRoute === "/dashboard" || currentRoute.startsWith("/dashboard/")
-      );
-    }
+  //   if (checkRoute === "/dashboard") {
+  //     return (
+  //       currentRoute === "/dashboard" || currentRoute.startsWith("/dashboard/")
+  //     );
+  //   }
 
-    if (checkRoute === "/accedi") {
-      return currentRoute === "/accedi";
-    }
+  //   if (checkRoute === "/accedi") {
+  //     return currentRoute === "/accedi";
+  //   }
 
-    if (checkRoute === "/registrazione") {
-      return currentRoute === "/registrazione";
-    }
+  //   if (checkRoute === "/registrazione") {
+  //     return currentRoute === "/registrazione";
+  //   }
 
-    if (checkRoute === "/dashboard/user-management") {
-      return currentRoute === "/dashboard/user-management";
-    }
+  //   if (checkRoute === "/dashboard/user-management") {
+  //     return currentRoute === "/dashboard/user-management";
+  //   }
 
-    return (
-      currentRoute === checkRoute ||
-      (checkRoute !== "/" && currentRoute.startsWith(checkRoute))
-    );
-  }
+  //   return (
+  //     currentRoute === checkRoute ||
+  //     (checkRoute !== "/" && currentRoute.startsWith(checkRoute))
+  //   );
+  // }
 
   isHomeRoute(): boolean {
     return (

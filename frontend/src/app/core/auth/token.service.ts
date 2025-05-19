@@ -17,7 +17,14 @@ export class TokenService {
   }
 
   clearToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    try {
+      localStorage.removeItem(this.TOKEN_KEY);
+      // Clear any other auth-related items
+      localStorage.removeItem('account-cache');
+      sessionStorage.clear();
+    } catch (error) {
+      console.error('Error clearing token:', error);
+    }
   }
 
   isTokenValid(): boolean {

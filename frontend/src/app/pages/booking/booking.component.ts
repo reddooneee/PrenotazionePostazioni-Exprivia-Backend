@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
 import { firstValueFrom } from 'rxjs';
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 
 // Material imports
 import { MatToolbarModule } from "@angular/material/toolbar";
@@ -21,8 +23,7 @@ import {
     PrenotazioneService,
     StanzaService,
     PostazioneService,
-    UtilsService,
-    AuthService
+    UtilsService
 } from "@core/services";
 import {
     Prenotazione,
@@ -32,6 +33,7 @@ import {
     StatoPrenotazione,
     User
 } from "@core/models";
+import { AuthService } from "../../core/auth/auth.service";
 
 @Component({
     selector: "app-booking",
@@ -54,7 +56,7 @@ import {
     ],
     templateUrl: "./booking.component.html",
 })
-export class BookingComponent implements OnInit {
+export class BookingComponent implements OnInit, OnDestroy {
     @ViewChild('stepper') stepper!: MatStepper;
     bookings: Prenotazione[] = [];
     rooms: Stanza[] = [];
@@ -74,6 +76,7 @@ export class BookingComponent implements OnInit {
     locations = [{ id: "1", name: "Sede Principale", type: "HQ" }];
     availableDesks: Postazione[] = [];
     currentUser: User | null = null;
+    private destroy$ = new Subject<void>();
 
     constructor(
         private prenotazioneService: PrenotazioneService,
@@ -85,12 +88,17 @@ export class BookingComponent implements OnInit {
 
     async ngOnInit(): Promise<void> {
         try {
-            this.currentUser = await this.authService.getCurrentUser();
+            this.currentUser = await this.authService.getUser();
             // await this.loadBookings();
             // await this.loadRooms();
         } catch (error: any) {
             this.error = error.message || 'Error initializing component';
         }
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     private async loadBookings(): Promise<void> {

@@ -11,5 +11,4 @@ public class ExprvApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ExprvApplication.class, args);
 	}
-
 }

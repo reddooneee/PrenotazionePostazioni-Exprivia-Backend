@@ -1,12 +1,25 @@
 import { inject, Injectable } from "@angular/core";
 import { AuthJwtService } from "./auth-jwt.service";
 import { AxiosService } from "../../core/services/axios.service";
-import { BehaviorSubject, Observable, tap, catchError, of } from "rxjs";
+import { BehaviorSubject, Observable, tap, catchError, of, from, throwError, switchMap } from "rxjs";
 import { User } from "../models";
-import { AxiosResponse } from "axios";
+import { TokenService } from "./token.service";
+import { Router } from "@angular/router";
 
 interface AuthResponse {
   token: string;
+}
+
+interface UserRegistration {
+  email: string;
+  password: string;
+  nome: string;
+  cognome: string;
+}
+
+interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }
 
 @Injectable({
@@ -19,29 +32,64 @@ export class AuthService {
   private userIdentity$ = this.userIdentity.asObservable();
   private authenticationState$ = this.authenticationState.asObservable();
   private currentUser: User | null = null;
+  private initialized = false;
+  private readonly baseUrl = "/api/auth";
 
   private authJwtService = inject(AuthJwtService);
   private axiosService = inject(AxiosService);
-  private accountUrl = "/api/utenti/current"; // URL per ottenere i dettagli dell'account corrente
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
+  private accountUrl = "/api/utenti/current";
 
   constructor() {
-    // Initialize authentication state on service creation
-    this.updateIdentity();
+    this.initializeAuth();
   }
 
-  // Aggiorna lo stato di autenticazione
-  private updateIdentity(): void {
-    if (this.authJwtService.isAuthenticated()) {
-      this.identity(true).subscribe();
+  private async initializeAuth(): Promise<void> {
+    if (this.initialized) return;
+    
+    const token = this.tokenService.getToken();
+    if (token && this.tokenService.isTokenValid()) {
+      try {
+        const cachedUser = this.getCachedAccount();
+        if (cachedUser) {
+          this.authenticate(cachedUser);
+        }
+        
+        const user = await this.fetchUserIdentity();
+        if (user) {
+          this.authenticate(user);
+        } else {
+          this.authenticate(null);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        this.authenticate(null);
+      }
     } else {
       this.authenticate(null);
     }
+    this.initialized = true;
   }
 
-  // Ottiene l'identità dell'utente dal server
+  private async fetchUserIdentity(): Promise<User | null> {
+    try {
+      const response = await this.axiosService.get<User>(this.accountUrl);
+      const user = response as User;
+      if (this.isValidUser(user)) {
+        this.cacheAccount(user);
+        return user;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user identity:', error);
+      return null;
+    }
+  }
+
   identity(force = false): Observable<User | null> {
-    if (!force && this.authenticationState.value) {
-      return this.userIdentity$;
+    if (!force && this.currentUser) {
+      return of(this.currentUser);
     }
 
     if (!this.authJwtService.isAuthenticated()) {
@@ -49,39 +97,22 @@ export class AuthService {
       return of(null);
     }
 
-    return new Observable<User | null>((observer) => {
-      this.axiosService
-        .get<User>(this.accountUrl)
-        .then((response: any) => {
-          const user = response as User;
-          // Verify user has required fields
-          if (this.isValidUser(user)) {
-            this.authenticate(user);
-            this.cacheAccount(user);
-            observer.next(user);
-          } else {
-            console.error("Invalid user data received:", user);
-            this.authenticate(null);
-            observer.next(null);
-          }
-          observer.complete();
-        })
-        .catch((error) => {
-          console.error("AuthService: Error fetching user identity:", error);
+    return from(this.fetchUserIdentity()).pipe(
+      tap(user => {
+        if (user) {
+          this.authenticate(user);
+        } else {
           this.authenticate(null);
-          observer.next(null);
-          observer.complete();
-        });
-    }).pipe(
-      catchError((error) => {
-        console.error("AuthService: Error in identity observable:", error);
+        }
+      }),
+      catchError(error => {
+        console.error('Error in identity observable:', error);
         this.authenticate(null);
         return of(null);
       })
     );
   }
 
-  // Verifica se l'oggetto utente è valido
   private isValidUser(user: any): user is User {
     return (
       user &&
@@ -92,48 +123,41 @@ export class AuthService {
     );
   }
 
-  // Autentica l'utente con i dati dell'account
   authenticate(identity: User | null): void {
-    console.log("AuthService: Authenticating user:", identity?.email);
     this.userIdentity.next(identity);
     this.authenticationState.next(identity !== null);
     this.currentUser = identity;
 
     if (!identity) {
       this.clearAccountCache();
-      this.authJwtService.logout().subscribe();
+      this.tokenService.clearToken();
+    } else {
+      this.cacheAccount(identity);
     }
   }
 
-  // Verifica se l'utente ha l'autorità specificata
   hasAnyAuthority(authorities: string[]): boolean {
     const account = this.userIdentity.value;
-
     if (!account || !account.authorities) {
       return false;
     }
-
     return authorities.some((authority) =>
       account.authorities?.includes(authority)
     );
   }
 
-  // Verifica se l'utente è autenticato
   isAuthenticated(): boolean {
     return this.authJwtService.isAuthenticated() && this.currentUser !== null;
   }
 
-  // Sottoscrizione alle modifiche dello stato di autenticazione
   getAuthenticationState(): Observable<boolean> {
     return this.authenticationState$;
   }
 
-  // Ottiene l'identità corrente dell'utente
   getIdentity(): Observable<User | null> {
     return this.userIdentity$;
   }
 
-  // Gestione della cache dell'account
   private cacheAccount(account: User): void {
     if (account) {
       try {
@@ -170,35 +194,50 @@ export class AuthService {
       return this.currentUser;
     }
 
-    try {
-      const response = (await this.axiosService.get(
-        this.accountUrl
-      )) as AxiosResponse<User>;
-      this.currentUser = response.data;
-      return this.currentUser;
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      return null;
-    }
+    return this.fetchUserIdentity();
   }
 
-  async login(email: string, password: string): Promise<boolean> {
-    try {
-      const response = (await this.axiosService.post("/api/auth/login", {
-        email,
-        password,
-      })) as AxiosResponse<AuthResponse>;
-      const token = response.data.token;
-      localStorage.setItem("token", token);
-      return true;
-    } catch (error) {
-      console.error("Login error:", error);
-      return false;
-    }
+  logout(): Observable<void> {
+    return this.authJwtService.logout().pipe(
+      tap(() => {
+        this.authenticate(null);
+        this.clearAccountCache();
+        this.router.navigate(['/']);
+      }),
+      catchError(error => {
+        console.error('Logout error:', error);
+        this.authenticate(null);
+        this.clearAccountCache();
+        this.router.navigate(['/']);
+        return throwError(() => error);
+      })
+    );
   }
 
-  logout(): void {
-    localStorage.removeItem("token");
-    this.currentUser = null;
+  register(userData: UserRegistration): Observable<any> {
+    return from(this.axiosService.post(`${this.baseUrl}/register`, userData)).pipe(
+      catchError(error => {
+        console.error('Registration error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return from(this.axiosService.post(`${this.baseUrl}/forgot-password`, { email })).pipe(
+      catchError(error => {
+        console.error('Forgot password error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  resetPassword(resetData: ResetPasswordRequest): Observable<any> {
+    return from(this.axiosService.post(`${this.baseUrl}/reset-password`, resetData)).pipe(
+      catchError(error => {
+        console.error('Reset password error:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { inject, Injectable } from "@angular/core";
-import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { TokenService } from "../auth/token.service";
 import { Router } from "@angular/router";
 
@@ -44,25 +44,36 @@ export class AxiosService {
 
         // Add response interceptor to handle 401 errors
         this.axiosInstance.interceptors.response.use(
-            (response) => {
+            (response: AxiosResponse) => {
                 console.log('AxiosService: Response received:', {
                     url: response.config.url,
-                    status: response.status
+                    status: response.status,
+                    data: response.data
                 });
-                return response.data;
+                return response;
             },
             (error) => {
                 console.error('AxiosService: Response error:', {
                     url: error.config?.url,
                     status: error.response?.status,
-                    message: error.message
+                    message: error.message,
+                    data: error.response?.data
                 });
                 if (error.response?.status === 401) {
                     console.log('AxiosService: 401 error detected, clearing token and redirecting to login');
+                    // Clear token and navigate to login
                     this.tokenService.clearToken();
-                    // Use router for navigation instead of window.location
+                    // Use router for navigation
                     this.router.navigate(['/accedi'], {
                         queryParams: { returnUrl: this.router.url }
+                    }).then(() => {
+                        console.log('AxiosService: Navigation completed, reloading page...');
+                        // Force reload the page to clear any cached state
+                        window.location.reload();
+                    }).catch(navError => {
+                        console.error('AxiosService: Navigation error:', navError);
+                        // If navigation fails, still try to reload
+                        window.location.reload();
                     });
                 }
                 return Promise.reject(error);
@@ -74,27 +85,27 @@ export class AxiosService {
     async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
         console.log('AxiosService: Making GET request to:', url);
         const response = await this.axiosInstance.get<T>(url, config);
-        return response as T;
+        return response.data;
     }
 
     // POST
     async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
         console.log('AxiosService: Making POST request to:', url);
         const response = await this.axiosInstance.post<T>(url, data, config);
-        return response as T;
+        return response.data;
     }
 
     // PUT
     async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
         console.log('AxiosService: Making PUT request to:', url);
         const response = await this.axiosInstance.put<T>(url, data, config);
-        return response as T;
+        return response.data;
     }
 
     // DELETE
     async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
         console.log('AxiosService: Making DELETE request to:', url);
         const response = await this.axiosInstance.delete<T>(url, config);
-        return response as T;
+        return response.data;
     }
 }

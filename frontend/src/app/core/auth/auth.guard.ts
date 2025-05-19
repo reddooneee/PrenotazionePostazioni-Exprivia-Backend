@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable, map, take } from 'rxjs';
+import { Observable, map, take, switchMap, of } from 'rxjs';
 import { AuthService } from './auth.service';
 
 export const AuthGuard = (
@@ -10,33 +10,42 @@ export const AuthGuard = (
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isAuthenticated()) {
-    // Store the attempted URL for redirecting
-    return router.createUrlTree(['/accedi'], { 
-      queryParams: { returnUrl: state.url }
-    });
-  }
-
-  return authService.getIdentity().pipe(
+  return authService.getAuthenticationState().pipe(
     take(1),
-    map(user => {
-      if (!user) {
-        return router.createUrlTree(['/accedi'], { 
+    switchMap(isAuthenticated => {
+      if (!isAuthenticated) {
+        return of(router.createUrlTree(['/accedi'], { 
           queryParams: { returnUrl: state.url }
-        });
+        }));
       }
 
-      const authorities = route.data['authorities'] as string[];
-      
-      if (!authorities || authorities.length === 0) {
-        return true;
-      }
+      return authService.getIdentity().pipe(
+        take(1),
+        map(user => {
+          if (!user) {
+            return router.createUrlTree(['/accedi'], { 
+              queryParams: { returnUrl: state.url }
+            });
+          }
 
-      if (authService.hasAnyAuthority(authorities)) {
-        return true;
-      }
+          const authorities = route.data['authorities'] as string[];
+          
+          if (!authorities || authorities.length === 0) {
+            // If we're authenticated and there are no authority requirements,
+            // redirect to the default authenticated route
+            if (state.url === '/accedi' || state.url === '/') {
+              return router.createUrlTree(['/dashboard/prenotazione-posizione']);
+            }
+            return true;
+          }
 
-      return router.createUrlTree(['/forbidden']);
+          if (authService.hasAnyAuthority(authorities)) {
+            return true;
+          }
+
+          return router.createUrlTree(['/forbidden']);
+        })
+      );
     })
   );
 };

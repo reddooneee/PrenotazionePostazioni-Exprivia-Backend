@@ -10,13 +10,13 @@ import { AuthService } from "./core/auth/auth.service";
 import { Router } from "@angular/router";
 import { RegisterComponent } from "./account/register/register.component";
 
-// Guard to redirect authenticated users to dashboard
-const redirectAuthenticatedToDashboard = () => {
+// Guard to redirect authenticated users to prenotazione-posizione
+const redirectAuthenticatedToPrenotazione = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
   
   if (authService.isAuthenticated()) {
-    return router.createUrlTree(['/dashboard']);
+    return router.createUrlTree(['/dashboard/prenotazione-posizione']);
   }
   return true;
 };
@@ -26,17 +26,17 @@ export const routes: Routes = [
   { 
     path: "", 
     component: HomeComponent,
-    canActivate: [() => redirectAuthenticatedToDashboard()]
+    canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },
   { 
     path: "registrazione", 
     component: RegisterComponent,
-    canActivate: [() => redirectAuthenticatedToDashboard()]
+    canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },
   { 
     path: "accedi", 
     component: LoginComponent,
-    canActivate: [() => redirectAuthenticatedToDashboard()]
+    canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },
   {
     path: "dashboard",
@@ -46,12 +46,12 @@ export const routes: Routes = [
   { 
     path: "forgot-password", 
     component: ForgotpwdComponent,
-    canActivate: [() => redirectAuthenticatedToDashboard()]
+    canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },
   { 
     path: "reset-password", 
     component: ResetpwdComponent,
-    canActivate: [() => redirectAuthenticatedToDashboard()]
+    canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },
   { path: "forbidden", component: ForbiddenComponent },
   { path: "**", redirectTo: "" }

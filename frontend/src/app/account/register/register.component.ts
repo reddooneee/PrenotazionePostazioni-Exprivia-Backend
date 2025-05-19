@@ -12,6 +12,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, finalize } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { HeaderComponent } from '../../layout/header/header.component';
+
 
 @Component({
   selector: 'app-register',
@@ -26,7 +28,8 @@ import { throwError } from 'rxjs';
     RouterModule,
     MatProgressSpinnerModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    HeaderComponent
   ],
   animations: [
     authAnimations.fadeIn,

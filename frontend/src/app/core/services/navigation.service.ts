@@ -38,7 +38,7 @@ export class NavigationService {
       authorities: ["ROLE_USER", "ROLE_ADMIN"],
     },
     {
-      label: "Prenota Postazione",
+      label: "Prenota",
       icon: "layout-dashboard",
       route: "/dashboard/prenotazione-posizione",
       authorities: ["ROLE_USER", "ROLE_ADMIN"],
@@ -127,5 +127,10 @@ export class NavigationService {
   updateNavigationItems(userAuthorities: string[]): void {
     const filteredItems = this.filterNavigationByAuthorities(userAuthorities);
     this.navigationSubject.next(filteredItems);
+  }
+
+  // Metodo per resettare gli elementi di navigazione durante il logout
+  resetNavigationItems(): void {
+    this.navigationSubject.next([]);
   }
 }

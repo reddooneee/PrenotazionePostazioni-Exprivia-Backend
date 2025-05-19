@@ -1,89 +1,101 @@
 <!-- Dashboard Layout -->
-<div class="flex min-h-screen bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
-  
-  <!-- Sidebar -->
-  <app-sidebar></app-sidebar>
+<div class="flex flex-col min-h-screen bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
+  <!-- Header -->
+  <ng-container *ngIf="!isAdmin">
+    <app-header></app-header>
+  </ng-container>
 
-  <!-- Main Content -->
-  <main class="flex-1 flex flex-col bg-white">
-    <!-- Header Section -->
-    <div class="p-6 r bg-cover bg-center border-b border-gray-200">
-      <div class="flex justify-between items-center">
-        <div class="space-y-1">
-          <h1 class="text-2xl font-semibold text-gray-900">Benvenuto, {{ currentUser?.nome }}</h1>
-          <p class="text-sm text-gray-500">{{ currentDate | date:'EEEE d MMMM yyyy' }} - {{ currentTime }}</p>
-        </div>
+  <!-- Main Content Area -->
+  <div class="flex flex-1">
+    <!-- Sidebar -->
+    <app-sidebar *ngIf="isAdmin"></app-sidebar>
 
-        <!-- Notifications -->
-        <div class="flex items-center gap-4">
-          <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full">
-            <lucide-icon name="bell" class="w-6 h-6" />
-            <span *ngIf="notificationCount > 0"
-              class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {{ notificationCount }}
-            </span>
-          </button>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col bg-white">
+      <!-- Header Section -->
+      <div *ngIf="isAdmin" class="p-6 r bg-cover bg-center border-b border-gray-200">
+        <div class="flex justify-between items-center">
+          <div class="space-y-1">
+            <h1 class="text-2xl font-semibold text-gray-900">Benvenuto, {{ currentUser?.nome }}</h1>
+            <p class="text-sm text-gray-500">{{ currentDate | date:'EEEE d MMMM yyyy' }} - {{ currentTime }}</p>
+          </div>
+
+          <!-- Notifications -->
+          <div class="flex items-center gap-4">
+            <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full">
+              <lucide-icon name="bell" class="w-6 h-6" />
+              <span *ngIf="notificationCount > 0"
+                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {{ notificationCount }}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Dashboard Content -->
-    <div class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
-      <!-- Only show dashboard content on home route -->
-      <ng-container *ngIf="isHomeRoute()">
-        <!-- KPI Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Today's Bookings -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div class="flex items-center justify-between">
-              <div class="space-y-1">
-                <p class="text-sm font-medium text-gray-600">Prenotazioni Oggi</p>
-                <h3 class="text-2xl font-semibold text-gray-900">{{ todayBookings }}</h3>
+      <!-- Dashboard Content -->
+      <div class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
+        <!-- Admin Dashboard -->
+        <ng-container *ngIf="isAdmin && isHomeRoute()">
+          <!-- KPI Stats Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Today's Bookings -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-600">Prenotazioni Oggi</p>
+                  <h3 class="text-2xl font-semibold text-gray-900">{{ todayBookings }}</h3>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg">
+                  <lucide-icon name="calendar" class="w-6 h-6 text-blue-600" />
+                </div>
               </div>
-              <div class="p-3 bg-blue-50 rounded-lg">
-                <lucide-icon name="calendar" class="w-6 h-6 text-blue-600" />
+            </div>
+
+            <!-- Available Desks -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                  <p class="text-sm font-medium text-gray-600">Postazioni Disponibili</p>
+                  <h3 class="text-2xl font-semibold text-gray-900">{{ availableDesks }}/{{ totalDesks }}</h3>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg">
+                  <lucide-icon name="layout-dashboard" class="w-6 h-6 text-green-600" />
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-green-600 h-2 rounded-full" [style.width]="getAvailableDesksPercentage()"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <div class="space-y-3">
+                <button routerLink="bookings"
+                  class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                  <lucide-icon name="plus" class="w-5 h-5" />
+                  Nuova Prenotazione
+                </button>
+                <button routerLink="user-management"
+                  class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <lucide-icon name="users" class="w-5 h-5" />
+                  Gestione Utenti
+                </button>
               </div>
             </div>
           </div>
+        </ng-container>
 
-          <!-- Available Desks -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div class="flex items-center justify-between">
-              <div class="space-y-1">
-                <p class="text-sm font-medium text-gray-600">Postazioni Disponibili</p>
-                <h3 class="text-2xl font-semibold text-gray-900">{{ availableDesks }}/{{ totalDesks }}</h3>
-              </div>
-              <div class="p-3 bg-green-50 rounded-lg">
-                <lucide-icon name="layout-dashboard" class="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <div class="mt-4">
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="bg-green-600 h-2 rounded-full" [style.width]="getAvailableDesksPercentage()"></div>
-              </div>
-            </div>
-          </div>
+        <!-- User View -->
+        <ng-container *ngIf="!isAdmin">
+          <app-prenotazione-posizione></app-prenotazione-posizione>
+        </ng-container>
 
-          <!-- Quick Actions -->
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-            <div class="space-y-3">
-              <button routerLink="bookings"
-                class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                <lucide-icon name="plus" class="w-5 h-5" />
-                Nuova Prenotazione
-              </button>
-              <button *ngIf="isAdmin" routerLink="user-management"
-                class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <lucide-icon name="users" class="w-5 h-5" />
-                Gestione Utenti
-              </button>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- Router Outlet for Child Routes -->
-      <router-outlet></router-outlet>
-    </div>
-  </main>
+        <!-- Router Outlet for Child Routes -->
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
 </div>

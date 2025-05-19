@@ -46,12 +46,6 @@ public class UserService {
     }
 
     /**
-     * Valida i dati dell'utente
-     *
-     * @param userDTO dati da validare
-     * @throws IllegalArgumentException se i dati non sono validi
-     */
-    /**
      * Recupera tutti gli utenti dal database come AdminDTO (per utenti con
      * ruolo ADMIN)
      *

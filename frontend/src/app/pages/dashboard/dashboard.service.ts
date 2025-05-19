@@ -25,4 +25,6 @@ export class DashboardService {
         if (total === 0) return "0%";
         return `${Math.round((available / total) * 100)}%`;
     }
+
+    
 }

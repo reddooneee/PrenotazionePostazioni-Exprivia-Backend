@@ -9,7 +9,7 @@ import { Subject, takeUntil, catchError } from "rxjs";
 import { User } from "../../../core/models";
 import { AuthService } from "../../../core/auth/auth.service";
 import { LoginService } from "../../../login/login.service";
-import { NavigationService, NavItem } from "../../../core/services/navigation.service";
+import { NavigationService, NavItem } from "@core/services/navigation.service";
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 const SIDEBAR_STATE_KEY = 'sidebarCollapsed';
@@ -157,7 +157,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Gestione del logout
   logout(): void {
     this.loginService.logout();
-    this.resetAuthState();
   }
 
   // Verifica se una route è attiva

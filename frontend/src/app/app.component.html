@@ -1,5 +1,7 @@
 <!-- <app-header *ngIf="showLayout"></app-header> -->
-<div class="w-full flex min-h-screen flex-col bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70">
+<div class="w-full flex min-h-screen flex-col bg-gradient-to-br from-[var(--color-expriviaBlue)] to-[var(--color-expriviaBlue)]/70" role="application">
+    <main class="flex-1 w-full overflow-x-hidden">
         <router-outlet></router-outlet>
+    </main>
 </div>
 <app-footer *ngIf="showLayout"></app-footer>

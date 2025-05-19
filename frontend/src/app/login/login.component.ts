@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
@@ -11,6 +10,9 @@ import { RouterLink } from '@angular/router';
 import { LoginService } from './login.service';
 import { authAnimations } from '../shared/animations/auth.animations';
 import { LucideAngularModule } from 'lucide-angular';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { HeaderComponent } from '../layout/header/header.component';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +26,8 @@ import { LucideAngularModule } from 'lucide-angular';
     MatProgressSpinnerModule,
     RouterLink,
     LucideAngularModule,
-    MatIconModule
+    MatIconModule,
+    HeaderComponent
   ],
   animations: [
     authAnimations.fadeIn,
@@ -33,54 +36,86 @@ import { LucideAngularModule } from 'lucide-angular';
     authAnimations.scaleIn
   ]
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   hidePwd: boolean = true;
   isLoading: boolean = false;
   errorMessage: string | null = null;
   iconName: string = 'eye-off';
+  private destroy$ = new Subject<void>();
 
+  private loginService = inject(LoginService);
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private loginService: LoginService,
-    private router: Router
-  ) {
+  constructor() {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    this.loginForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.errorMessage) {
+          this.errorMessage = null;
+        }
+      });
   }
 
   ngOnInit(): void { }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.isLoading = false;
+  }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = null;
 
-      this.loginService.login(this.loginForm.value).subscribe({
-        next: (user) => {
-          this.isLoading = false;
-          if (user) {
-            // Successful login, navigate to dashboard
-            const returnUrl = this.router.routerState.snapshot.root.queryParams['returnUrl'] || '/dashboard';
-            this.router.navigateByUrl(returnUrl);
-          } else {
-            this.errorMessage = 'Errore durante il login. Riprova.';
+      this.loginService.login(this.loginForm.value)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => {
+            this.isLoading = false;
+          })
+        )
+        .subscribe({
+          next: (user) => {
+            if (user) {
+              const returnUrl = this.router.routerState.snapshot.root.queryParams['returnUrl'] || '/dashboard';
+              this.router.navigateByUrl(returnUrl);
+            }
+          },
+          error: (error) => {
+            console.error('Login error:', {
+              message: error.message,
+              originalError: error.originalError,
+              timestamp: new Date().toISOString()
+            });
+            
+            this.errorMessage = error.message;
+            this.loginForm.markAsPristine();
+            
+            if (error.originalError?.response?.status === 400) {
+              const emailControl = this.loginForm.get('email');
+              if (emailControl) {
+                emailControl.markAsTouched();
+                const emailInput = document.getElementById('email') as HTMLInputElement;
+                if (emailInput) {
+                  emailInput.focus();
+                }
+              }
+            }
           }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = 'Credenziali non valide. Riprova.';
-          console.error('Login error:', error);
-        }
-      });
+        });
     }
   }
 
-  // Funzione per cambiare l'icona della password
-  togglePasswordIcon() {
+  togglePasswordIcon(): void {
     this.iconName = this.iconName === 'eye' ? 'eye-off' : 'eye';
   }
 

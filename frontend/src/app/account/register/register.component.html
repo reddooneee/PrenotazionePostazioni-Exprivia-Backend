@@ -1,46 +1,53 @@
+<app-header></app-header>
 <div class="min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-xl flex w-full max-w-4xl overflow-hidden">
+  <div class="bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] flex w-full max-w-4xl overflow-hidden">
     <!-- Sinistra: Form di registrazione -->
-    <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
+    <div class="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
       <div class="text-center">
         <div class="relative inline-block">
-        <img src="LogoExprivia.svg" alt="Exprivia Logo"
-          class="h-12 mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
-      </div>
+          <img src="LogoExprivia.svg" alt="Exprivia Logo"
+            class="h-10 sm:h-12 mx-auto mb-4 transform hover:scale-110 transition-[var(--transition-transform)]"
+            width="180" height="48">
+        </div>
         <h1
-          class="text-3xl font-bold bg-gradient-to-r from-expriviaOrange via-expriviaOrange400 to-expriviaOrange bg-clip-text text-transparent animate-gradient">
+          class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[var(--color-expriviaOrange)] via-[var(--color-expriviaOrange400)] to-[var(--color-expriviaOrange)] bg-clip-text text-transparent animate-gradient">
           Crea il tuo account
         </h1>
-        <p class="text-gray-600 mb-8">Compila il modulo per registrarti.</p>
+        <p class="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">Compila il modulo per registrarti.</p>
       </div>
 
       <!-- Form di registrazione -->
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
-        <div class="flex gap-4">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4 sm:space-y-5" role="form"
+        aria-label="Form di registrazione">
+        <div class="flex flex-col sm:flex-row gap-4">
           <!-- Nome -->
-          <div class="w-1/2">
+          <div class="w-full sm:w-1/2">
             <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
-              class="transform hover:scale-[1.02] transition-transform duration-300">
-              <label class="block text-sm font-medium mb-1">Nome *</label>
-              <input matInput formControlName="nome" placeholder="Nome"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              class="transform hover:scale-[1.02] transition-[var(--transition-transform)]">
+              <label class="block text-sm font-medium mb-1" for="nome">Nome *</label>
+              <input matInput id="nome" formControlName="nome" placeholder="Nome"
+                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 focus:outline-none focus:border-[var(--color-expriviaOrange)] focus:ring-1 focus:ring-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+                aria-required="true" [attr.aria-invalid]="registerForm.get('nome')?.invalid"
+                [attr.aria-describedby]="registerForm.get('nome')?.invalid ? 'nome-error' : null" />
               <div
                 *ngIf="registerForm.get('nome')?.invalid && (registerForm.get('nome')?.dirty || registerForm.get('nome')?.touched)"
-                class="text-xs text-red-600 mt-1">
+                class="text-xs text-red-600 mt-1" id="nome-error" role="alert">
                 Il nome è obbligatorio.
               </div>
             </div>
           </div>
           <!-- Cognome -->
-          <div class="w-1/2">
+          <div class="w-full sm:w-1/2">
             <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
-              class="transform hover:scale-[1.02] transition-transform duration-300">
-              <label class="block text-sm font-medium mb-1">Cognome *</label>
-              <input matInput formControlName="cognome" placeholder="Cognome"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+              class="transform hover:scale-[1.02] transition-[var(--transition-transform)]">
+              <label class="block text-sm font-medium mb-1" for="cognome">Cognome *</label>
+              <input matInput id="cognome" formControlName="cognome" placeholder="Cognome"
+                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 focus:outline-none focus:border-[var(--color-expriviaOrange)] focus:ring-1 focus:ring-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+                aria-required="true" [attr.aria-invalid]="registerForm.get('cognome')?.invalid"
+                [attr.aria-describedby]="registerForm.get('cognome')?.invalid ? 'cognome-error' : null" />
               <div
                 *ngIf="registerForm.get('cognome')?.invalid && (registerForm.get('cognome')?.dirty || registerForm.get('cognome')?.touched)"
-                class="text-xs text-red-600 mt-1">
+                class="text-xs text-red-600 mt-1" id="cognome-error" role="alert">
                 Il cognome è obbligatorio.
               </div>
             </div>
@@ -49,46 +56,54 @@
 
         <!-- Email -->
         <div [@slideUp]="{ value: '', params: { delay: '200ms' } }"
-          class="transform hover:scale-[1.02] transition-transform duration-300">
-          <label class="block text-sm font-medium mb-1">Email *</label>
-          <input matInput formControlName="email" placeholder="Email"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
+          class="transform hover:scale-[1.02] transition-[var(--transition-transform)]">
+          <label class="block text-sm font-medium mb-1" for="email">Email *</label>
+          <input matInput id="email" formControlName="email" placeholder="Email" type="email"
+            class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 focus:outline-none focus:border-[var(--color-expriviaOrange)] focus:ring-1 focus:ring-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+            aria-required="true" [attr.aria-invalid]="registerForm.get('email')?.invalid"
+            [attr.aria-describedby]="registerForm.get('email')?.invalid ? 'email-error' : null" />
           <div
             *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)"
-            class="text-xs text-red-600 mt-1">
+            class="text-xs text-red-600 mt-1" id="email-error" role="alert">
             L'email è obbligatoria e deve essere valida.
           </div>
         </div>
 
-        <div class="flex gap-4">
+        <div class="flex flex-col sm:flex-row gap-4">
           <!-- Password -->
           <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
-            class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
-            <label class="block text-sm font-medium mb-1">Password *</label>
+            class="transform hover:scale-[1.02] transition-[var(--transition-transform)] w-full sm:w-1/2">
+            <label class="block text-sm font-medium mb-1" for="password">Password *</label>
             <div class="relative">
-              <input matInput [type]="hidePwd ? 'password' : 'text'" formControlName="password" placeholder="Password"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-              <button type="button" (click)="hidePwd = !hidePwd" class="absolute right-2 top-2.5 text-gray-500">
-                <mat-icon>{{hidePwd ? 'visibility_off' : 'visibility'}}</mat-icon>
+              <input matInput id="password" [type]="hidePwd ? 'password' : 'text'" formControlName="password"
+                placeholder="Password"
+                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 focus:outline-none focus:border-[var(--color-expriviaOrange)] focus:ring-1 focus:ring-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+                aria-required="true" [attr.aria-invalid]="registerForm.get('password')?.invalid"
+                [attr.aria-describedby]="registerForm.get('password')?.invalid ? 'password-error' : null" />
+              <button type="button" (click)="hidePwd = !hidePwd"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+                [attr.aria-label]="hidePwd ? 'Mostra password' : 'Nascondi password'">
+                <mat-icon class="w-5 h-5" aria-hidden="true">{{hidePwd ? 'visibility_off' : 'visibility'}}</mat-icon>
               </button>
             </div>
-            <div *ngIf="passwordInvalid" class="text-xs text-red-600 mt-1">
+            <div *ngIf="passwordInvalid" class="text-xs text-red-600 mt-1" id="password-error" role="alert">
               {{getPasswordErrorMessage()}}
             </div>
           </div>
 
           <!-- Conferma password -->
           <div [@slideUp]="{ value: '', params: { delay: '300ms' } }"
-            class="transform hover:scale-[1.02] transition-transform duration-300 w-1/2">
-            <label class="block text-sm font-medium mb-1">Conferma password *</label>
+            class="transform hover:scale-[1.02] transition-[var(--transition-transform)] w-full sm:w-1/2">
+            <label class="block text-sm font-medium mb-1" for="confirmPassword">Conferma password *</label>
             <div class="relative">
-              <input matInput [type]="hideConfirmPwd ? 'password' : 'text'" formControlName="confirmPassword"
-                placeholder="Conferma password"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-expriviaOrange" />
-              <button type="button" (click)="hideConfirmPwd = !hideConfirmPwd" class="absolute right-2 top-2.5 text-gray-500">
-              </button>
+              <input matInput id="confirmPassword" [type]="hideConfirmPwd ? 'password' : 'text'"
+                formControlName="confirmPassword" placeholder="Conferma password"
+                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 focus:outline-none focus:border-[var(--color-expriviaOrange)] focus:ring-1 focus:ring-[var(--color-expriviaOrange)] transition-[var(--transition-colors)]"
+                aria-required="true" [attr.aria-invalid]="registerForm.get('confirmPassword')?.invalid"
+                [attr.aria-describedby]="registerForm.get('confirmPassword')?.invalid ? 'confirm-password-error' : null" />
             </div>
-            <div *ngIf="confirmPasswordInvalid" class="text-xs text-red-600 mt-1">
+            <div *ngIf="confirmPasswordInvalid" class="text-xs text-red-600 mt-1" id="confirm-password-error"
+              role="alert">
               {{getConfirmPasswordErrorMessage()}}
             </div>
           </div>
@@ -97,23 +112,45 @@
         <!-- Bottone Registrati -->
         <div [@slideUp]="{ value: '', params: { delay: '400ms' } }">
           <button mat-raised-button
-            class="w-full bg-gradient-to-r from-expriviaOrange to-expriviaOrange400 text-white font-medium rounded-lg text-sm px-5 py-3 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-expriviaOrange/20 focus:outline-none focus:ring-2 focus:ring-expriviaOrange focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-            type="submit" [disabled]="registerForm.invalid || isLoading">
+            class="w-full bg-gradient-to-r from-[var(--color-expriviaOrange)] to-[var(--color-expriviaOrange400)] text-white font-medium rounded-[var(--radius-lg)] text-sm px-5 py-2.5 text-center transform transition-[var(--transition-all)] hover:scale-[1.02] hover:shadow-[var(--shadow-lg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-expriviaOrange)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+            type="submit" [disabled]="registerForm.invalid || isLoading" aria-label="Registrati"
+            [attr.aria-busy]="isLoading">
             <div
-              class="absolute inset-0 bg-gradient-to-r from-expriviaOrange400 to-expriviaOrange opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              class="absolute inset-0 bg-gradient-to-r from-[var(--color-expriviaOrange400)] to-[var(--color-expriviaOrange)] opacity-0 group-hover:opacity-100 transition-[var(--transition-opacity)]">
             </div>
             <div class="relative flex items-center justify-center gap-2">
-              <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2"></mat-spinner>
-              <span *ngIf="!isLoading" class="group-hover:scale-110 transition-transform duration-300">Registrati</span>
+              <mat-spinner *ngIf="isLoading" diameter="20" class="mr-2" aria-hidden="true"></mat-spinner>
+              <span *ngIf="!isLoading"
+                class="group-hover:scale-110 transition-[var(--transition-transform)]">Registrati</span>
             </div>
           </button>
+        </div>
+
+        <!-- Messaggio errore -->
+        <div *ngIf="errorMessage" class="p-4 text-sm text-red-600 bg-red-50 rounded-[var(--radius-lg)]" [@shake]
+          role="alert" aria-live="assertive">
+          <div class="flex items-center gap-2">
+            <mat-icon class="text-red-500 animate-pulse" aria-hidden="true">error</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+        </div>
+
+        <!-- Link Login -->
+        <div class="text-center text-sm mt-6" [@slideUp]="{ value: '', params: { delay: '500ms' } }">
+          <span class="text-gray-600">Hai già un account?</span>
+          <a [routerLink]="['/accedi']"
+            class="text-sm text-[var(--color-expriviaOrange)] hover:text-[var(--color-expriviaOrange400)] transition-[var(--transition-colors)] ml-1 relative group">
+            Accedi
+            <span
+              class="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-expriviaOrange)] transform scale-x-0 group-hover:scale-x-100 transition-[var(--transition-transform)]"></span>
+          </a>
         </div>
       </form>
     </div>
 
-    <!-- Destra: Immagine -->
-    <div class="hidden md:block w-1/2">
-      <img src="registration.avif" alt="Appartamenti moderni" class="w-full h-full object-cover" />
+    <!-- Destra: Immagine decorativa -->
+    <div class="hidden md:block w-1/2 relative">
+      <div class="absolute inset-0 bg-[url('assets/images/registration.avif')] bg-cover bg-center"></div>
     </div>
   </div>
-</div>
+  </div>

@@ -1,18 +1,130 @@
-<header class="w-full bg-white sticky top-0 z-50 shadow-md">
-    <div class="mx-auto container px-10 flex h-16 items-center justify-between">
+<header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100" role="banner">
+    <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
         <!-- Logo -->
-        <div class="cursor-pointer hover:opacity-80 transition-opacity duration-200" [routerLink]="['/']">
-            <img class="h-8 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo">
+        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/']" role="link" aria-label="Torna alla home">
+            <img class="h-6 sm:h-8 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo" width="120" height="32">
         </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex items-center gap-3">
-            <button [routerLink]="['/accedi']" 
-                class="px-4 py-2 text-sm font-medium text-white bg-expriviaOrange rounded-lg hover:bg-expriviaOrange400 transition-all duration-200">
+        <!-- Navigation for authenticated users -->
+        <ng-container *ngIf="isAuthenticated">
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-1" role="navigation" aria-label="Menu principale">
+                <a [routerLink]="['/dashboard/prenotazione-posizione']"
+                    [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/prenotazione-posizione')"
+                    [class.text-white]="isRouteActive('/dashboard/prenotazione-posizione')"
+                    class="px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
+                    aria-current="page">
+                    Prenota
+                </a>
+                <a [routerLink]="['/dashboard/bookings']"
+                    [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/bookings')"
+                    [class.text-white]="isRouteActive('/dashboard/bookings')"
+                    class="px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
+                    aria-current="page">
+                    Le mie prenotazioni
+                </a>
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <!-- Desktop User Menu -->
+                <div class="hidden md:flex items-center gap-2 sm:gap-4">
+                    <button mat-button [matMenuTriggerFor]="userMenu" 
+                        class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)]"
+                        aria-label="Menu utente">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--color-expriviaOrange)] flex items-center justify-center text-white">
+                            <lucide-icon name="user" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                        </div>
+                        <span class="text-gray-700 font-medium text-sm sm:text-base">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
+                        <lucide-icon name="chevron-down" class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" aria-hidden="true" />
+                    </button>
+                    <mat-menu #userMenu="matMenu" class="mt-2">
+                        <button mat-menu-item [routerLink]="['/dashboard/profile']" class="flex items-center gap-2">
+                            <lucide-icon name="user" class="w-4 h-4" aria-hidden="true" />
+                            <span>Profilo</span>
+                        </button>
+                        <button mat-menu-item (click)="logout()" class="flex items-center gap-2 text-red-600">
+                            <lucide-icon name="log-out" class="w-4 h-4" aria-hidden="true" />
+                            <span>Logout</span>
+                        </button>
+                    </mat-menu>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button mat-icon-button class="block md:hidden p-1.5 sm:p-2 rounded-[var(--radius-lg)] hover:bg-gray-50" 
+                    (click)="toggleMenu()"
+                    aria-label="Apri menu"
+                    [attr.aria-expanded]="isMenuOpen">
+                    <lucide-icon name="menu" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" aria-hidden="true" />
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div *ngIf="isMenuOpen" 
+                class="fixed md:hidden inset-0 bg-black bg-opacity-50 z-[var(--z-50)] transition-[var(--transition-opacity)]"
+                (click)="isMenuOpen = false"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu mobile">
+                <div class="absolute top-14 sm:top-16 right-0 w-[280px] sm:w-64 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] transform transition-[var(--transition-transform)]"
+                    (click)="$event.stopPropagation()">
+                    <div class="p-3 sm:p-4 border-b border-gray-100">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[var(--color-expriviaOrange)] flex items-center justify-center text-white">
+                                <lucide-icon name="user" class="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 text-sm sm:text-base">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
+                                <p class="text-xs sm:text-sm text-gray-500">{{ currentUser?.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="p-2" role="navigation" aria-label="Menu mobile">
+                        <a [routerLink]="['/dashboard/prenotazione-posizione']"
+                            [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/prenotazione-posizione')"
+                            [class.text-white]="isRouteActive('/dashboard/prenotazione-posizione')"
+                            class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
+                            (click)="isMenuOpen = false"
+                            aria-current="page">
+                            <lucide-icon name="calendar-plus" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                            <span>Prenota</span>
+                        </a>
+                        <a [routerLink]="['/dashboard/bookings']"
+                            [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/bookings')"
+                            [class.text-white]="isRouteActive('/dashboard/bookings')"
+                            class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
+                            (click)="isMenuOpen = false"
+                            aria-current="page">
+                            <lucide-icon name="calendar" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                            <span>Le mie prenotazioni</span>
+                        </a>
+                        <a [routerLink]="['/dashboard/profile']"
+                            [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/profile')"
+                            [class.text-white]="isRouteActive('/dashboard/profile')"
+                            class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
+                            (click)="isMenuOpen = false"
+                            aria-current="page">
+                            <lucide-icon name="user" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                            <span>Profilo</span>
+                        </a>
+                        <button (click)="logout(); isMenuOpen = false"
+                            class="w-full flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)] text-sm sm:text-base">
+                            <lucide-icon name="log-out" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
+                            <span>Logout</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- Navigation for non-authenticated users -->
+        <div *ngIf="!isAuthenticated" class="flex items-center gap-2 sm:gap-3">
+            <button [routerLink]="['/accedi']"
+                class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-[var(--color-expriviaOrange)] rounded-[var(--radius-lg)] hover:bg-[var(--color-expriviaOrange400)] transition-[var(--transition-all)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-base)]">
                 Accedi
             </button>
             <button [routerLink]="['/registrazione']"
-                class="px-4 py-2 text-sm font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200">
+                class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-base)]">
                 Registrati
             </button>
         </div>
