@@ -44,13 +44,15 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        // Test Endpoints
+                        .requestMatchers("/api/admin/**").permitAll()
 
                         // DA CAMBIARE IN AUTHENTICATED
                         .requestMatchers("/api/stats/prenotazioni**").permitAll()
                         .requestMatchers("/api/stats/stanze**").permitAll()
 
                         // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                        // .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                         .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
                         // Authenticated user endpoints
