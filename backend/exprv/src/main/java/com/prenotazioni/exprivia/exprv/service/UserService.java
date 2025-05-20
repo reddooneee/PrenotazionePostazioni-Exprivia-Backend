@@ -202,23 +202,23 @@ public class UserService {
     }
 
     public UserDTO creaUser(UserRegistrationDTO userRegistrationDTO) {
-        if (userRegistrationDTO.email() == null || userRegistrationDTO.email().trim().isEmpty()) {
+        if (userRegistrationDTO.getEmail() == null || userRegistrationDTO.getEmail().trim().isEmpty()) {
             throw new IllegalArgumentException("L'email è obbligatoria");
         }
 
-        if (userRegistrationDTO.password() == null || userRegistrationDTO.password().trim().isEmpty()) {
+        if (userRegistrationDTO.getPassword() == null || userRegistrationDTO.getPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("La password è obbligatoria");
         }
 
-        if (userRepository.findByEmail(userRegistrationDTO.email()).isPresent()) {
+        if (userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email già registrata");
         }
 
         Users user = new Users();
-        user.setEmail(userRegistrationDTO.email());
-        user.setPassword(passwordEncoder.encode(userRegistrationDTO.password()));
-        user.setNome(userRegistrationDTO.nome());
-        user.setCognome(userRegistrationDTO.cognome());
+        user.setEmail(userRegistrationDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        user.setNome(userRegistrationDTO.getNome());
+        user.setCognome(userRegistrationDTO.getCognome());
 
         Users savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);

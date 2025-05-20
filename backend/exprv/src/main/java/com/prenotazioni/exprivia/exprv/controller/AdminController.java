@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -83,9 +82,17 @@ public class AdminController {
     }
 
     @PostMapping("/crea_utente")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDto) {
+    public ResponseEntity<?> register(@RequestBody UserRegistrationDTO userRegistrationDTO) {
         try {
-            AdminDTO newUser = adminService.creaUtenteAdmin(userDto);
+            System.out.println("Dati ricevuti nel controller admin: " + userRegistrationDTO);
+            System.out.println("Tipo authorities: " + (userRegistrationDTO.getAuthorities() != null
+                    ? userRegistrationDTO.getAuthorities().getClass().getName()
+                    : "null"));
+            System.out.println("Authorities ricevute: " + userRegistrationDTO.getAuthorities());
+
+            System.out.println("Authorities: " + userRegistrationDTO.getAuthorities());
+
+            UserDTO newUser = adminService.creaUtenteAdmin(userRegistrationDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

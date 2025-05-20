@@ -91,16 +91,16 @@ public class AuthService {
      * Validazione dati di registrazione
      */
     private void validateRegistrationData(UserRegistrationDTO registrationDTO) {
-        if (registrationDTO.nome() == null || registrationDTO.nome().isEmpty()) {
+        if (registrationDTO.getNome() == null || registrationDTO.getNome().isEmpty()) {
             throw new IllegalArgumentException("Il nome non può essere nullo!");
         }
-        if (registrationDTO.cognome() == null || registrationDTO.cognome().isEmpty()) {
+        if (registrationDTO.getCognome() == null || registrationDTO.getCognome().isEmpty()) {
             throw new IllegalArgumentException("Il cognome non può essere nullo!");
         }
-        if (registrationDTO.email() == null || registrationDTO.email().isEmpty()) {
+        if (registrationDTO.getEmail() == null || registrationDTO.getEmail().isEmpty()) {
             throw new IllegalArgumentException("La mail non può essere nulla!");
         }
-        if (registrationDTO.password() == null || registrationDTO.password().isEmpty()) {
+        if (registrationDTO.getPassword() == null || registrationDTO.getPassword().isEmpty()) {
             throw new IllegalArgumentException("La password non può essere nulla!");
         }
     }
@@ -111,7 +111,7 @@ public class AuthService {
     public UserDTO creaUtente(UserRegistrationDTO registrationDTO) {
         validateRegistrationData(registrationDTO);
 
-        if (userRepository.findByEmail(registrationDTO.email()).isPresent()) {
+        if (userRepository.findByEmail(registrationDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Esiste già un utente con questa email!");
         }
 

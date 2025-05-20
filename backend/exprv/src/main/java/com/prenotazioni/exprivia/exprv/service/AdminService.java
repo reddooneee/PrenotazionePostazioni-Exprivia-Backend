@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.prenotazioni.exprivia.exprv.dto.AdminDTO;
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
+import com.prenotazioni.exprivia.exprv.dto.UserRegistrationDTO;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
+import com.prenotazioni.exprivia.exprv.mapper.UserMapper;
 import com.prenotazioni.exprivia.exprv.repository.AuthorityRepository;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 
@@ -21,8 +22,8 @@ public class AdminService {
     @Autowired
     private UserRepository userRepository;
 
-    // @Autowired
-    // private UserDTO userDTO;
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,7 +37,6 @@ public class AdminService {
     public AdminService(UserRepository userRepository,
             PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository) {
         this.userRepository = userRepository;
-        // this.userDTO = userDTO;
 
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
@@ -45,14 +45,14 @@ public class AdminService {
     /*
      * Validazione Dati Dell'utente
      */
-    private void validateUserData(UserDTO userDTO) {
-        if (userDTO.getNome() == null || userDTO.getNome().isEmpty()) {
+    private void validateUserData(UserRegistrationDTO userRegistrationDTO) {
+        if (userRegistrationDTO.getNome() == null || userRegistrationDTO.getNome().isEmpty()) {
             throw new IllegalArgumentException("Il nome non può essere nullo!");
         }
-        if (userDTO.getCognome() == null || userDTO.getCognome().isEmpty()) {
+        if (userRegistrationDTO.getCognome() == null || userRegistrationDTO.getCognome().isEmpty()) {
             throw new IllegalArgumentException("Il cognome non può essere nullo!");
         }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
+        if (userRegistrationDTO.getEmail() == null || userRegistrationDTO.getEmail().isEmpty()) {
             throw new IllegalArgumentException("La mail non può essere nulla!");
         }
 
@@ -65,35 +65,43 @@ public class AdminService {
      * @return UserDTO dell'utente creato
      * @throws IllegalArgumentException se ci sono problemi di validazione
      */
-    public AdminDTO creaUtenteAdmin(UserDTO userDTO) {
-    validateUserData(userDTO);
+    /**
+     * Crea un nuovo utente
+     */
+    public UserDTO creaUtenteAdmin(UserRegistrationDTO userRegistrationDTO) {
+        validateUserData(userRegistrationDTO);
 
-    if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-        throw new IllegalArgumentException("Esiste già un utente con questa email!");
+        // Controllo Email Duplicata
+        if (userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Esiste già un utente con questa email!");
+        }
+
+        Users user = userMapper.toEntity(userRegistrationDTO);
+        user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+
+        Set<Authority> authorities = new HashSet<>();
+
+        // Validazione ruoli
+        if (userRegistrationDTO.getAuthorities() == null || userRegistrationDTO.getAuthorities().isEmpty()) {
+            throw new IllegalArgumentException("È necessario specificare almeno un ruolo per l'utente");
+        }
+
+        // Verifica validità dei ruoli
+        for (String roleName : userRegistrationDTO.getAuthorities()) {
+            if (roleName.isEmpty()) {
+                throw new IllegalArgumentException("L'utente deve avere almeno un ruolo");
+            }
+
+            Authority authority = authorityRepository.findByName(roleName)
+                    .orElseThrow(() -> new IllegalArgumentException("Ruolo non valido: " + roleName));
+            authorities.add(authority);
+        }
+
+        user.setAuthorities(authorities);
+        user.setEnabled(true);
+        user.setCreatoIl(LocalDateTime.now());
+
+        user = userRepository.save(user);
+        return userMapper.toDto(user);
     }
-
-    Users user = new Users();
-    user.setNome(user.getNome());
-    user.setCognome(user.getCognome());
-    user.setEmail(user.getEmail());
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-    Set<Authority> authorities = new HashSet<>();
-    for (String roleName : userDTO.getAuthorities()) {
-        Authority authority = authorityRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Ruolo " + roleName + " non trovato"));
-        authorities.add(authority);
-    }
-    user.setAuthorities(authorities);
-
-    user.setEnabled(true);
-    user.setCreatoIl(LocalDateTime.now());
-
-    user = userRepository.save(user);
-
-    // Se hai un mapper da Users a AdminDTO, usa quello (consigliato):
-    // return adminMapper.toDto(user)
-
-    return new AdminDTO(user);
-}
 }
