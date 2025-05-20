@@ -7,12 +7,25 @@ import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
 
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 public class PrenotazioniDTO {
 
     private Integer id_prenotazioni;
+
+    @ManyToOne
+    @JoinColumn(name = "id_user", referencedColumnName = "id_user")
     private Users users;
+
+    @ManyToOne
+    @JoinColumn(name = "id_postazione", referencedColumnName = "id_postazione")
     private Postazioni postazione;
+
+    @ManyToOne
+    @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     private Stanze stanze;
+
     private stato_prenotazione stato_prenotazione;
     private LocalDateTime data_inizio;
     private LocalDateTime data_fine;
