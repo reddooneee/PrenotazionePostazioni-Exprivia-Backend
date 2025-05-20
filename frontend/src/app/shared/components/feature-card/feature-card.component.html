@@ -1,18 +1,29 @@
-<div class="group relative bg-white/10 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 sm:p-6 transition-[var(--transition-all)] hover:bg-white/20 hover:shadow-[var(--shadow-lg)] hover:scale-[1.02] border border-white/20"
+<div
+  class="group relative bg-white/10 backdrop-blur-sm rounded-[var(--radius-xl)] p-4 sm:p-6 transition-[var(--transition-all)] hover:bg-white/20 hover:shadow-[var(--shadow-lg)] hover:scale-[1.02] border border-white/20"
   [@fadeIn]="{ value: '', params: { delay: config.delay } }"
   role="article"
-  [attr.aria-labelledby]="'feature-title-' + config.id">
+  [attr.aria-labelledby]="'feature-title-' + config.id"
+>
   <!-- Icon Container -->
-  <div class="relative mb-4 sm:mb-6">
-    <div class="absolute -inset-2 bg-gradient-to-r from-[var(--color-expriviaOrange)] to-[var(--color-expriviaOrange400)] rounded-[var(--radius-lg)] blur-lg opacity-20 group-hover:opacity-30 transition-[var(--transition-opacity)]" aria-hidden="true"></div>
-    <div class="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white/10 rounded-[var(--radius-lg)] border border-white/20">
-      <i [class]="config.icon" class="text-2xl sm:text-3xl text-white group-hover:scale-110 transition-[var(--transition-transform)]" aria-hidden="true"></i>
-    </div>
+  <div
+    class="relative w-16 h-16 flex items-center justify-center rounded-[var(--radius-xl)] mb-6 mx-auto transition-[var(--transition-colors)]"
+    [class]="getIconContainerClasses()"
+  >
+    <mat-icon
+      [class]="getIconClasses()"
+      class="transform group-hover:scale-110 transition-[var(--transition-transform)] drop-shadow-[0_2px_4px_rgba(233,80,14,0.3)]"
+      aria-hidden="true"
+    >
+      {{ config.icon }}
+    </mat-icon>
   </div>
 
   <!-- Content -->
   <div class="space-y-2 sm:space-y-3">
-    <h3 [id]="'feature-title-' + config.id" class="text-lg sm:text-xl font-semibold text-white">
+    <h3
+      [id]="'feature-title-' + config.id"
+      class="text-lg sm:text-xl font-semibold text-white"
+    >
       {{ config.title }}
     </h3>
     <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
@@ -21,5 +32,8 @@
   </div>
 
   <!-- Hover Effect -->
-  <div class="absolute inset-0 bg-gradient-to-br from-[var(--color-expriviaOrange)]/10 to-[var(--color-expriviaOrange400)]/10 rounded-[var(--radius-xl)] opacity-0 group-hover:opacity-100 transition-[var(--transition-opacity)]" aria-hidden="true"></div>
-</div> 
+  <div
+    class="absolute inset-0 bg-gradient-to-br from-[var(--color-expriviaOrange)]/10 to-[var(--color-expriviaOrange400)]/10 rounded-[var(--radius-xl)] opacity-0 group-hover:opacity-100 transition-[var(--transition-opacity)]"
+    aria-hidden="true"
+  ></div>
+</div>

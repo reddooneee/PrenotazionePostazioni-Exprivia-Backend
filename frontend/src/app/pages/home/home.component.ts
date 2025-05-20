@@ -33,7 +33,6 @@ export class HomeComponent {
                 'Selezione rapida date e orari',
                 'Visualizzazione in tempo reale'
             ],
-            linkText: 'Scopri di più',
             linkUrl: '/prenotazioni'
         },
         {
@@ -44,7 +43,6 @@ export class HomeComponent {
                 'Modifiche istantanee',
                 'Notifiche push'
             ],
-            linkText: 'Scopri di più',
             linkUrl: '/gestione'
         },
         {
@@ -55,7 +53,6 @@ export class HomeComponent {
                 'Gestione team',
                 'Spazi condivisi'
             ],
-            linkText: 'Scopri di più',
             linkUrl: '/team'
         }
     ];

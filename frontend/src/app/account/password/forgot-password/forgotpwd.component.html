@@ -1,13 +1,17 @@
+<app-header></app-header>
+
 <main class="flex min-h-screen items-center justify-center px-4 py-12">
   <div class="w-full max-w-md p-8 shadow-lg bg-white flex flex-col rounded-xl">
+    <div class="text-center">
     <div class="relative inline-block">
         <img src="LogoExprivia.svg" alt="Exprivia Logo"
           class="h-12 mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
       </div>
-    <h1 class="text-2xl font-bold text-gray-900">Recupero Password</h1>
+    <h1  class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[var(--color-expriviaOrange)] via-[var(--color-expriviaOrange400)] to-[var(--color-expriviaOrange)] bg-clip-text text-transparent animate-gradient ">Recupero Password</h1>
     <p class="text-gray-500 mt-2">
       Inserisci l'email associata al tuo account per ricevere il link di reimpostazione.
     </p>
+</div>
 
     <form
       class="flex flex-col gap-6 mt-6"
@@ -15,6 +19,7 @@
       (ngSubmit)="onSubmit()"
       novalidate
     >
+  
       <!-- Campo email -->
       <div [@slideUp]="{ value: '', params: { delay: '100ms' } }"
         class="transform hover:scale-[1.02] transition-transform duration-300">
@@ -24,9 +29,6 @@
           </div>
           <input matInput formControlName="email" placeholder="nome.cognome@exprivia.com" type="email" autocomplete="email"
             class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-expriviaOrange focus:ring-1 focus:ring-expriviaOrange transition-colors duration-200" />
-        </div>
-        <div *ngIf="forgotPwdForm.get('email')?.hasError('required')" class="text-red-500 text-sm mt-1">
-          Email <strong>richiesta</strong>
         </div>
         <div *ngIf="forgotPwdForm.get('email')?.hasError('email')" class="text-red-500 text-sm mt-1">
           Inserisci una mail valida

@@ -1,3 +1,4 @@
+import { HeaderComponent } from "@/app/layout/header/header.component";
 import { Component } from "@angular/core";
 import { FormBuilder, Validators, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { CommonModule } from "@angular/common";
@@ -23,7 +24,8 @@ import { authAnimations } from "@/app/shared/animations/auth.animations";
     MatButtonModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
-    LucideAngularModule
+    LucideAngularModule,
+    HeaderComponent
   ],
   animations: [
       authAnimations.fadeIn,
