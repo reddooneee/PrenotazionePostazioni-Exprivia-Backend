@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.prenotazioni.exprivia.exprv.dto.StanzeDTO;
 import com.prenotazioni.exprivia.exprv.service.StanzeService;
@@ -27,19 +26,18 @@ public class StanzeController {
 
     private final StanzeService stanzeService;
 
-    @Autowired
     public StanzeController(StanzeService stanzeService) {
         this.stanzeService = stanzeService;
     }
 
-    //Gestione Richieste Get Per Ottenere Tutte Le Stanze
+    // Gestione Richieste Get Per Ottenere Tutte Le Stanze
     @GetMapping()
     public List<StanzeDTO> getStanzeTotali() {
         return stanzeService.cercaStanze();
-        // Chiama Il Servizio Scritto in precedenza per ottenere tutte le stanze   
+        // Chiama Il Servizio Scritto in precedenza per ottenere tutte le stanze
     }
 
-    //Richiesta GET per ricevere una stanza in abse all'ID
+    // Richiesta GET per ricevere una stanza in abse all'ID
     @GetMapping("/{id_stanza}")
     public ResponseEntity<StanzeDTO> getStanzeByID(@PathVariable("id_stanza") Integer id_stanza) {
         try {
@@ -50,7 +48,7 @@ public class StanzeController {
         }
     }
 
-    //Richiesta POST per creare una stanza
+    // Richiesta POST per creare una stanza
     @Transactional
     @PostMapping("/creaStanza")
     public ResponseEntity<?> creaStanza(@RequestBody StanzeDTO stanzeDTO) {
@@ -62,19 +60,23 @@ public class StanzeController {
         }
     }
 
-    /*@PostMapping("/crea_Postazione")
-    public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
-        System.out.println("Ricevuto: " + postazioni.getStanze() + ", " + postazioni.getStato_postazione());
-        try {
-            Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
-            return ResponseEntity.ok(newPostazioni);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }*/
+    /*
+     * @PostMapping("/crea_Postazione")
+     * public ResponseEntity<?> creaPostazione(@RequestBody Postazioni postazioni) {
+     * System.out.println("Ricevuto: " + postazioni.getStanze() + ", " +
+     * postazioni.getStato_postazione());
+     * try {
+     * Postazioni newPostazioni = PostazioniService.creaPostazione(postazioni);
+     * return ResponseEntity.ok(newPostazioni);
+     * } catch (IllegalArgumentException e) {
+     * return ResponseEntity.badRequest().body(e.getMessage());
+     * }
+     * }
+     */
     // Gestisce Le Richieste PUT per aggiornare una Stanza tramite ID
     @PutMapping("/aggiornastanza/{id}")
-    public ResponseEntity<?> aggiornaStanza(@PathVariable("id") Integer id_stanza, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<?> aggiornaStanza(@PathVariable("id") Integer id_stanza,
+            @RequestBody Map<String, Object> updates) {
         try {
             StanzeDTO updatedStanza = stanzeService.aggiornaStanze(id_stanza, updates);
             return ResponseEntity.ok(updatedStanza);
@@ -86,11 +88,11 @@ public class StanzeController {
     @DeleteMapping("/eliminastanza/{id}")
     public ResponseEntity<String> eliminaStanza(@PathVariable Integer id) {
         try {
-            stanzeService.eliminaStanze(id); //Chiama Il Servizio Per eliminare l'utente
+            stanzeService.eliminaStanze(id); // Chiama Il Servizio Per eliminare l'utente
             return ResponseEntity.noContent().build(); // Restituisce una risposta con stato 204 (NO CONTENT)
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-            //Manda Un Messaggio se non é stato eliminato l'utente
+            // Manda Un Messaggio se non é stato eliminato l'utente
         }
     }
 }

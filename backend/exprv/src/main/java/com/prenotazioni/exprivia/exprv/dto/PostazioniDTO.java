@@ -1,21 +1,24 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
-import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
+import com.prenotazioni.exprivia.exprv.entity.StatoPostazione;
 
 public class PostazioniDTO {
 
     private Integer id_postazione;
     private Stanze stanze;
-    private stato_postazione stato_postazione;
+
+    @JsonProperty("StatoPostazione")
+    private StatoPostazione statoPostazione;
 
     public PostazioniDTO() {
     }
 
-    public PostazioniDTO(Integer id_postazione, Stanze stanze, stato_postazione stato_postazione) {
+    public PostazioniDTO(Integer id_postazione, Stanze stanze, StatoPostazione statoPostazione) {
         this.id_postazione = id_postazione;
         this.stanze = stanze;
-        this.stato_postazione = stato_postazione;
+        this.statoPostazione = statoPostazione;
     }
 
     public Integer getId_postazione() {
@@ -34,12 +37,12 @@ public class PostazioniDTO {
         this.stanze = stanze;
     }
 
-    public stato_postazione getStato_postazione() {
-        return stato_postazione;
+    public StatoPostazione getStatoPostazione() {
+        return statoPostazione;
     }
 
-    public void setStato_postazione(stato_postazione stato_postazione) {
-        this.stato_postazione = stato_postazione;
+    public void setStatoPostazione(StatoPostazione statoPostazione) {
+        this.statoPostazione = statoPostazione;
     }
 
 }

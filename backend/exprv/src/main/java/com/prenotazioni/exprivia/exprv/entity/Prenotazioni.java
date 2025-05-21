@@ -2,11 +2,14 @@ package com.prenotazioni.exprivia.exprv.entity;
 
 //import Enum Prenotazioni
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
+
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +19,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -51,11 +55,14 @@ public class Prenotazioni {
     @UpdateTimestamp
     private LocalDateTime dataFine;
 
-    // Creato il e Aggiornato il;
-    // data_inizio, data_fine Da Aggiungere!!;
+    @ManyToMany(mappedBy = "prenotazioni")
+    private Set<CosaDurata> coseDurata = new HashSet<>();
+
     // JPA richiede un costruttore senza argomenti affinché possa creare istanze
     // delle entità tramite reflection
+
     // Costruttore Per JPa
+
     public Prenotazioni() {
     }
 
@@ -70,6 +77,8 @@ public class Prenotazioni {
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;
     }
+
+    // Getters and Setters
 
     public Integer getId_prenotazioni() {
         return id_prenotazioni;
@@ -127,5 +136,4 @@ public class Prenotazioni {
         this.dataFine = dataFine;
     }
 
-    // Getters and Setters
 }

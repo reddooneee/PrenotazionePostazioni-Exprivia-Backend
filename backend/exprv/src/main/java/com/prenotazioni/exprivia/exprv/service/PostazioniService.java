@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.prenotazioni.exprivia.exprv.dto.PostazioniDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
-import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
+import com.prenotazioni.exprivia.exprv.entity.StatoPostazione;
 import com.prenotazioni.exprivia.exprv.mapper.PostazioniMapper;
 import com.prenotazioni.exprivia.exprv.repository.PostazioniRepository;
 
@@ -24,7 +24,8 @@ public class PostazioniService {
     @Autowired
     private PostazioniMapper postazioniMapper;
 
-    public PostazioniService() {}
+    public PostazioniService() {
+    }
 
     public PostazioniService(PostazioniRepository postazioniRepository) {
         this.postazioniRepository = postazioniRepository;
@@ -43,7 +44,7 @@ public class PostazioniService {
      */
     public PostazioniDTO cercaSingolo(Integer id) {
         Postazioni postazioni = postazioniRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
+                .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
         return postazioniMapper.toDto(postazioni);
     }
 
@@ -53,7 +54,7 @@ public class PostazioniService {
     public PostazioniDTO creaPostazione(PostazioniDTO postazioniDTO) {
         Postazioni postazioni = postazioniMapper.toEntity(postazioniDTO);
 
-        if (postazioni.getStato_postazione() == null) {
+        if (postazioni.getStatoPostazione() == null) {
             throw new IllegalArgumentException("Lo stato della postazione non può essere nullo!");
         }
 
@@ -70,15 +71,17 @@ public class PostazioniService {
      */
     public PostazioniDTO aggiornaPostazioni(Integer id, Map<String, Object> updates) {
         Postazioni postazione = postazioniRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
+                .orElseThrow(() -> new EntityNotFoundException("Postazione con id " + id + " non trovata."));
 
         updates.forEach((key, value) -> {
             switch (key) {
                 case "stanze":
                     postazione.setstanze(new Stanze((Integer) value));
                     break;
-                case "stato_postazione":
-                    postazione.setStato_postazione(stato_postazione.valueOf((String) value));
+                case "statoPostazione":
+                    // postazione.setStato_postazione(stato_postazione.valueOf((String) value));
+                    StatoPostazione nuovoStato = new StatoPostazione((String) value);
+                    postazione.setStatoPostazione(nuovoStato);
                     break;
                 default:
                     throw new IllegalArgumentException("Chiave non valida: " + key);

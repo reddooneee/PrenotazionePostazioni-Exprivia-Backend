@@ -47,6 +47,8 @@ public class SecurityConfig {
                         // Test Endpoints
                         .requestMatchers("/api/admin/**").permitAll()
 
+                        .requestMatchers("/api/postazioni/aggiornaPostazione/**").permitAll()
+
                         // DA CAMBIARE IN AUTHENTICATED
                         .requestMatchers("/api/stats/prenotazioni**").permitAll()
                         .requestMatchers("/api/stats/stanze**").permitAll()

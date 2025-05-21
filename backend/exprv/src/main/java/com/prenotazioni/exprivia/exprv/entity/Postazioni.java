@@ -9,12 +9,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.prenotazioni.exprivia.exprv.enumerati.stato_postazione;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,16 +28,17 @@ public class Postazioni {
     // deserializzazione:
     private Integer id_postazione;
 
+    // Relazione Per Stato Postazione
+    @ManyToOne
+    @JoinColumn(name = "stato_postazione_name")
+    @JsonBackReference
+    private StatoPostazione statoPostazione;
+
     // @JsonProperty("stanze")
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     @JsonBackReference
     private Stanze stanze; // Relazione con la tabella Stanze
-
-    // enum (Disponibile,Occupato, Manutenzione)
-    @Enumerated(EnumType.STRING)
-    // @JsonProperty("stato_postazione")
-    private stato_postazione stato_postazione;
 
     @Column(name = "nome")
     private String nomePostazione;
@@ -68,11 +66,11 @@ public class Postazioni {
     }
 
     // Costruttore
-    public Postazioni(Integer id_postazione, Stanze stanze, stato_postazione stato_postazione, LocalDateTime creatoIl,
+    public Postazioni(Integer id_postazione, Stanze stanze, StatoPostazione statoPostazione, LocalDateTime creatoIl,
             LocalDateTime aggiornatoIl, String nomePostazione) {
         this.id_postazione = id_postazione;
         this.stanze = stanze;
-        this.stato_postazione = stato_postazione;
+        this.statoPostazione = statoPostazione;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
         this.nomePostazione = nomePostazione;
@@ -94,12 +92,12 @@ public class Postazioni {
         this.stanze = stanze;
     }
 
-    public stato_postazione getStato_postazione() {
-        return stato_postazione;
+    public StatoPostazione getStatoPostazione() {
+        return statoPostazione;
     }
 
-    public void setStato_postazione(stato_postazione stato_postazione) {
-        this.stato_postazione = stato_postazione;
+    public void setStatoPostazione(StatoPostazione statoPostazione) {
+        this.statoPostazione = statoPostazione;
     }
 
     // TIMESTAMP
