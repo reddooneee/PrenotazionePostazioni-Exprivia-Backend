@@ -44,7 +44,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   { 
-    path: "forgot-password", 
+    path: "password-dimenticata", 
     component: ForgotpwdComponent,
     canActivate: [() => redirectAuthenticatedToPrenotazione()]
   },

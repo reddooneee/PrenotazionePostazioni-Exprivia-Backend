@@ -96,7 +96,15 @@
 
     <!-- Table Container with proper padding -->
     <div class="overflow-x-auto">
+      
       <table mat-table [dataSource]="dataSource" matSort class="w-full">
+
+        <!-- Nome Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold text-gray-900 px-6 py-4">id</th>
+          <td mat-cell *matCellDef="let user" class="px-6 py-4">{{ user.id }}</td>
+        </ng-container>
+        
         <!-- Nome Column -->
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="font-semibold text-gray-900 px-6 py-4">Nome</th>

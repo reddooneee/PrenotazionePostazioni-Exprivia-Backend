@@ -114,16 +114,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.currentTime = time;
       });
 
-    // Recupera le statistiche delle postazioni
-    this.dashboardService.getDashboardDeskStats().subscribe({
-      next: ({ total, available }) => {
-        this.totalDesks = total;
-        this.availableDesks = available;
-      },
-      error: (err) => {
-        console.error("Errore nel caricamento dei dati dashboard:", err);
-      },
-    });
+    // // Recupera le statistiche delle postazioni
+    // this.dashboardService.getDashboardDeskStats().subscribe({
+    //   next: ({ total, available }) => {
+    //     this.totalDesks = total;
+    //     this.availableDesks = available;
+    //   },
+    //   error: (err) => {
+    //     console.error("Errore nel caricamento dei dati dashboard:", err);
+    //   },
+    // });
   }
 
   ngOnDestroy() {

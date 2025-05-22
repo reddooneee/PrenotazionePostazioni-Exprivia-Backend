@@ -2,53 +2,68 @@ import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AxiosService } from './axios.service';
-import { Prenotazione } from '@core/models';
+import { Prenotazione, PrenotazioneRequest } from '@core/models';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PrenotazioneService {
-    private baseUrl = '/api/prenotazioni';
+    private readonly BASE_URL = '/api/prenotazioni';
 
     constructor(private axiosService: AxiosService) {}
 
-    getAllPrenotazioni(): Observable<Prenotazione[]> {
-        return from(this.axiosService.get<Prenotazione[]>(`${this.baseUrl}/lista`));
-    }
-
-    // Alias for backward compatibility
+    /**
+     * Recupera tutte le prenotazioni
+     */
     getPrenotazioni(): Observable<Prenotazione[]> {
-        return this.getAllPrenotazioni();
+        return from(this.axiosService.get<Prenotazione[]>(`${this.BASE_URL}/lista`));
     }
 
+    /**
+     * Recupera le prenotazioni di una data specifica
+     */
     getPrenotazioneById(id: number): Observable<Prenotazione> {
-        return from(this.axiosService.get<Prenotazione>(`${this.baseUrl}/${id}`));
+        return from(this.axiosService.get<Prenotazione>(`${this.BASE_URL}/${id}`));
     }
 
-    getPrenotazioniByUser(userId: number): Observable<Prenotazione[]> {
-        return from(this.axiosService.get<Prenotazione[]>(`${this.baseUrl}/utente/${userId}`));
+    /**
+     * Recupera le prenotazioni di una data specifica
+     */
+    getPrenotazioniByDay(date: string): Observable<Prenotazione[]> {
+        return from(this.axiosService.get<Prenotazione[]>(`${this.BASE_URL}/prenotazioni-del-giorno?data=${date}`));
     }
 
-    getPrenotazioniByData(date: Date): Observable<Prenotazione[]> {
-        const formattedDate = date.toISOString().split('T')[0];
-        return from(this.axiosService.get<Prenotazione[]>(`${this.baseUrl}/data/${formattedDate}`));
+    /**
+     * Crea una nuova prenotazione
+     */
+    createPrenotazione(prenotazione: Prenotazione): Observable<Prenotazione> {
+        return from(this.axiosService.post<Prenotazione>(`${this.BASE_URL}/creaPrenotazione`, prenotazione));
     }
 
-    createPrenotazione(prenotazione: Partial<Prenotazione>): Observable<Prenotazione> {
-        return from(this.axiosService.post<Prenotazione>(`${this.baseUrl}/creaPrenotazione`, prenotazione));
-    }
-
+    /**
+     * Aggiorna una prenotazione esistente
+     */
     updatePrenotazione(id: number, updates: Partial<Prenotazione>): Observable<Prenotazione> {
-        return from(this.axiosService.put<Prenotazione>(`${this.baseUrl}/aggiornaPrenotazione/${id}`, updates));
+        return from(this.axiosService.put<Prenotazione>(`${this.BASE_URL}/aggiornaPrenotazione/${id}`, updates));
     }
 
+    /**
+     * Elimina una prenotazione
+     */
     deletePrenotazione(id: number): Observable<void> {
-        return from(this.axiosService.delete(`${this.baseUrl}/eliminaPrenotazione/${id}`)).pipe(
+        return from(this.axiosService.delete(`${this.BASE_URL}/eliminaPrenotazione/${id}`)).pipe(
             map(() => void 0)
         );
     }
 
-    checkAvailability(date: string, workspaceId: number): Observable<boolean> {
-        return from(this.axiosService.get<boolean>(`${this.baseUrl}/disponibilita/${workspaceId}/${date}`));
+    /**
+     * Esporta le prenotazioni giornaliere in formato Excel
+     */
+    exportPrenotazioniDaily(date: Date): Observable<Blob> {
+        const formattedDate = date.toISOString().split('T')[0];
+        return from(this.axiosService.get<Blob>(
+            `${this.BASE_URL}/export/giorno/${formattedDate}`,
+            { responseType: 'blob' }
+        ));
     }
 }

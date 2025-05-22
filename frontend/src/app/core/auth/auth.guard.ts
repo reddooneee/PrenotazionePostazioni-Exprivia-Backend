@@ -43,6 +43,8 @@ export const AuthGuard = (
             return true;
           }
 
+          // If user is authenticated but doesn't have required authorities,
+          // redirect to forbidden page
           return router.createUrlTree(['/forbidden']);
         })
       );

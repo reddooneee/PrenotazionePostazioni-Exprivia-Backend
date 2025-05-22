@@ -1,306 +1,219 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { firstValueFrom } from "rxjs";
-import {
-  PrenotazioneService,
-  PostazioneService,
-  StanzaService,
-} from "@core/services";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { AuthService } from "@core/auth/auth.service";
-import { CalendarService, CalendarDay } from "@core/services/calendar.service";
-import {
-  User,
-  Prenotazione,
-  Postazione,
-  Stanza,
-  StatoPostazione,
-  StatoPrenotazione,
-} from "@core/models";
-import { AvailabilityService } from "@core/services/availability.service";
-import {
-  TimeSlotBooking,
-  UserBooking,
-  DateAvailability,
-  BookingFormData,
-  AvailabilityStatus,
-} from "@core/interfaces/booking.interface";
-import {
-  WorkspaceOption,
-  FloorPlanMarker,
- WorkspaceData,
-} from "@core/interfaces/workspace.interface";
-import { Subscription } from "rxjs";
-
-
+import { CalendarComponent } from "@shared/components/calendar/calendar.component";
+import { StanzaWithPostazioni } from "@core/models/stanza.model";
+import { PostazioneWithStanza } from "@core/models/postazione.model";
+import { PrenotazionePosizioneService } from "./prenotazione-posizione.service";
+import { BookingFormData, BookingState, TimeSlot } from "./prenotazione-posizione.model";
+import { Subject, takeUntil } from "rxjs";
+import { Prenotazione } from "@core/models/prenotazione.model";
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CalendarComponent],
   selector: "app-prenotazione-posizione",
   templateUrl: "./prenotazione-posizione.component.html",
+  providers: [PrenotazionePosizioneService]
 })
 export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
-  currentUser: User | null = null;
-  isLoading = false;
-  selectedDates: Date[] = [];
-  calendarDays: CalendarDay[] = [];
-  currentDate = new Date();
-  currentMonth = "";
-  currentWeekDays: Date[] = [];
-  availabilityStatus: AvailabilityStatus = {
-    level: "nessuna",
-    text: "Nessuna data selezionata",
-    description: "",
-    dotClass: "none",
+  bookingForm: FormGroup;
+  state: BookingState = {
+    stanze: [],
+    postazioniDisponibili: [],
+    selectedDates: [],
+    availableTimeSlots: [],
+    isLoading: false,
+    errorMessage: ""
   };
 
-  bookingForm: BookingFormData = {
-    tipo_stanza: "",
-    piano: "",
-    id_postazione: "",
-    ora_inizio: "",
-    dipendenti: [],
-  };
-
-  workspaceOptions: WorkspaceOption[] = [];
-  floorPlanMarkers: FloorPlanMarker[] = [];
-  userBookings: UserBooking[] = [];
-  timeSlots: TimeSlotBooking[] = [];
-
-  stanze: Stanza[] = [];
-  postazioni: Postazione[] = [];
-  prenotazioni: Prenotazione[] = [];
-  availableTimeSlots: string[] = [];
   tipiStanza: string[] = [];
-
-  private subscriptions: Subscription[] = [];
+  prenotazioni: Prenotazione[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private prenotazioneService: PrenotazioneService,
+    private fb: FormBuilder,
     private authService: AuthService,
-    private postazioneService: PostazioneService,
-    private stanzaService: StanzaService,
-    private calendarService: CalendarService,
-    private availabilityService: AvailabilityService
-  ) {}
-
-  ngOnInit(): void {
-    this.setupSubscriptions();
-    this.loadInitialData();
-    this.loadTipiStanza();
-
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
-  }
-
-  private setupSubscriptions(): void {
-    this.subscriptions.push(
-      this.calendarService.getCalendarDays().subscribe((days) => {
-        this.calendarDays = days;
-      }),
-      this.calendarService.getSelectedDates().subscribe((dates) => {
-        this.selectedDates = dates;
-        if (dates.length > 0) {
-          this.updateAvailablePostazioni();
-        }
-      }),
-      this.calendarService.getCurrentDate().subscribe((date) => {
-        this.currentMonth = this.calendarService.formatMonthYear(date);
-        this.currentWeekDays = this.calendarService.getCurrentWeek();
-      })
-    );
-  }
-
-  private async loadInitialData(): Promise<void> {
-    try {
-      this.isLoading = true;
-      this.currentUser = await this.authService.getUser();
-      if (this.currentUser?.id_user) {
-        await this.loadUserPrenotazioni();
-      }
-      await this.loadStanze();
-    } catch (error) {
-      console.error("Error loading initial data:", error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-
-
-  loadTipiStanza(): void {
-    this.stanzaService.getAllStanze().subscribe((stanze) => {
-      const tipiUnici = new Set(stanze.map((s) => s.tipo_stanza));
-      this.tipiStanza = Array.from(tipiUnici);
+    private prenotazioneService: PrenotazionePosizioneService
+  ) {
+    this.bookingForm = this.fb.group({
+      tipo_stanza: ["", Validators.required],
+      id_stanza: [null, Validators.required],
+      id_postazione: [null, Validators.required],
+      ora_inizio: ["", Validators.required],
+      ora_fine: ["", Validators.required]
     });
   }
 
-  private async loadUserPrenotazioni(): Promise<void> {
-    if (!this.currentUser?.id_user) return;
+  ngOnInit(): void {
+    this.loadStanzeEPostazioni();
+    this.loadUserPrenotazioni();
+    this.setupFormSubscriptions();
+  }
 
-    try {
-      const prenotazioni = await firstValueFrom(
-        this.prenotazioneService.getPrenotazioniByUser(this.currentUser.id_user)
-      );
-      this.prenotazioni = prenotazioni;
-    } catch (error) {
-      console.error("Error loading user prenotazioni:", error);
-      this.prenotazioni = [];
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadStanzeEPostazioni(): void {
+    this.state.isLoading = true;
+    this.prenotazioneService.getStanzeWithPostazioni()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stanze) => {
+          console.log('Received stanze:', stanze);
+          this.state.stanze = stanze;
+          this.tipiStanza = [...new Set(stanze.map(s => s.tipo_stanza))];
+          console.log('Tipi stanza disponibili:', this.tipiStanza);
+          this.state.isLoading = false;
+        },
+        error: (error) => {
+          console.error("Error loading stanze:", error);
+          this.state.errorMessage = "Errore nel caricamento delle stanze";
+          this.state.isLoading = false;
+        }
+      });
+  }
+
+  private loadUserPrenotazioni(): void {
+    this.prenotazioneService.getUserPrenotazioni()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (prenotazioni: Prenotazione[]) => {
+          this.prenotazioni = prenotazioni;
+        },
+        error: (error: unknown) => {
+          console.error("Error loading user bookings:", error);
+          this.state.errorMessage = "Errore nel caricamento delle prenotazioni";
+        }
+      });
+  }
+
+  private setupFormSubscriptions(): void {
+    // Quando cambia il tipo stanza
+    this.bookingForm.get("tipo_stanza")?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(tipo => {
+        console.log('Tipo stanza selezionato:', tipo);
+        this.bookingForm.patchValue({
+          id_stanza: null,
+          id_postazione: null,
+          ora_inizio: "",
+          ora_fine: ""
+        });
+        
+        if (tipo) {
+          // Filtra le stanze per tipo
+          const stanzeDelTipo = this.state.stanze.filter(s => s.tipo_stanza === tipo);
+          console.log('Stanze filtrate per tipo:', stanzeDelTipo);
+          
+          // Ottieni tutte le postazioni per le stanze filtrate
+          this.state.postazioniDisponibili = stanzeDelTipo.flatMap(stanza => 
+            stanza.postazioni
+              .filter(p => p.id_postazione && p.nomePostazione)
+              .map(p => ({
+                id_postazione: p.id_postazione!,
+                nomePostazione: p.nomePostazione!,
+                stanza_id: stanza.id_stanza,
+                stanza_nome: stanza.nome,
+                tipo_stanza: stanza.tipo_stanza
+              }))
+          );
+          console.log('Postazioni disponibili aggiornate:', this.state.postazioniDisponibili);
+        } else {
+          this.state.postazioniDisponibili = [];
+        }
+      });
+
+    // Quando cambia la postazione
+    this.bookingForm.get("id_postazione")?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(postazioneId => {
+        if (postazioneId) {
+          const postazione = this.state.postazioniDisponibili.find(p => p.id_postazione === postazioneId);
+          if (postazione) {
+            // Aggiorna automaticamente la stanza
+            this.bookingForm.patchValue({
+              id_stanza: postazione.stanza_id
+            }, { emitEvent: false }); // Evita il loop di eventi
+          }
+          
+          if (this.state.selectedDates.length > 0) {
+            this.loadAvailableTimeSlots(postazioneId);
+          }
+        }
+      });
+  }
+
+  onDateSelectionChange(dates: Date[]): void {
+    this.state.selectedDates = dates;
+    const postazioneId = this.bookingForm.get("id_postazione")?.value;
+    if (postazioneId) {
+      this.loadAvailableTimeSlots(postazioneId);
     }
   }
 
-  private async loadStanze(): Promise<void> {
-    try {
-      const stanze = await firstValueFrom(this.stanzaService.getStanze());
-      this.stanze = stanze;
-    } catch (error) {
-      console.error("Error loading stanze:", error);
-      this.stanze = [];
-    }
-  }
+  private loadAvailableTimeSlots(postazioneId: number): void {
+    if (this.state.selectedDates.length === 0) return;
 
-  async onTipoStanzaChange(): Promise<void> {
-    if (!this.bookingForm.tipo_stanza) return;
-
-    try {
-      const stanza = await firstValueFrom(
-        this.stanzaService.getStanzaById(parseInt(this.bookingForm.tipo_stanza))
-      );
-      this.stanze = [stanza];
-    } catch (error) {
-      console.error("Error loading stanze by tipo:", error);
-      this.stanze = [];
-    }
-  }
-
-  async onPianoChange(): Promise<void> {
-    await this.updateAvailablePostazioni();
-  }
-
-  private async updateAvailablePostazioni(): Promise<void> {
-    if (!this.selectedDates.length || !this.bookingForm.piano) return;
-
-    try {
-      this.isLoading = true;
-      const date = this.selectedDates[0].toISOString().split("T")[0];
-      const postazioni = await firstValueFrom(
-        this.postazioneService.getAllPostazioni()
-      );
-      this.postazioni = postazioni;
-
-      // Filter by piano if needed
-      if (this.bookingForm.piano) {
-        this.postazioni = this.postazioni.filter(
-          (p) => p.stanza?.piano === parseInt(this.bookingForm.piano)
-        );
-      }
-    } catch (error) {
-      console.error("Error loading available postazioni:", error);
-      this.postazioni = [];
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  async onPostazioneChange(): Promise<void> {
-    if (!this.selectedDates.length || !this.bookingForm.id_postazione) return;
-
-    try {
-      this.isLoading = true;
-      // For now, just use some default time slots
-      this.availableTimeSlots = [
-        "09:00",
-        "10:00",
-        "11:00",
-        "12:00",
-        "13:00",
-        "14:00",
-        "15:00",
-        "16:00",
-        "17:00",
-      ];
-    } catch (error) {
-      console.error("Error loading time slots:", error);
-    } finally {
-      this.isLoading = false;
-    }
+    this.state.isLoading = true;
+    this.prenotazioneService
+      .getAvailableTimeSlots(this.state.selectedDates[0], postazioneId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (slots) => {
+          this.state.availableTimeSlots = slots.map(s => s.start);
+          this.state.isLoading = false;
+        },
+        error: (error) => {
+          console.error("Error loading time slots:", error);
+          this.state.errorMessage = "Errore nel caricamento degli orari disponibili";
+          this.state.isLoading = false;
+        }
+      });
   }
 
   async createPrenotazione(): Promise<void> {
-    if (!this.currentUser?.id_user || !this.validateForm()) return;
+    if (!this.bookingForm.valid || this.state.selectedDates.length === 0) return;
 
-    try {
-      this.isLoading = true;
-      const prenotazione: Prenotazione = {
-        user: this.currentUser,
-        postazione: {
-          id_postazione: parseInt(this.bookingForm.id_postazione),
-          stato_postazione: StatoPostazione.OCCUPATO,
+    const formValue = this.bookingForm.value;
+    const date = this.state.selectedDates[0];
+    
+    const request = {
+      id_stanza: formValue.id_stanza,
+      id_postazione: formValue.id_postazione,
+      data_inizio: new Date(date.setHours(parseInt(formValue.ora_inizio.split(":")[0]))).toISOString(),
+      data_fine: new Date(date.setHours(parseInt(formValue.ora_fine.split(":")[0]))).toISOString()
+    };
+
+    this.state.isLoading = true;
+    this.prenotazioneService.createPrenotazione(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.resetForm();
+          this.state.isLoading = false;
         },
-        stato_prenotazione: StatoPrenotazione.CONFERMATA,
-        data_inizio: `${this.selectedDates[0].toISOString().split("T")[0]}T${
-          this.bookingForm.ora_inizio
-        }`,
-        data_fine: this.calculateEndTime(this.bookingForm.ora_inizio),
-      };
-
-      await firstValueFrom(
-        this.prenotazioneService.createPrenotazione(prenotazione)
-      );
-      await this.loadUserPrenotazioni();
-      this.resetForm();
-    } catch (error) {
-      console.error("Error creating prenotazione:", error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  private calculateEndTime(startTime: string): string {
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const endHours = hours + 4;
-    return `${this.selectedDates[0].toISOString().split("T")[0]}T${endHours
-      .toString()
-      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  }
-
-  private validateForm(): boolean {
-    return !!(
-      this.selectedDates.length &&
-      this.bookingForm.tipo_stanza &&
-      this.bookingForm.piano &&
-      this.bookingForm.id_postazione &&
-      this.bookingForm.ora_inizio
-    );
+        error: (error) => {
+          console.error("Error creating prenotazione:", error);
+          this.state.errorMessage = "Errore nella creazione della prenotazione";
+          this.state.isLoading = false;
+        }
+      });
   }
 
   private resetForm(): void {
-    this.bookingForm = {
-      tipo_stanza: "",
-      piano: "",
-      id_postazione: "",
-      ora_inizio: "",
-      dipendenti: [],
-    };
-    this.calendarService.selectDates([]);
-    this.postazioni = [];
-    this.availableTimeSlots = [];
+    this.bookingForm.reset();
+    this.state.selectedDates = [];
+    this.state.availableTimeSlots = [];
+    this.state.errorMessage = "";
   }
 
-  // Calendar navigation methods
-  nextMonth(): void {
-    this.calendarService.nextMonth();
-  }
-
-  previousMonth(): void {
-    this.calendarService.previousMonth();
-  }
-
-  onDateClick(day: CalendarDay): void {
-    if (day.isDisabled) return;
-    this.calendarService.selectDates([day.date]);
+  getStanzaName(stanzaId: number | undefined): string {
+    if (!stanzaId) return '';
+    const stanza = this.state.stanze.find(s => s.id_stanza === stanzaId);
+    return stanza ? stanza.nome : '';
   }
 }

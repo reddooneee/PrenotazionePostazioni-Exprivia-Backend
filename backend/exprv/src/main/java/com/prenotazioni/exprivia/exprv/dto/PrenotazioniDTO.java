@@ -2,28 +2,25 @@ package com.prenotazioni.exprivia.exprv.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
 
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrenotazioniDTO {
 
     private Integer id_prenotazioni;
-
-    @ManyToOne
-    @JoinColumn(name = "id_user", referencedColumnName = "id_user")
+    
+    // Per la creazione usiamo gli ID
+    private Integer id_user;
+    private Integer id_postazione;
+    private Integer id_stanza;
+    
+    // Per le risposte includiamo gli oggetti completi
     private Users users;
-
-    @ManyToOne
-    @JoinColumn(name = "id_postazione", referencedColumnName = "id_postazione")
     private Postazioni postazione;
-
-    @ManyToOne
-    @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     private Stanze stanze;
 
     private stato_prenotazione stato_prenotazione;
@@ -33,6 +30,17 @@ public class PrenotazioniDTO {
     public PrenotazioniDTO() {
     }
 
+    // Costruttore per la creazione
+    public PrenotazioniDTO(Integer id_user, Integer id_postazione, Integer id_stanza,
+            LocalDateTime data_inizio, LocalDateTime data_fine) {
+        this.id_user = id_user;
+        this.id_postazione = id_postazione;
+        this.id_stanza = id_stanza;
+        this.data_inizio = data_inizio;
+        this.data_fine = data_fine;
+    }
+
+    // Costruttore completo per le risposte
     public PrenotazioniDTO(Integer id_prenotazioni, Users users, Postazioni postazione, Stanze stanze,
             stato_prenotazione stato_prenotazione, LocalDateTime data_inizio, LocalDateTime data_fine) {
         this.id_prenotazioni = id_prenotazioni;
@@ -44,6 +52,32 @@ public class PrenotazioniDTO {
         this.data_fine = data_fine;
     }
 
+    // Getters e Setters per gli ID
+    public Integer getId_user() {
+        return id_user;
+    }
+
+    public void setId_user(Integer id_user) {
+        this.id_user = id_user;
+    }
+
+    public Integer getId_postazione() {
+        return id_postazione;
+    }
+
+    public void setId_postazione(Integer id_postazione) {
+        this.id_postazione = id_postazione;
+    }
+
+    public Integer getId_stanza() {
+        return id_stanza;
+    }
+
+    public void setId_stanza(Integer id_stanza) {
+        this.id_stanza = id_stanza;
+    }
+
+    // Getters e Setters esistenti
     public Integer getId_prenotazioni() {
         return id_prenotazioni;
     }
@@ -99,5 +133,4 @@ public class PrenotazioniDTO {
     public void setData_fine(LocalDateTime data_fine) {
         this.data_fine = data_fine;
     }
-
 }

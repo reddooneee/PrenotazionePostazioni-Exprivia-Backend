@@ -23,6 +23,7 @@
     "@auth0/angular-jwt": "^5.2.0",
     "@tailwindcss/postcss": "^4.0.7",
     "axios": "^1.8.1",
+    "date-fns": "^4.1.0",
     "exprivia": "file:",
     "flowbite": "^3.1.2",
     "jwt-decode": "^4.0.0",

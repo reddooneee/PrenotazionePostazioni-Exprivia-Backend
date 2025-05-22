@@ -3,10 +3,14 @@ package com.prenotazioni.exprivia.exprv.service;
 import java.io.ByteArrayOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -20,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
+import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
@@ -369,6 +374,162 @@ public class PrenotazioniService {
         } catch (Exception e) {
             throw new RuntimeException("Errore Durante La generazione del File Excel" + e.getMessage());
         }
+    }
+
+    /**
+     * Crea una nuova prenotazione per l'utente loggato
+     * 
+     * @param request   i dati della prenotazione
+     * @param userEmail email dell'utente loggato
+     * @return PrenotazioniDTO della prenotazione creata
+     */
+    @Transactional
+    public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO request, String userEmail) {
+        // Recupera l'utente dal database
+        Users user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        // Recupera la postazione
+        Postazioni postazione = postazioniRepository.findById(request.getPostazione().getId_postazione())
+                .orElseThrow(() -> new EntityNotFoundException("Postazione non trovata"));
+
+        // Recupera la stanza
+        Stanze stanza = stanzeRepository.findById(request.getStanze().getId_stanza())
+                .orElseThrow(() -> new EntityNotFoundException("Stanza non trovata"));
+
+        // Validazione delle date
+        validateDates(request.getData_inizio(), request.getData_fine());
+
+        // Verifica sovrapposizioni
+        checkOverlappingBookings(request.getData_inizio(), request.getData_fine(),
+                request.getPostazione().getId_postazione());
+
+        // Crea la prenotazione
+        Prenotazioni prenotazione = new Prenotazioni();
+        prenotazione.setUsers(user);
+        prenotazione.setPostazione(postazione);
+        prenotazione.setStanze(stanza);
+        prenotazione.setDataInizio(request.getData_inizio());
+        prenotazione.setDataFine(request.getData_fine());
+        prenotazione.setStato_prenotazione(stato_prenotazione.Confermata);
+
+        // Salva la prenotazione
+        Prenotazioni savedPrenotazione = prenotazioniRepository.save(prenotazione);
+
+        // Converti e restituisci il DTO
+        return prenotazioniMapper.toDto(savedPrenotazione);
+    }
+
+    /**
+     * Valida le date di inizio e fine della prenotazione
+     */
+    private void validateDates(LocalDateTime startTime, LocalDateTime endTime) {
+        validateStartTime(startTime);
+
+        if (endTime == null) {
+            throw new IllegalArgumentException("La data di fine non può essere nulla!");
+        }
+
+        if (endTime.isBefore(startTime)) {
+            throw new IllegalArgumentException("La data di fine deve essere successiva alla data di inizio!");
+        }
+
+        if (startTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Non è possibile effettuare prenotazioni nel passato!");
+        }
+    }
+
+    /**
+     * Verifica se ci sono sovrapposizioni con altre prenotazioni
+     */
+    private void checkOverlappingBookings(LocalDateTime startTime, LocalDateTime endTime, Integer postazioneId) {
+        List<Prenotazioni> overlappingBookings = prenotazioniRepository.findOverlappingBookings(startTime, endTime,
+                postazioneId);
+        if (!overlappingBookings.isEmpty()) {
+            throw new IllegalArgumentException("La postazione è già prenotata in questo periodo!");
+        }
+    }
+
+    /**
+     * Recupera tutte le stanze come opzioni per una select
+     */
+    public List<SelectOptionDTO> getStanzeOptions() {
+        return stanzeRepository.findAll().stream()
+            .map(stanza -> new SelectOptionDTO(stanza.getId_stanza(), stanza.getNome()))
+            .toList();
+    }
+
+    /**
+     * Recupera tutte le postazioni di una stanza come opzioni per una select
+     */
+    public List<SelectOptionDTO> getPostazioniByStanzaOptions(Integer idStanza) {
+        return postazioniRepository.findByStanzaId(idStanza).stream()
+            .map(postazione -> new SelectOptionDTO(postazione.getId_postazione(), postazione.getNomePostazione()))
+            .toList();
+    }
+
+    /**
+     * Recupera le fasce orarie disponibili per una postazione in una data specifica
+     * @return Lista di orari disponibili nel formato HH:mm
+     */
+    public List<String> getOrariDisponibili(Integer idPostazione, LocalDate data) {
+        List<String> tuttiOrari = List.of("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00");
+        
+        // Recupera le prenotazioni esistenti per quella postazione in quella data
+        LocalDateTime inizioGiornata = data.atStartOfDay();
+        LocalDateTime fineGiornata = data.atTime(23, 59, 59);
+        
+        List<Prenotazioni> prenotazioniEsistenti = prenotazioniRepository.findOverlappingBookings(
+            inizioGiornata, fineGiornata, idPostazione);
+
+        // Filtra gli orari già prenotati
+        return tuttiOrari.stream()
+            .filter(orario -> !isOrarioPrenotato(orario, prenotazioniEsistenti, data))
+            .toList();
+    }
+
+    private boolean isOrarioPrenotato(String orario, List<Prenotazioni> prenotazioni, LocalDate data) {
+        LocalDateTime dataOrario = data.atTime(
+            Integer.parseInt(orario.split(":")[0]), 
+            Integer.parseInt(orario.split(":")[1])
+        );
+
+        return prenotazioni.stream().anyMatch(p -> 
+            (dataOrario.isEqual(p.getDataInizio()) || dataOrario.isAfter(p.getDataInizio())) &&
+            dataOrario.isBefore(p.getDataFine())
+        );
+    }
+
+    /**
+     * Recupera tutte le stanze con le relative postazioni
+     */
+    public Map<String, List<Map<String, Object>>> getStanzeEPostazioni() {
+        List<Stanze> stanze = stanzeRepository.findAll();
+        
+        Map<String, List<Map<String, Object>>> result = new HashMap<>();
+        List<Map<String, Object>> stanzeList = new ArrayList<>();
+        
+        for (Stanze stanza : stanze) {
+            Map<String, Object> stanzaMap = new HashMap<>();
+            stanzaMap.put("id", stanza.getId_stanza());
+            stanzaMap.put("nome", stanza.getNome());
+            
+            List<Map<String, Object>> postazioniList = postazioniRepository.findByStanzaId(stanza.getId_stanza())
+                .stream()
+                .map(p -> {
+                    Map<String, Object> postazione = new HashMap<>();
+                    postazione.put("id", p.getId_postazione());
+                    postazione.put("nome", p.getNomePostazione());
+                    return postazione;
+                })
+                .collect(Collectors.toList());
+            
+            stanzaMap.put("postazioni", postazioniList);
+            stanzeList.add(stanzaMap);
+        }
+        
+        result.put("stanze", stanzeList);
+        return result;
     }
 
 }
