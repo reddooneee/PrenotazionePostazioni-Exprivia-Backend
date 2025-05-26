@@ -257,9 +257,9 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
       updateData.newPassword = formData.newPassword
     }
 
-    if (this.currentUser?.id) {
+    if (this.currentUser?.id_user) {
       this.userService
-        .updateUser(this.currentUser.id as unknown as number, updateData)
+        .updateUser(this.currentUser.id_user as unknown as number, updateData)
         .pipe(
           catchError((error) => {
             console.error("Update error:", error)
