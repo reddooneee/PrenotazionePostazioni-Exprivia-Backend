@@ -59,10 +59,10 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/utente/{id}")
+    @PutMapping("/aggiorna_utente/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
-            UserDTO updatedUser = userService.aggiornaUser(id, updates);
+            AdminDTO updatedUser = adminService.aggiornaUserByAdmin(id, updates);
             return ResponseEntity.ok(updatedUser);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utente non trovato");

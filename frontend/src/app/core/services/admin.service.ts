@@ -25,7 +25,7 @@ export class AdminService {
     }
 
     createUser(user: Partial<User>): Observable<User> {
-        return from(this.axiosService.post<User>(`${this.baseUrl}/users`, user));
+        return from(this.axiosService.post<User>(`${this.baseUrl}/crea_utente`, user));
     }
 
     updateUser(id: number, updates: Partial<User>): Observable<User> {

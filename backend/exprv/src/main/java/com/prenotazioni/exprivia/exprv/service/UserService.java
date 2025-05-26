@@ -1,14 +1,12 @@
 package com.prenotazioni.exprivia.exprv.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -85,27 +83,19 @@ public class UserService {
     }
 
     /**
-     * Aggiorna un utente esistente con i valori specificati
+     * Aggiorna un utente con i dati forniti
      *
      * @param id      ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
      * @return UserDTO dell'utente aggiornato
-     * @throws EntityNotFoundException se l'utente non esiste
+     * @throws EntityNotFoundException  se l'utente non esiste
+     * @throws IllegalArgumentException se i dati forniti non sono validi
      */
     public UserDTO aggiornaUser(Integer id, Map<String, Object> updates) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(role -> role.equals("ROLE_ADMIN"));
-
-        if (!isAdmin) {
-            throw new AccessDeniedException("Accesso negato: solo un amministratore può aggiornare un utente");
-        }
-
         Users existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
 
+        // Verifica email duplicata
         if (updates.containsKey("email")) {
             String newEmail = (String) updates.get("email");
             Optional<Users> userWithSameEmail = userRepository.findByEmail(newEmail);
@@ -114,6 +104,7 @@ public class UserService {
             }
         }
 
+        // Aggiorna i campi
         updates.forEach((key, value) -> {
             switch (key) {
                 case "nome":
@@ -128,42 +119,12 @@ public class UserService {
                 case "password":
                     existingUser.setPassword(passwordEncoder.encode((String) value));
                     break;
-                case "authorities":
-                    if (value instanceof Set) {
-                        @SuppressWarnings("unchecked")
-                        Set<String> authorities = (Set<String>) value;
-                        existingUser.setAuthorities(userMapper.stringsToAuthorities(authorities));
-                    }
-                    break;
+                default:
+                    throw new IllegalArgumentException("Campo non valido per l'aggiornamento: " + key);
             }
         });
 
-        Users updatedUser = userRepository.save(existingUser);
-        return userMapper.toDto(updatedUser);
-    }
-
-    /**
-     * Aggiorna un utente con i dati forniti in un DTO
-     *
-     * @param id      ID dell'utente da aggiornare
-     * @param userDTO dati aggiornati dell'utente
-     * @return UserDTO dell'utente aggiornato
-     */
-    public UserDTO aggiornaUserConDTO(Integer id, UserDTO userDTO) {
-        Users existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Utente con ID " + id + " non trovato"));
-
-        // Verifica che l'email non sia già in uso (se è stata modificata)
-        if (userDTO.getEmail() != null && !userDTO.getEmail().equals(existingUser.getEmail())) {
-            Optional<Users> userWithSameEmail = userRepository.findByEmail(userDTO.getEmail());
-            if (userWithSameEmail.isPresent() && !userWithSameEmail.get().getId_user().equals(id)) {
-                throw new IllegalArgumentException("Email già in uso");
-            }
-        }
-        // Aggiorna l'utente con i dati del DTO
-        userMapper.updateUserFromDto(userDTO, existingUser);
-
-        // Salva le modifiche
+        existingUser.setAggiornatoIl(LocalDateTime.now());
         Users updatedUser = userRepository.save(existingUser);
         return userMapper.toDto(updatedUser);
     }
