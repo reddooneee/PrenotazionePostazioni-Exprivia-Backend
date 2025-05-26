@@ -150,8 +150,22 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   onDateSelectionChange(dates: Date[]): void {
     this.state.selectedDates = dates;
     const postazioneId = this.bookingForm.get("id_postazione")?.value;
-    if (postazioneId) {
+    if (postazioneId && dates.length > 0) {
+      // Load time slots for the first selected date
       this.loadAvailableTimeSlots(postazioneId);
+    }
+  }
+
+  removeDateFromSelection(dateToRemove: Date): void {
+    this.state.selectedDates = this.state.selectedDates.filter(
+      date => date.getTime() !== dateToRemove.getTime()
+    );
+    
+    const postazioneId = this.bookingForm.get("id_postazione")?.value;
+    if (postazioneId && this.state.selectedDates.length > 0) {
+      this.loadAvailableTimeSlots(postazioneId);
+    } else if (this.state.selectedDates.length === 0) {
+      this.state.availableTimeSlots = [];
     }
   }
 
@@ -179,29 +193,33 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     if (!this.bookingForm.valid || this.state.selectedDates.length === 0) return;
 
     const formValue = this.bookingForm.value;
-    const date = this.state.selectedDates[0];
-    
-    const request = {
-      id_stanza: formValue.id_stanza,
-      id_postazione: formValue.id_postazione,
-      data_inizio: new Date(date.setHours(parseInt(formValue.ora_inizio.split(":")[0]))).toISOString(),
-      data_fine: new Date(date.setHours(parseInt(formValue.ora_fine.split(":")[0]))).toISOString()
-    };
-
     this.state.isLoading = true;
-    this.prenotazioneService.createPrenotazione(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.resetForm();
-          this.state.isLoading = false;
-        },
-        error: (error) => {
-          console.error("Error creating prenotazione:", error);
-          this.state.errorMessage = "Errore nella creazione della prenotazione";
-          this.state.isLoading = false;
-        }
-      });
+    this.state.errorMessage = "";
+
+    try {
+      // Create an array of booking requests, one for each selected date
+      const bookingRequests = this.state.selectedDates.map(date => ({
+        id_stanza: formValue.id_stanza,
+        id_postazione: formValue.id_postazione,
+        data_inizio: new Date(new Date(date).setHours(parseInt(formValue.ora_inizio.split(":")[0]))).toISOString(),
+        data_fine: new Date(new Date(date).setHours(parseInt(formValue.ora_fine.split(":")[0]))).toISOString()
+      }));
+
+      // Create all bookings sequentially
+      for (const request of bookingRequests) {
+        await this.prenotazioneService.createPrenotazione(request).toPromise();
+      }
+
+      // Reset form after all bookings are created
+      this.resetForm();
+      // Reload user bookings to show the new ones
+      this.loadUserPrenotazioni();
+    } catch (error) {
+      console.error("Error creating prenotazioni:", error);
+      this.state.errorMessage = "Errore nella creazione delle prenotazioni";
+    } finally {
+      this.state.isLoading = false;
+    }
   }
 
   private resetForm(): void {
