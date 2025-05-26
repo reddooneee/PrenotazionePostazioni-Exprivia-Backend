@@ -66,14 +66,6 @@ export class AxiosService {
                     // Use router for navigation
                     this.router.navigate(['/accedi'], {
                         queryParams: { returnUrl: this.router.url }
-                    }).then(() => {
-                        console.log('AxiosService: Navigation completed, reloading page...');
-                        // Force reload the page to clear any cached state
-                        window.location.reload();
-                    }).catch(navError => {
-                        console.error('AxiosService: Navigation error:', navError);
-                        // If navigation fails, still try to reload
-                        window.location.reload();
                     });
                 }
                 return Promise.reject(error);

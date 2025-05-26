@@ -11,10 +11,10 @@ interface AuthResponse {
 }
 
 interface UserRegistration {
-  email: string;
-  password: string;
   nome: string;
   cognome: string;
+  email: string;
+  password: string;
 }
 
 interface ResetPasswordRequest {
@@ -63,11 +63,15 @@ export class AuthService {
         if (user) {
           this.authenticate(user);
         } else {
-          this.authenticate(null);
+          if (!cachedUser) {
+            this.authenticate(null);
+          }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        this.authenticate(null);
+        if (!this.getCachedAccount()) {
+          this.authenticate(null);
+        }
       }
     } else {
       this.authenticate(null);

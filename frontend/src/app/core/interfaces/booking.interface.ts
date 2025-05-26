@@ -10,33 +10,31 @@ export interface BookingDetail {
 }
 
 export interface TimeSlotBooking {
-  time: string;
+  startTime: string;
+  endTime: string;
   isAvailable: boolean;
 }
 
 export interface UserBooking {
   id: number;
-  desk: string;
-  room: string;
-  date: string;
+  date: Date;
   startTime: string;
   endTime: string;
-  status: string;
+  postazione: string;
+  stato: string;
 }
 
 export interface DateAvailability {
-  date: string;
-  timeSlots?: TimeSlotBooking[];
-  availableCount: number;
+  date: Date;
+  availableSlots: number;
+  totalSlots: number;
 }
 
 export interface AvailabilityStatus {
-  level: 'alta' | 'media' | 'bassa' | 'nessuna';
+  level: 'nessuna' | 'bassa' | 'media' | 'alta';
   text: string;
   description: string;
   dotClass: string;
-  availableCount?: number;
-  totalCount?: number;
 }
 
 export interface BookingFormData {

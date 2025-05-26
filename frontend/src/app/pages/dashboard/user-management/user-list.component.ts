@@ -45,7 +45,7 @@ import { UserFormDialogComponent } from "./user-form-dialog.component";
   ],
 })
 export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
-  displayedColumns: string[] = ["nome", "cognome", "email", "ruolo", "azioni"];
+  displayedColumns: string[] = ["id", "nome", "cognome", "email", "ruolo", "azioni"];
   dataSource: MatTableDataSource<User>;
   loading$: Observable<boolean>;
   searchTerm = "";

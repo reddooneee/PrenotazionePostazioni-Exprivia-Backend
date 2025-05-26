@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Observable, from } from "rxjs";
 import { map, tap } from "rxjs/operators";
 import { AxiosService } from "./axios.service";
-import { Stanza } from "../models";
+import { Stanza, StanzaWithPostazioni } from "../models";
 import { TokenService } from "../auth/token.service";
 
 @Injectable({
@@ -54,5 +54,9 @@ export class StanzaService {
         return from(
             this.axiosService.delete(`${this.baseUrl}/eliminastanza/${id}`)
         ).pipe(map(() => void 0));
+    }
+
+    getStanzeWithPostazioni(): Observable<StanzaWithPostazioni[]> {
+        return from(this.axiosService.get<StanzaWithPostazioni[]>(this.baseUrl));
     }
 }

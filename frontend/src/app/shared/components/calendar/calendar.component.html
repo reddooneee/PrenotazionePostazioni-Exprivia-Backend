@@ -1,0 +1,127 @@
+<div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+    <!-- Calendar Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div class="flex items-center space-x-4">
+        <h2 class="text-lg sm:text-xl font-semibold" id="calendar-title">
+          {{ currentMonth() }}
+        </h2>
+        <div class="flex space-x-2">
+          <button
+            class="text-sm text-gray-500 hover:text-gray-900 transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100"
+            (click)="previousPeriod()"
+            aria-label="Periodo precedente"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button
+            class="text-sm text-gray-500 hover:text-gray-900 transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100"
+            (click)="nextPeriod()"
+            aria-label="Periodo successivo"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- View Toggle -->
+      <div class="flex items-center space-x-2">
+        <button
+          [class.bg-blue-100]="view === 'month'"
+          class="px-3 py-1 rounded-lg text-sm transition-colors duration-200 hover:bg-gray-100"
+          (click)="setView('month')"
+          [attr.aria-pressed]="view === 'month'"
+          aria-label="Visualizzazione mensile"
+        >
+          Mese
+        </button>
+        <button
+          [class.bg-blue-100]="view === 'week'"
+          class="px-3 py-1 rounded-lg text-sm transition-colors duration-200 hover:bg-gray-100"
+          (click)="setView('week')"
+          [attr.aria-pressed]="view === 'week'"
+          aria-label="Visualizzazione settimanale"
+        >
+          Settimana
+        </button>
+      </div>
+    </div>
+
+    <div class="calendar-container w-full max-w-4xl mx-auto">
+      <!-- Calendar Header (Days of Week) -->
+      <div class="grid grid-cols-7 mb-2 text-center text-xs sm:text-sm font-medium" role="row">
+        <div class="py-2" role="columnheader">Lun</div>
+        <div class="py-2" role="columnheader">Mar</div>
+        <div class="py-2" role="columnheader">Mer</div>
+        <div class="py-2" role="columnheader">Gio</div>
+        <div class="py-2" role="columnheader">Ven</div>
+        <div class="py-2 text-red-500" role="columnheader">Sab</div>
+        <div class="py-2 text-red-500" role="columnheader">Dom</div>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div 
+        class="grid grid-cols-7 gap-1 sm:gap-2 bg-gray-100 rounded-lg p-2 sm:p-3"
+        role="grid"
+        aria-labelledby="calendar-title"
+      >
+        <div
+          *ngFor="let day of displayDays()"
+          class="relative aspect-square flex flex-col items-center justify-center p-1 sm:p-2 rounded-lg transition-all duration-200"
+          [class.bg-white]="!day.isToday"
+          [class.bg-blue-50]="day.isToday"
+          [class.text-gray-400]="!day.isCurrentMonth"
+          [class.ring-2]="day.isToday"
+          [class.ring-blue-500]="day.isToday"
+          [class.bg-blue-100]="isSelected(day)"
+          [class.ring-2]="isSelected(day)"
+          [class.ring-blue-600]="isSelected(day)"
+          [class.bg-red-50]="day.isWeekend"
+          [class.text-red-600]="day.isWeekend"
+          [class.opacity-50]="day.isDisabled"
+          [class.cursor-not-allowed]="day.isDisabled"
+          [class.cursor-pointer]="!day.isDisabled && !day.isWeekend"
+          [class.hover:bg-gray-50]="!day.isDisabled && !day.isWeekend"
+          [class.hover:scale-105]="!day.isDisabled && !day.isWeekend"
+          [class.hover:shadow-md]="!day.isDisabled && !day.isWeekend"
+          [class.hover:z-10]="!day.isDisabled && !day.isWeekend"
+          (click)="onDateClick(day)"
+          [attr.aria-selected]="isSelected(day)"
+          [attr.aria-disabled]="day.isDisabled || day.isWeekend"
+          role="gridcell"
+          tabindex="0"
+          (keydown.enter)="onDateClick(day)"
+          (keydown.space)="onDateClick(day)"
+        >
+          <div class="flex flex-col items-center">
+            <span class="text-xs sm:text-sm font-medium">{{ day.date | date : "d" }}</span>
+          </div>
+
+          <div
+            *ngIf="day.availableCount !== undefined"
+            class="absolute top-1 right-1 text-xs"
+          >
+            <span class="flex items-center">
+              <span
+                class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
+                [class.bg-green-500]="day.availableCount > 5"
+                [class.bg-yellow-500]="day.availableCount <= 5 && day.availableCount > 0"
+                [class.bg-red-500]="day.availableCount === 0"
+                aria-hidden="true"
+              ></span>
+              <span class="hidden sm:inline ml-1">{{ day.availableCount }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Dates Summary -->
+      <div *ngIf="selectedDates().length > 0" class="mt-4 p-3 bg-gray-50 rounded-lg">
+        <h3 class="text-sm font-medium text-gray-700 mb-2">Date selezionate:</h3>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let date of selectedDates()" class="text-xs sm:text-sm text-gray-600">
+            {{ date | date:'EEEE d MMMM yyyy':'':'it' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>

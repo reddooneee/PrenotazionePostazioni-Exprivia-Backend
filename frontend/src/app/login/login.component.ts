@@ -50,8 +50,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.loginForm = this.formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      email: ['', { validators: [Validators.required, Validators.email], nonNullable: true }],
+      password: ['', { validators: [Validators.required, Validators.minLength(6)], nonNullable: true }]
     });
 
     this.loginForm.valueChanges
@@ -75,12 +75,16 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (this.loginForm.valid) {
       this.isLoading = true;
       this.errorMessage = null;
+      
+      // Disable form controls while loading
+      this.loginForm.disable();
 
       this.loginService.login(this.loginForm.value)
         .pipe(
           takeUntil(this.destroy$),
           finalize(() => {
             this.isLoading = false;
+            this.loginForm.enable();
           })
         )
         .subscribe({

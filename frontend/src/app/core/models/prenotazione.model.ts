@@ -1,13 +1,21 @@
 import { User } from './user.model';
 import { Postazione } from './postazione.model';
+import { Stanza } from './stanza.model';
 import { StatoPrenotazione } from './enums';
 
 export interface Prenotazione {
     id_prenotazione?: number;
-    user?: User;
+    users?: User;
     postazione?: Postazione;
-    data_prenotazione: string;
-    stato_prenotazione: StatoPrenotazione;
-    creatoIl?: string;
-    aggiornatoIl?: string;
+    stanze?: Stanza;
+    stato_prenotazione?: StatoPrenotazione;
+    data_inizio?: string;
+    data_fine?: string;
+}
+
+export interface PrenotazioneRequest {
+    id_stanza: number;
+    id_postazione: number;
+    data_inizio: string;
+    data_fine: string;
 } 

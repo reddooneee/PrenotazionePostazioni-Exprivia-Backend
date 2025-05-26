@@ -14,6 +14,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatNativeDateModule } from "@angular/material/core";
+import { CalendarService } from "./app/core/services/calendar.service";
 import {
   LucideAngularModule,
   CircleCheck,
@@ -101,5 +102,6 @@ bootstrapApplication(AppComponent, {
     AxiosService,
     UserService,
     AuthService,
+    CalendarService
   ],
 }).catch((err) => console.error(err));

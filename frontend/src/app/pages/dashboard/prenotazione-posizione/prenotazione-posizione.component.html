@@ -1,170 +1,145 @@
-<!-- <!-- Main Container -->
-<div class="max-w-7xl mx-auto p-6">
-  <!-- Loading Indicator -->
-  <!-- <div *ngIf="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-  </div> -->
-
-  <div class="grid grid-cols-12 gap-6">
-    <!-- Calendar Section -->
-    <div class="col-span-12 md:col-span-8 bg-white rounded-xl shadow-sm p-6">
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center space-x-4">
-          <h2 class="text-xl font-semibold">{{ currentMonth }}</h2>
-          <div class="flex space-x-2">
-            <button class="text-sm text-gray-500 hover:text-gray-900 transition-colors duration-200"
-              (click)="previousMonth()">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="text-sm text-gray-500 hover:text-gray-900 transition-colors duration-200"
-              (click)="nextMonth()">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Calendar Grid -->
-      <div class="mb-4 grid grid-cols-7 text-center text-sm text-gray-500">
-        <div class="text-red-500 font-medium">Dom</div>
-        <div>Lun</div>
-        <div>Mar</div>
-        <div>Mer</div>
-        <div>Gio</div>
-        <div>Ven</div>
-        <div class="text-red-500 font-medium">Sab</div>
-      </div>
-
-      <div class="grid grid-cols-7 gap-1 bg-gray-100">
-        <div *ngFor="let day of calendarDays"
-          class="aspect-square bg-white flex flex-col items-center justify-center p-2 relative cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-lg hover:z-10"
-          [class.bg-gray-50]="!day.isCurrentMonth" [class.text-gray-400]="!day.isCurrentMonth"
-          [class.bg-blue-50]="day.isToday" [class.ring-2]="day.isToday" [class.ring-blue-400]="day.isToday"
-          [class.bg-blue-100]="day.isSelected" [class.ring-2]="day.isSelected" [class.ring-blue-500]="day.isSelected"
-          [class.bg-red-50]="day.isWeekend" [class.text-red-500]="day.isWeekend" [class.opacity-50]="day.isDisabled"
-          [class.cursor-not-allowed]="day.isDisabled" (click)="onDateClick(day)">
-          <span class="text-sm font-medium">{{ day.date | date:'d' }}</span>
-          <div *ngIf="day.availableCount !== undefined" class="absolute top-1 right-1 text-xs">
-            <span class="flex items-center">
-              <span class="w-2 h-2 rounded-full mr-1" [class.bg-green-500]="day.availableCount > 5"
-                [class.bg-yellow-500]="day.availableCount <= 5 && day.availableCount > 0"
-                [class.bg-red-500]="day.availableCount === 0"></span>
-              {{ day.availableCount }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
+<!-- Main Container -->
+<div class="max-w-7xl mx-auto p-4 sm:p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Booking Form Section -->
-    <div class="col-span-12 md:col-span-4 bg-white rounded-xl shadow-sm p-6">
-      <h3 class="text-lg font-semibold mb-4">Dettagli Prenotazione</h3>
+    <div class="lg:col-span-12">
+      <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+        <h3 class="text-lg font-semibold mb-4">Dettagli Prenotazione</h3>
 
-      <!-- Room Type Selection -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Stanza</label>
-        <select [(ngModel)]="bookingForm.tipo_stanza" (ngModelChange)="onTipoStanzaChange()"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-          <option *ngFor="let tipo of tipiStanza" [value]="tipo">
-            {{ (tipo) }}
-          </option>
-        </select>
-      </div>
+        <form [formGroup]="bookingForm" class="space-y-6">
+          <!-- Calendar and Time Selection Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Calendar Section -->
+            <div class="md:col-span-2">
+              <app-calendar [view]="'month'" [multiSelect]="false" [maxSelections]="1"
+                (dateSelectionChange)="onDateSelectionChange($event)">
+              </app-calendar>
+            </div>
 
-      <!-- Workspace Selection -->
-      <div class="mb-6">
-        <label for="tipoStanza" class="block text-sm font-semibold text-gray-800 mb-2">
-          Tipo Stanza
-        </label>
-        <div class="relative">
-          <select
-            id="tipoStanza"
-            [(ngModel)]="bookingForm.tipo_stanza"
-            (ngModelChange)="onTipoStanzaChange()"
-            class="block w-full appearance-none bg-white border border-gray-300 rounded-xl px-4 py-2 pr-10 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"
-          >
-            <option value="" disabled selected>Seleziona tipo stanza</option>
-            <option *ngFor="let tipo of tipiStanza" [value]="tipo">
-              {{ tipo.replace('_', ' ').toLowerCase() | titlecase }}
-            </option>
-          </select>
-          <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
+            <div class="flex flex-col gap-4">
+              <!-- Room Type Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Stanza</label>
+                <select formControlName="tipo_stanza"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                  <option value="">Seleziona tipo stanza</option>
+                  <option *ngFor="let tipo of tipiStanza" [value]="tipo">
+                    {{ tipo }}
+                  </option>
+                </select>
+              </div>
+              <!-- Workstation Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Postazione</label>
+                <select formControlName="id_postazione"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                  <option value="">Seleziona postazione</option>
+                  <option *ngFor="let postazione of state.postazioniDisponibili" [value]="postazione.id_postazione">
+                    {{ postazione.nomePostazione }} - {{ postazione.stanza_nome }}
+                  </option>
+                </select>
+              </div>
+              <!-- Room Selection -->
+              <!-- <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Stanza</label>
+                <select formControlName="id_stanza" [disabled]="true"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 cursor-not-allowed">
+                  <option value="">Seleziona stanza</option>
+                  <option *ngFor="let stanza of state.stanze" [value]="stanza.id_stanza">
+                    {{ stanza.nome }}
+                  </option>
+                </select>
+              </div> -->
+              <!-- Time Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Orario Inizio</label>
+                <select formControlName="ora_inizio"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                  <option value="">Seleziona orario inizio</option>
+                  <option *ngFor="let timeSlot of state.availableTimeSlots" [value]="timeSlot">
+                    {{ timeSlot }}
+                  </option>
+                </select>
+              </div>
+              <!-- Time Selection -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Orario Fine</label>
+                <select formControlName="ora_fine"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                  <option value="">Seleziona orario fine</option>
+                  <option *ngFor="let timeSlot of state.availableTimeSlots" [value]="timeSlot"
+                    [disabled]="timeSlot <= bookingForm.get('ora_inizio')?.value">
+                    {{ timeSlot }}
+                  </option>
+                </select>
+              </div>
+              <!-- Error Message -->
+              <div *ngIf="state.errorMessage" class="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                {{ state.errorMessage }}
+              </div>
+              <!-- Submit Button -->
+              <button (click)="createPrenotazione()"
+                [disabled]="!bookingForm.valid || state.selectedDates.length === 0 || state.isLoading"
+                class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]">
+                {{ state.isLoading ? 'Prenotazione in corso...' : 'Prenota' }}
+              </button>
+            </div>
+
+
           </div>
-        </div>
-      </div>
 
-      <!-- Time Slot Selection -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Orario</label>
-        <select [(ngModel)]="bookingForm.ora_inizio"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-          <option value="">Seleziona orario</option>
-          <option *ngFor="let timeSlot of availableTimeSlots" [value]="timeSlot">
-            {{ timeSlot }}
-          </option>
-        </select>
-      </div>
 
-      <!-- Selected Date Display -->
-      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h4 class="text-sm font-mexwdium text-gray-700 mb-2">Data Selezionata</h4>
-        <div *ngIf="selectedDates.length > 0" class="text-sm text-gray-600">
-          {{ selectedDates[0] | date:'fullDate':'it-IT' }}
-        </div>
-        <div *ngIf="selectedDates.length === 0" class="text-sm text-gray-500">
-          Nessuna data selezionata
-        </div>
-      </div>
 
-      <!-- Submit Button -->
-      <button (click)="createPrenotazione()"
-        class="w-full bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]">
-        Prenota
-      </button>
+
+        </form>
+      </div>
     </div>
   </div>
 
   <!-- User Bookings Section -->
-  <div class="mt-8 bg-white rounded-xl shadow-sm p-6">
+  <div class="mt-8 bg-white rounded-xl shadow-sm p-4 sm:p-6">
     <h3 class="text-lg font-semibold mb-4">Le tue prenotazioni</h3>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orario</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Postazione</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato</th>
+            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orario
+            </th>
+            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Postazione</th>
+            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato
+            </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr *ngFor="let prenotazione of prenotazioni" class="hover:bg-gray-50 transition-colors duration-150">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ prenotazione.data_inizio | date:'shortDate':'it-IT' }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ prenotazione.data_inizio | date:'shortTime':'it-IT' }} -
               {{ prenotazione.data_fine | date:'shortTime':'it-IT' }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ prenotazione.postazione?.id_postazione }}
+            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ prenotazione.stanze?.nome}} - {{ prenotazione.postazione?.nomePostazione }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
               <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" [ngClass]="{
-                      'bg-green-100 text-green-800': prenotazione.stato_prenotazione === 'CONFERMATA',
-                      'bg-yellow-100 text-yellow-800': prenotazione.stato_prenotazione === 'IN_ATTESA',
-                      'bg-red-100 text-red-800': prenotazione.stato_prenotazione === 'ANNULLATA'
-                    }">
+                'bg-green-100 text-green-800': prenotazione.stato_prenotazione === 'CONFERMATA',
+                'bg-red-100 text-red-800': prenotazione.stato_prenotazione === 'ANNULLATA'
+              }">
                 {{ prenotazione.stato_prenotazione }}
               </span>
+            </td>
+          </tr>
+          <tr *ngIf="!prenotazioni?.length">
+            <td colspan="4" class="px-4 sm:px-6 py-4 text-center text-sm text-gray-500">
+              Nessuna prenotazione trovata
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
-</div> 
+</div>

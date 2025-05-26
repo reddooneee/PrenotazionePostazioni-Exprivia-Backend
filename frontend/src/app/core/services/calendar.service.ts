@@ -1,154 +1,144 @@
-import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable } from "rxjs";
+import { Injectable, signal, computed, Signal } from "@angular/core";
+import { 
+  format, 
+  addMonths, 
+  subMonths, 
+  startOfMonth, 
+  endOfMonth, 
+  eachDayOfInterval, 
+  isSameMonth, 
+  isToday, 
+  addWeeks, 
+  subWeeks, 
+  startOfWeek, 
+  endOfWeek, 
+  getDay, 
+  startOfDay,
+  isWeekend,
+  addDays
+} from "date-fns";
+import { it } from "date-fns/locale";
 
 export interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;
-  isSelected: boolean;
   isToday: boolean;
   isWeekend: boolean;
   isDisabled: boolean;
-  availableCount?: number;
+  isSelected?: boolean;
+  availableCount?: number | undefined;
 }
+
+export type CalendarView = 'month' | 'week';
 
 @Injectable({
   providedIn: "root",
 })
 export class CalendarService {
-  private currentDate = new BehaviorSubject<Date>(new Date());
-  private selectedDates = new BehaviorSubject<Date[]>([]);
-  private calendarDays = new BehaviorSubject<CalendarDay[]>([]);
+  private readonly currentDateTime = signal<Date>(new Date());
+  private readonly selectedDates = signal<Date[]>([]);
+  private readonly currentView = signal<CalendarView>("month");
 
-  constructor() {
-    this.renderCalendar();
+  readonly calendarDays = computed(() => {
+    const current = this.currentDateTime();
+    const view = this.currentView();
+
+    if (view === "month") {
+      // Per la vista mensile, genera sempre una griglia 5x7
+      const firstDayOfMonth = startOfMonth(current);
+      const startDate = startOfWeek(firstDayOfMonth, { locale: it, weekStartsOn: 1 });
+      
+      // Genera 35 giorni (5 settimane)
+      const days: CalendarDay[] = [];
+      for (let i = 0; i < 35; i++) {
+        const date = addDays(startDate, i);
+        const isWeekendDay = isWeekend(date);
+        days.push({
+          date,
+          isCurrentMonth: isSameMonth(date, current),
+          isToday: isToday(date),
+          isWeekend: isWeekendDay,
+          isDisabled: this.isDateDisabled(date, isWeekendDay)
+        });
+      }
+      return days;
+    } else {
+      // Per la vista settimanale
+      const start = startOfWeek(current, { locale: it, weekStartsOn: 1 });
+      const end = endOfWeek(current, { locale: it, weekStartsOn: 1 });
+      
+      return eachDayOfInterval({ start, end }).map(date => {
+        const isWeekendDay = isWeekend(date);
+        return {
+          date,
+          isCurrentMonth: isSameMonth(date, current),
+          isToday: isToday(date),
+          isWeekend: isWeekendDay,
+          isDisabled: this.isDateDisabled(date, isWeekendDay)
+        };
+      });
+    }
+  });
+
+  readonly formattedCurrentMonth = computed(() => 
+    format(this.currentDateTime(), "MMMM yyyy", { locale: it })
+  );
+
+  getCurrentDateTime(): Signal<Date> {
+    return this.currentDateTime.asReadonly();
   }
 
-  getCurrentDate(): Observable<Date> {
-    return this.currentDate.asObservable();
+  getSelectedDates(): Signal<Date[]> {
+    return this.selectedDates.asReadonly();
   }
 
-  getSelectedDates(): Observable<Date[]> {
-    return this.selectedDates.asObservable();
+  getCurrentView(): Signal<CalendarView> {
+    return this.currentView.asReadonly();
   }
 
-  getCalendarDays(): Observable<CalendarDay[]> {
-    return this.calendarDays.asObservable();
+  setView(view: CalendarView): void {
+    this.currentView.set(view);
   }
 
   setCurrentDate(date: Date): void {
-    this.currentDate.next(date);
-    this.renderCalendar();
+    this.currentDateTime.set(startOfDay(date));
   }
 
   selectDates(dates: Date[]): void {
-    this.selectedDates.next(dates);
-    this.renderCalendar();
+    this.selectedDates.set(dates.map(date => startOfDay(date)));
   }
 
   getCurrentWeek(): Date[] {
-    const curr = new Date(this.currentDate.value);
-    const week: Date[] = [];
-
-    // Starting from Monday
-    curr.setDate(curr.getDate() - curr.getDay() + 1);
-
-    for (let i = 0; i < 7; i++) {
-      week.push(new Date(curr));
-      curr.setDate(curr.getDate() + 1);
-    }
-
-    return week;
-  }
-
-  private renderCalendar(): void {
-    const days: CalendarDay[] = [];
-    const currentDate = this.currentDate.value;
-    const selectedDates = this.selectedDates.value;
-    const firstDay = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    const lastDay = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0
-    );
-    const today = new Date();
-
-    // Add days from previous month
-    const firstDayOfWeek = firstDay.getDay();
-    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(firstDay);
-      date.setDate(date.getDate() - i - 1);
-      days.push(this.createCalendarDay(date, false, today, selectedDates));
-    }
-
-    // Add days from current month
-    for (let i = 1; i <= lastDay.getDate(); i++) {
-      const date = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        i
-      );
-      days.push(this.createCalendarDay(date, true, today, selectedDates));
-    }
-
-    // Add days from next month if needed
-    const remainingDays = 42 - days.length; // 6 rows * 7 days
-    if (remainingDays > 0) {
-      for (let i = 1; i <= remainingDays; i++) {
-        const date = new Date(lastDay);
-        date.setDate(date.getDate() + i);
-        days.push(this.createCalendarDay(date, false, today, selectedDates));
-      }
-    }
-
-    this.calendarDays.next(days);
-  }
-
-  private createCalendarDay(
-    date: Date,
-    isCurrentMonth: boolean,
-    today: Date,
-    selectedDates: Date[]
-  ): CalendarDay {
-    const isToday = date.toDateString() === today.toDateString();
-    const isSelected = selectedDates.some(
-      (d) => d.toDateString() === date.toDateString()
-    );
-    const isWeekend = this.isWeekend(date);
-
-    return {
-      date,
-      isCurrentMonth,
-      isSelected,
-      isToday,
-      isWeekend,
-      isDisabled: isWeekend || date < today,
-    };
-  }
-
-  private isWeekend(date: Date): boolean {
-    const day = date.getDay();
-    return day === 0 || day === 6; // 0 is Sunday, 6 is Saturday
+    const curr = this.currentDateTime();
+    const start = startOfWeek(curr, { locale: it, weekStartsOn: 1 });
+    return eachDayOfInterval({
+      start,
+      end: endOfWeek(curr, { locale: it, weekStartsOn: 1 })
+    });
   }
 
   nextMonth(): void {
-    const current = this.currentDate.value;
-    this.setCurrentDate(
-      new Date(current.getFullYear(), current.getMonth() + 1, 1)
-    );
+    this.currentDateTime.update(current => startOfDay(addMonths(current, 1)));
   }
 
   previousMonth(): void {
-    const current = this.currentDate.value;
-    this.setCurrentDate(
-      new Date(current.getFullYear(), current.getMonth() - 1, 1)
-    );
+    this.currentDateTime.update(current => startOfDay(subMonths(current, 1)));
+  }
+
+  nextWeek(): void {
+    this.currentDateTime.update(current => startOfDay(addWeeks(current, 1)));
+  }
+
+  previousWeek(): void {
+    this.currentDateTime.update(current => startOfDay(subWeeks(current, 1)));
   }
 
   formatMonthYear(date: Date): string {
-    return date.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+    return format(date, "MMMM yyyy", { locale: it });
+  }
+
+  private isDateDisabled(date: Date, isWeekendDay: boolean): boolean {
+    const today = startOfDay(new Date());
+    return date < today || isWeekendDay;
   }
 }

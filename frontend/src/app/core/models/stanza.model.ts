@@ -3,10 +3,16 @@ import { TipoStanza } from './enums';
 
 export interface Stanza {
     id_stanza?: number;
-    nome: string;
+    nome?: string;
+    tipo_stanza?: string;
+    capacita_stanza?: number;
     postazioni?: Postazione[];
-    tipo_stanza: TipoStanza;
+}
+
+export interface StanzaWithPostazioni extends Stanza {
+    id_stanza: number;
+    nome: string;
+    tipo_stanza: string;
     capacita_stanza: number;
-    creatoIl?: string;
-    aggiornatoIl?: string;
+    postazioni: Postazione[];
 } 

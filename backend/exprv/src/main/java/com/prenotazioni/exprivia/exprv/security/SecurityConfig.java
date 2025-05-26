@@ -44,17 +44,12 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        // Test Endpoints
-                        .requestMatchers("/api/admin/**").permitAll()
 
+                        // Test Endpoints DA VEDERE SE METTERLI ONLY ADMIN O AUTHENTICATED
                         .requestMatchers("/api/postazioni/aggiornaPostazione/**").permitAll()
 
-                        // DA CAMBIARE IN AUTHENTICATED
-                        .requestMatchers("/api/stats/prenotazioni**").permitAll()
-                        .requestMatchers("/api/stats/stanze**").permitAll()
-
                         // Admin only endpoints
-                        // .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                        .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                         .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
                         // Authenticated user endpoints
@@ -62,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/postazioni/**").authenticated()
                         .requestMatchers("/api/stanze/**").authenticated()
                         .requestMatchers("/api/prenotazioni/**").authenticated()
+                        .requestMatchers("/api/stats/prenotazioni**").authenticated()
+                        .requestMatchers("/api/stats/stanze**").authenticated()
 
                         // Any other request needs authentication
                         .anyRequest().authenticated());
