@@ -49,6 +49,7 @@ export interface FloorPlanMarker {
 }
 
 export interface User {
+    id(id: any, updateData: any): unknown;
     id_user?: number;
     nome: string;
     cognome: string;

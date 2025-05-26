@@ -1,4 +1,4 @@
-<header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100" role="banner">
+<header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
     <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
         <!-- Logo -->
         <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/']" role="link" aria-label="Torna alla home">
@@ -8,60 +8,56 @@
         <!-- Navigation for authenticated users -->
         <ng-container *ngIf="isAuthenticated">
             <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-1" role="navigation" aria-label="Menu principale">
-                <a [routerLink]="['/dashboard/prenotazione-posizione']"
-                    [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/prenotazione-posizione')"
-                    [class.text-white]="isRouteActive('/dashboard/prenotazione-posizione')"
-                    class="px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
-                    aria-current="page">
-                    Prenota
-                </a>
-                <a [routerLink]="['/dashboard/bookings']"
-                    [class.bg-[var(--color-expriviaOrange)]]="isRouteActive('/dashboard/bookings')"
-                    [class.text-white]="isRouteActive('/dashboard/bookings')"
-                    class="px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)] text-sm sm:text-base"
-                    aria-current="page">
-                    Le mie prenotazioni
-                </a>
-            </nav>
-
+            
             <!-- User Menu -->
             <div class="flex items-center gap-2 sm:gap-4">
                 <!-- Desktop User Menu -->
-                <div class="hidden md:flex items-center gap-2 sm:gap-4">
+                <div class="hidden md:flex items-center gap-4">
                     <button mat-button [matMenuTriggerFor]="userMenu" 
-                        class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)]"
+                        class="flex items-center gap-3 px-4 py-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] border border-gray-100 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-base)]"
                         aria-label="Menu utente">
-                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[var(--color-expriviaOrange)] flex items-center justify-center text-white">
-                            <lucide-icon name="user" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-                        </div>
-                        <span class="text-gray-700 font-medium text-sm sm:text-base">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
-                        <lucide-icon name="chevron-down" class="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" aria-hidden="true" />
-                    </button>
-                    <mat-menu #userMenu="matMenu" class="mt-2">
-                        <button mat-menu-item [routerLink]="['/dashboard/profile']" class="flex items-center gap-2">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-expriviaOrange)] text-white">
                             <lucide-icon name="user" class="w-4 h-4" aria-hidden="true" />
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs text-gray-500">Ciao! Benvenuto</span>
+                            <span class="text-[var(--color-expriviaBlue)] font-medium text-sm">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
+                        </div>
+                        <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 ml-1" aria-hidden="true" />
+                    </button>
+                    
+                    <button mat-icon-button 
+                        class="p-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)]"
+                        (click)="logout()
+                        "
+                        aria-label="Logout
+                        ">
+                        <lucide-icon name="log-out" class="w-5 h-5 text-gray-700" aria-hidden="true" />
+                    </button>
+
+                    <mat-menu #userMenu="matMenu" class="mt-2 shadow-[var(--shadow-md)] rounded-[var(--radius-lg)] overflow-hidden">
+                        <button mat-menu-item [routerLink]="['update-user']" 
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-[var(--transition-colors)]">
+                            <lucide-icon name="user" class="w-4 h-4 text-gray-500" aria-hidden="true" />
                             <span>Profilo</span>
-                        </button>
-                        <button mat-menu-item (click)="logout()" class="flex items-center gap-2 text-red-600">
-                            <lucide-icon name="log-out" class="w-4 h-4" aria-hidden="true" />
-                            <span>Logout</span>
                         </button>
                     </mat-menu>
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button mat-icon-button class="block md:hidden p-1.5 sm:p-2 rounded-[var(--radius-lg)] hover:bg-gray-50" 
-                    (click)="toggleMenu()"
-                    aria-label="Apri menu"
-                    [attr.aria-expanded]="isMenuOpen">
-                    <lucide-icon name="menu" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" aria-hidden="true" />
-                </button>
+                <div class="md:hidden">
+                    <button mat-icon-button class="p-1.5 sm:p-2 rounded-[var(--radius-lg)] hover:bg-gray-50" 
+                        (click)="toggleMenu()"
+                        aria-label="Apri menu"
+                        [attr.aria-expanded]="isMenuOpen">
+                        <lucide-icon name="menu" class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" aria-hidden="true" />
+                    </button>
+                </div>
             </div>
 
             <!-- Mobile Menu -->
             <div *ngIf="isMenuOpen" 
-                class="fixed md:hidden inset-0 bg-black bg-opacity-50 z-[var(--z-50)] transition-[var(--transition-opacity)]"
+                class="fixed md:hidden inset-0 bg-opacity-50 z-[var(--z-50)] transition-[var(--transition-opacity)]"
                 (click)="isMenuOpen = false"
                 role="dialog"
                 aria-modal="true"
@@ -107,7 +103,7 @@
                             <lucide-icon name="user" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
                             <span>Profilo</span>
                         </a>
-                        <button (click)="logout(); isMenuOpen = false"
+                        <button (click)="logout()"
                             class="w-full flex items-center gap-2 px-3 sm:px-4 py-2 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)] text-sm sm:text-base">
                             <lucide-icon name="log-out" class="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
                             <span>Logout</span>

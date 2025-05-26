@@ -16,6 +16,8 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { MatNativeDateModule } from "@angular/material/core";
 import {
   LucideAngularModule,
+  CircleCheck,
+  ChevronDown,
   Calendar,
   MapPin,
   Clock,
@@ -68,6 +70,8 @@ bootstrapApplication(AppComponent, {
       MatSidenavModule,
       MatExpansionModule,
       LucideAngularModule.pick({
+        ChevronDown,
+        CircleCheck,
         Calendar,
         MapPin,
         Clock,

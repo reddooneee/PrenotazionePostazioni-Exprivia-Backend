@@ -25,6 +25,7 @@ import { MatMenuModule } from "@angular/material/menu";
 import { MatDividerModule } from "@angular/material/divider";
 import { DashboardService } from "./dashboard.service";
 import { PrenotazionePosizioneComponent } from "./prenotazione-posizione/prenotazione-posizione.component";
+import { UpdateUserComponent } from "../../account/update-user/update-user.component";
 
 @Component({
   selector: "app-dashboard",
@@ -43,8 +44,7 @@ import { PrenotazionePosizioneComponent } from "./prenotazione-posizione/prenota
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
-    PrenotazionePosizioneComponent
-  ],
+],
   providers: [
     AuthService,
     LoginService,

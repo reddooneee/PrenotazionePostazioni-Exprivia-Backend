@@ -26,6 +26,9 @@ interface ResetPasswordRequest {
   providedIn: "root",
 })
 export class AuthService {
+  updateUserIdentity(arg0: { nome: any; cognome: any; email: any; id_user?: number; password?: string; enabled?: boolean | undefined; authorities?: string[] | undefined; creatoIl?: string; aggiornatoIl?: string; }) {
+    throw new Error("Method not implemented.");
+  }
   private userIdentity = new BehaviorSubject<User | null>(null);
   private authenticationState = new BehaviorSubject<boolean>(false);
   private accountCacheKey = "account-cache";
