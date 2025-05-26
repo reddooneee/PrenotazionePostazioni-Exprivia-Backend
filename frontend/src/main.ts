@@ -42,7 +42,8 @@ import {
   Bell,
   Shield,
   ChartBar,
-  LayoutDashboard
+  LayoutDashboard,
+  X
 } from "lucide-angular";
 import { routes } from "./app/app.routes";
 import { provideHttpClient } from "@angular/common/http";
@@ -96,7 +97,8 @@ bootstrapApplication(AppComponent, {
         Bell,
         Shield,
         ChartBar,
-        LayoutDashboard
+        LayoutDashboard,
+        X
       })
     ),
     AxiosService,

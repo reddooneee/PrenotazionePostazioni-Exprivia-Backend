@@ -17,6 +17,17 @@ const redirectAuthenticatedToPrenotazione = () => {
   const router = inject(Router);
 
   if (authService.isAuthenticated()) {
+    // Controlla se l'utente sta navigando intenzionalmente alla home
+    // o se è un caricamento iniziale dell'app
+    const navigation = router.getCurrentNavigation();
+    const isInitialNavigation = !navigation?.previousNavigation;
+    
+    // Se è la navigazione iniziale, permetti di vedere la home
+    if (isInitialNavigation) {
+      return true;
+    }
+    
+    // Altrimenti reindirizza alla dashboard
     return router.createUrlTree(["/dashboard/prenotazione-posizione"]);
   }
   return true;

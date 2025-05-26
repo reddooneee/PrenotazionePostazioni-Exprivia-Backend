@@ -23,6 +23,6 @@ export class UserService {
   }
 
   updateUser(id: number, updates: Partial<User>): Observable<User> {
-    return from(this.axiosService.put<User>(`${this.baseUrl}/aggiorna?id=${id}`, updates));
+    return from(this.axiosService.put<User>(`${this.baseUrl}/aggiorna/${id}`, updates));
   }
 }
