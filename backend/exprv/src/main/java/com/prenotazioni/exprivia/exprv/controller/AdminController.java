@@ -59,7 +59,7 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/aggiorna_utente/{id}")
+    @PutMapping("/utente/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             AdminDTO updatedUser = adminService.aggiornaUserByAdmin(id, updates);
