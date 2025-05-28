@@ -1,7 +1,9 @@
 package com.prenotazioni.exprivia.exprv.service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -158,11 +160,29 @@ public class AdminService {
                     existingUser.setPassword(passwordEncoder.encode((String) value));
                     break;
                 case "authorities":
+                    Set<String> authoritiesSet;
                     if (value instanceof Set) {
-                        @SuppressWarnings("unchecked")
-                        Set<String> authorities = (Set<String>) value;
-                        existingUser.setAuthorities(userMapper.stringsToAuthorities(authorities));
+                        authoritiesSet = (Set<String>) value;
+                    } else if (value instanceof List) {
+                        authoritiesSet = new HashSet<>((List<String>) value);
+                    } else if (value instanceof String[]) {
+                        authoritiesSet = new HashSet<>(Arrays.asList((String[]) value));
+                    } else {
+                        throw new IllegalArgumentException("Formato authorities non valido");
                     }
+
+                    // Verifica validità dei ruoli
+                    Set<Authority> authorities = new HashSet<>();
+                    for (String roleName : authoritiesSet) {
+                        if (roleName == null || roleName.isEmpty()) {
+                            throw new IllegalArgumentException("L'utente deve avere almeno un ruolo valido");
+                        }
+
+                        Authority authority = authorityRepository.findByName(roleName)
+                                .orElseThrow(() -> new IllegalArgumentException("Ruolo non valido: " + roleName));
+                        authorities.add(authority);
+                    }
+                    existingUser.setAuthorities(authorities);
                     break;
                 case "enabled":
                     existingUser.setEnabled((Boolean) value);

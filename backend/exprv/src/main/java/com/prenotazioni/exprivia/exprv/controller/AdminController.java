@@ -84,14 +84,6 @@ public class AdminController {
     @PostMapping("/crea_utente")
     public ResponseEntity<?> register(@RequestBody UserRegistrationDTO userRegistrationDTO) {
         try {
-            System.out.println("Dati ricevuti nel controller admin: " + userRegistrationDTO);
-            System.out.println("Tipo authorities: " + (userRegistrationDTO.getAuthorities() != null
-                    ? userRegistrationDTO.getAuthorities().getClass().getName()
-                    : "null"));
-            System.out.println("Authorities ricevute: " + userRegistrationDTO.getAuthorities());
-
-            System.out.println("Authorities: " + userRegistrationDTO.getAuthorities());
-
             UserDTO newUser = adminService.creaUtenteAdmin(userRegistrationDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (IllegalArgumentException e) {
