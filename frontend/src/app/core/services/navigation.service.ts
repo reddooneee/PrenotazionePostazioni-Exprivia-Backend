@@ -49,6 +49,12 @@ export class NavigationService {
       route: "/dashboard/statistiche",
       authorities: ["ROLE_ADMIN"],
     },
+    {
+      label: "Aggiorna Profilo",
+      icon: "user",
+      route: "/dashboard/update-user",
+      authorities: ["ROLE_USER", "ROLE_ADMIN"],
+    },
   ];
 
   // Subject per gestire gli aggiornamenti della navigazione

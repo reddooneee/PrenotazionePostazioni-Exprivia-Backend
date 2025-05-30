@@ -46,11 +46,10 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         // Test Endpoints DA VEDERE SE METTERLI ONLY ADMIN O AUTHENTICATED
-                        .requestMatchers("/api/postazioni/aggiornaPostazione/**").permitAll()
 
                         // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                         .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                        .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
                         // Authenticated user endpoints
                         .requestMatchers("/api/utenti/**").authenticated()

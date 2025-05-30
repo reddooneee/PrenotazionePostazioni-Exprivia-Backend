@@ -83,7 +83,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   isRouteActive(route: string): boolean {
-    return window.location.pathname === route;
+    const currentRoute = window.location.pathname;
+    if (route === '/dashboard/update-user') {
+      return currentRoute === '/dashboard/update-user';
+    }
+    return currentRoute === route;
   }
 
   ngOnDestroy(): void {

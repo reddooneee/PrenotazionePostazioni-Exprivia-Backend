@@ -7,7 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.prenotazioni.exprivia.exprv.dto.UserDTO;
 import com.prenotazioni.exprivia.exprv.service.UserService;
@@ -32,8 +37,8 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/aggiorna")
-    public ResponseEntity<?> updateUser(@RequestParam Integer id, @RequestBody Map<String, Object> updates) {
+    @PutMapping("/aggiorna/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
         try {
             UserDTO updatedUser = userService.aggiornaUser(id, updates);
             return ResponseEntity.ok(updatedUser);

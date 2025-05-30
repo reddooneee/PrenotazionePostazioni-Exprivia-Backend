@@ -6,17 +6,38 @@
       <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <h3 class="text-lg font-semibold mb-4">Dettagli Prenotazione</h3>
 
-        <form [formGroup]="bookingForm" class="space-y-6">
+        <form [formGroup]="bookingForm" class="space-y-6 ">
           <!-- Calendar and Time Selection Grid -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Calendar Section -->
             <div class="md:col-span-2">
-              <app-calendar [view]="'month'" [multiSelect]="false" [maxSelections]="1"
+              <app-calendar [view]="'month'" [multiSelect]="true" [maxSelections]="5"
                 (dateSelectionChange)="onDateSelectionChange($event)">
               </app-calendar>
             </div>
 
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-4 justify-end">
+              <!-- Selected Dates Summary -->
+              <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center mb-2">
+                  <h3 class="text-sm font-medium text-gray-700">Date selezionate:</h3>
+                  <span class="text-xs text-gray-500">{{ state.selectedDates.length }}/5 date</span>
+                </div>
+                <div class="flex flex-col gap-1 min-h-[100px]">
+                  <div *ngIf="state.selectedDates.length === 0"
+                    class="flex items-center justify-center h-full text-gray-400 text-sm">
+                    Nessuna data selezionata
+                  </div>
+                  <div *ngFor="let date of state.selectedDates"
+                    class="flex justify-between items-center text-xs sm:text-sm text-gray-600 py-1 px-2 hover:bg-gray-100 rounded border border-gray-200">
+                    <span>{{ date | date:'EEEE d MMMM yyyy':'':'it' }}</span>
+                    <button (click)="removeDateFromSelection(date)"
+                      class="text-red-500 hover:text-red-700 focus:outline-none" aria-label="Rimuovi data">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
               <!-- Room Type Selection -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Stanza</label>
@@ -39,17 +60,6 @@
                   </option>
                 </select>
               </div>
-              <!-- Room Selection -->
-              <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Stanza</label>
-                <select formControlName="id_stanza" [disabled]="true"
-                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 cursor-not-allowed">
-                  <option value="">Seleziona stanza</option>
-                  <option *ngFor="let stanza of state.stanze" [value]="stanza.id_stanza">
-                    {{ stanza.nome }}
-                  </option>
-                </select>
-              </div> -->
               <!-- Time Selection -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Orario Inizio</label>
@@ -84,13 +94,7 @@
                 {{ state.isLoading ? 'Prenotazione in corso...' : 'Prenota' }}
               </button>
             </div>
-
-
           </div>
-
-
-
-
         </form>
       </div>
     </div>

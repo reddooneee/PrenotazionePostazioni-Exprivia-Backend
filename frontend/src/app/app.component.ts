@@ -6,6 +6,7 @@ import { FooterComponent } from "./layout/footer/footer.component";
 import { filter } from "rxjs";
 import { UpdateUserComponent } from "./account/update-user/update-user.component";
 import { HeaderComponent } from "./layout/header/header.component";
+import { AuthService } from "./core/auth/auth.service";
 
 
 @Component({
@@ -18,15 +19,22 @@ export class AppComponent implements OnInit {
   title = 'exprivia';
   showLayout: boolean = true;
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
-      // Aggiungi il controllo per la rotta 'prenotazione-posizione'
-      this.showLayout = !event.urlAfterRedirects.includes('/admin-dashboard') &&
-        !event.urlAfterRedirects.includes('/prenotazione-posizione');
+      // Mostra header e footer sempre, tranne che per:
+      // - Dashboard admin (gli admin hanno la loro sidebar)
+      // - Pagine di login/registrazione se necessario
+      const isAdminDashboard = event.urlAfterRedirects.includes('/dashboard') && 
+        this.authService.hasAnyAuthority(['ROLE_ADMIN']);
+      
+      this.showLayout = !isAdminDashboard;
     });
   }
 }

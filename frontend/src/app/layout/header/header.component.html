@@ -15,7 +15,7 @@
                     <div class="flex items-center gap-4">
                         <div class="relative group">
                             <div class="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] cursor-pointer">
-                                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-expriviaOrange)] text-white font-medium">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-expriviaBlue)] text-white font-medium">
                                     {{ currentUser ? ((currentUser.nome ? (currentUser.nome | slice:0:1) : '') + (currentUser.cognome ? (currentUser.cognome | slice:0:1) : '')) : '' }}
                                 </div>
                                 <div class="flex flex-col">
@@ -43,58 +43,61 @@
                     </div>
                 </div>
 
-                <!-- Mobile Menu Button (Simplified) -->
+                <!-- Mobile Menu Button -->
                 <div class="md:hidden">
                     <button (click)="toggleMenu()" class="p-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)]">
                         <lucide-icon name="menu" class="w-5 h-5 text-gray-700" />
                     </button>
                 </div>
             </div>
-
-            <!-- Mobile Menu -->
-            <div *ngIf="isMenuOpen" class="fixed md:hidden inset-0  bg-opacity-50 z-[var(--z-50)] transition-[var(--transition-opacity)]" (click)="isMenuOpen = false">
-                <div class="absolute top-16 right-4 w-64 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-lg)] transform transition-[var(--transition-transform)]" (click)="$event.stopPropagation()">
-                    <div class="p-4 border-b border-gray-200">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-[var(--color-expriviaOrange)] flex items-center justify-center text-white font-medium">
-                                {{ currentUser ? ((currentUser.nome ? (currentUser.nome | slice:0:1) : '') + (currentUser.cognome ? (currentUser.cognome | slice:0:1) : '')) : '' }}
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-900">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
-                                <p class="text-xs text-gray-500">{{ currentUser?.email }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <nav class="p-2">
-                        <a [routerLink]="['/dashboard/prenotazione-posizione']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                            <lucide-icon name="calendar-plus" class="w-5 h-5" />
-                            <span>Prenota</span>
-                        </a>
-                        <a [routerLink]="['/dashboard/bookings']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                            <lucide-icon name="calendar" class="w-5 h-5" />
-                            <span>Le mie prenotazioni</span>
-                        </a>
-                        <a [routerLink]="['/dashboard/profile']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                            <lucide-icon name="user" class="w-5 h-5" />
-                            <span>Profilo</span>
-                        </a>
-                        <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
-                            <lucide-icon name="log-out" class="w-5 h-5" />
-                            <span>Logout</span>
-                        </button>
-                    </nav>
-                </div>
-            </div>
         </ng-container>
 
         <!-- Navigation for non-authenticated users -->
         <div *ngIf="!isAuthenticated" class="flex items-center gap-3">
-            <button [routerLink]="['/accedi']" class="px-4 py-2 text-sm font-medium text-white bg-[var(--color-expriviaOrange)] rounded-[var(--radius-lg)] hover:bg-[var(--color-expriviaOrange400)] transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
+            <a [routerLink]="['/accedi']" class="px-4 py-2 text-sm font-medium text-white bg-[var(--color-expriviaOrange)] rounded-[var(--radius-lg)] hover:bg-[var(--color-expriviaOrange400)] transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
                 Accedi
-            </button>
-            <button [routerLink]="['/registrazione']" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
+            </a>
+            <a [routerLink]="['/registrazione']" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
                 Registrati
-            </button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mobile Menu (outside main container) -->
+    <div *ngIf="isMenuOpen && isAuthenticated" class="md:hidden fixed inset-0 z-[var(--z-50)] bg-black/50" (click)="isMenuOpen = false">
+        <div class="absolute inset-x-0 top-16 m-4 bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] overflow-hidden transition-[var(--transition-all)]" (click)="$event.stopPropagation()">
+            <!-- User Info -->
+            <div class="p-6 bg-[var(--color-expriviaBlue)] text-white">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-xl">
+                        {{ (currentUser?.nome || 'U')[0] }}{{ (currentUser?.cognome || '')[0] }}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
+                        <p class="text-sm opacity-90">{{ currentUser?.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Links -->
+            <nav class="p-2">
+                <a [routerLink]="['/dashboard/prenotazione-posizione']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="calendar-plus" class="w-5 h-5" />
+                    <span>Prenota</span>
+                </a>
+                <a [routerLink]="['/dashboard/bookings']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="calendar" class="w-5 h-5" />
+                    <span>Le mie prenotazioni</span>
+                </a>
+                <a [routerLink]="['/dashboard/profile']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="user" class="w-5 h-5" />
+                    <span>Profilo</span>
+                </a>
+                <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
+                    <lucide-icon name="log-out" class="w-5 h-5" />
+                    <span>Logout</span>
+                </button>
+            </nav>
         </div>
     </div>
 </header>

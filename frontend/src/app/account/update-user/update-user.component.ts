@@ -25,6 +25,7 @@ import { AuthService } from "../../core/auth/auth.service"
 import { UserService } from "../../core/services/user.service"
 import type { User } from "../../core/models"
 import { FooterComponent } from "../../layout/footer/footer.component";
+import { DatePipe } from "@angular/common";
 
 @Component({
   selector: "app-update-user",

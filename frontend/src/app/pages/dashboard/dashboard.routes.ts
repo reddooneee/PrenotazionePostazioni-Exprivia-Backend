@@ -17,12 +17,12 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [UserRouteAccessService],
       },
       {
-        path: "",
+        path: "prenotazione-posizione",
         loadComponent: () =>
           import(
             "./prenotazione-posizione/prenotazione-posizione.component"
           ).then((m) => m.PrenotazionePosizioneComponent),
-        data: { authorities: ["ROLE_USER"] },
+        data: { authorities: ["ROLE_USER", "ROLE_ADMIN"] },
         canActivate: [UserRouteAccessService],
       },
       {
@@ -34,6 +34,11 @@ export const DASHBOARD_ROUTES: Routes = [
         data: { authorities: ["ROLE_ADMIN", "ROLE_USER"] },
         canActivate: [UserRouteAccessService],
       },
+      {
+        path: "",
+        redirectTo: "prenotazione-posizione",
+        pathMatch: "full"
+      }
     ],
   },
 ];
