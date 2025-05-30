@@ -4,12 +4,14 @@ import { OnInit } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from "@angular/router"
 import { FooterComponent } from "./layout/footer/footer.component";
 import { filter } from "rxjs";
+import { UpdateUserComponent } from "./account/update-user/update-user.component";
+import { HeaderComponent } from "./layout/header/header.component";
 
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule, RouterOutlet, FooterComponent],
+  imports: [CommonModule, RouterOutlet, FooterComponent, UpdateUserComponent, HeaderComponent],
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
