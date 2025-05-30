@@ -14,6 +14,7 @@ export class PrenotazionePosizioneService {
         FINE: 18
     };
 
+
     constructor(
         private prenotazioneService: PrenotazioneService,
         private stanzaService: StanzaService
@@ -62,6 +63,13 @@ export class PrenotazionePosizioneService {
         );
     }
 
+
+    getFileByPrenotazioni(date:Date): Observable<Blob> {
+        return this.prenotazioneService.exportPrenotazioniDaily(date);
+    }
+
+
+
     createPrenotazione(request: PrenotazioneRequest): Observable<void> {
         return this.prenotazioneService.createPrenotazione(request).pipe(
             map(() => void 0)
@@ -96,4 +104,7 @@ export class PrenotazionePosizioneService {
         const day = date.getDay();
         return day !== 0 && day !== 6; // 0 = Domenica, 6 = Sabato
     }
+
+
+    
 } 

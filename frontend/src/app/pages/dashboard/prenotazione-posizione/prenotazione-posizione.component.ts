@@ -31,6 +31,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   tipiStanza: string[] = [];
   prenotazioni: Prenotazione[] = [];
   private destroy$ = new Subject<void>();
+  dataSpecifica = new Date(2025,5,27);
 
   constructor(
     private fb: FormBuilder,
@@ -221,6 +222,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       this.state.isLoading = false;
     }
   }
+  
 
   private resetForm(): void {
     this.bookingForm.reset();
@@ -234,4 +236,33 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     const stanza = this.state.stanze.find(s => s.id_stanza === stanzaId);
     return stanza ? stanza.nome : '';
   }
+
+  
+  getFileByPrenotazioni(): void {
+    this.state.isLoading = true;
+
+    this.prenotazioneService.getFileByPrenotazioni(this.dataSpecifica).subscribe((blob: Blob) => {
+      const nomeFile = `prenotazioni_${this.formattaData(this.dataSpecifica)}.xlsx`;
+
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.download = nomeFile;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      this.state.isLoading = false;
+    }, error => {
+      console.error("Errore nel download del file:", error);
+      this.state.isLoading = false;
+    });
+  }
+
+  private formattaData(data: Date): string {
+    const giorno = String(data.getDate()).padStart(2, '0');
+    const mese = String(data.getMonth()).padStart(2, '0');
+    const anno = data.getFullYear();
+    return `${anno}-${mese}-${giorno}`;
+  }
+
 }

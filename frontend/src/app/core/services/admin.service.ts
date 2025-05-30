@@ -23,6 +23,7 @@ export class AdminService {
     getUserByEmail(email: string): Observable<User> {
         return from(this.axiosService.get<User>(`${this.baseUrl}/utente/email/${email}`));
     }
+    
 
     createUser(user: Partial<User>): Observable<User> {
         return from(this.axiosService.post<User>(`${this.baseUrl}/crea_utente`, user));
@@ -41,4 +42,6 @@ export class AdminService {
     createAdminUser(user: Partial<User>): Observable<User> {
         return from(this.axiosService.post<User>(`${this.baseUrl}/crea_utente`, user));
     }
+
+    
 }

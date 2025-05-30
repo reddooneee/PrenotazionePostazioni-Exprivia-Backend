@@ -33,10 +33,11 @@ export class PrenotazioneService {
         return from(this.axiosService.get<Prenotazione[]>(`${this.BASE_URL}/prenotazioni-del-giorno?data=${date}`));
     }
 
+
     /**
      * Crea una nuova prenotazione
      */
-    createPrenotazione(prenotazione: Prenotazione): Observable<Prenotazione> {
+    createPrenotazione(prenotazione: Prenotazione): Observable<Prenotazione> { 
         return from(this.axiosService.post<Prenotazione>(`${this.BASE_URL}/creaPrenotazione`, prenotazione));
     }
 
@@ -60,10 +61,20 @@ export class PrenotazioneService {
      * Esporta le prenotazioni giornaliere in formato Excel
      */
     exportPrenotazioniDaily(date: Date): Observable<Blob> {
-        const formattedDate = date.toISOString().split('T')[0];
+        console.log(" Inizio Chiamatam API");
+        const giorno = String(date.getDate()).padStart(2, '0');
+        const mese = String(date.getMonth()).padStart(2, '0'); // mese da 0 a 11
+        const anno = date.getFullYear();
+
+        const formattedDate = `${anno}-${mese}-${giorno}`;
+        console.log("Data corretta da inviare:", formattedDate);
+    
         return from(this.axiosService.get<Blob>(
             `${this.BASE_URL}/export/giorno/${formattedDate}`,
             { responseType: 'blob' }
+            
         ));
+        
     }
+   
 }
