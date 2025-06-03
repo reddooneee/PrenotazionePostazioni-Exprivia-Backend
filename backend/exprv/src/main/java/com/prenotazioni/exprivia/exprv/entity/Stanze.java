@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
 
 import jakarta.persistence.CascadeType;
@@ -20,6 +21,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_stanza"
+)
 public class Stanze {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +35,10 @@ public class Stanze {
     private String nome;
 
     @OneToMany(mappedBy = "stanze", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private List<Postazioni> postazioni = new ArrayList<>();
+
+    @OneToMany(mappedBy = "stanze")
+    private List<Prenotazioni> prenotazioni = new ArrayList<>();
 
     // Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
     @Enumerated(EnumType.STRING)
@@ -111,6 +118,14 @@ public class Stanze {
         this.postazioni = postazioni;
     }
 
+    public List<Prenotazioni> getPrenotazioni() {
+        return prenotazioni;
+    }
+
+    public void setPrenotazioni(List<Prenotazioni> prenotazioni) {
+        this.prenotazioni = prenotazioni;
+    }
+
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
@@ -125,7 +140,5 @@ public class Stanze {
 
     public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
         this.aggiornatoIl = aggiornatoIl;
-
     }
-
 }

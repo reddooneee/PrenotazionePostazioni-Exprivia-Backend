@@ -11,10 +11,9 @@ export enum StatoPostazione {
 }
 
 export enum StatoPrenotazione {
-    CONFERMATA = 'CONFERMATA',
-    PENDENTE = 'PENDENTE',
-    ANNULLATA = 'ANNULLATA',
-    COMPLETATA = 'COMPLETATA'
+    CONFERMATA = 'Confermata',
+    SOSPESA = 'Sospesa',
+    ANNULLATA = 'Annullata'
 }
 
 export enum UserRole {

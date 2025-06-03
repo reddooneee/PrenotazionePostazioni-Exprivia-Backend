@@ -44,4 +44,3 @@ export * from "./stanza.model";
 export * from "./postazione.model";
 export * from "./prenotazione.model";
 export * from "./auth.model";
-export * from "./enums";

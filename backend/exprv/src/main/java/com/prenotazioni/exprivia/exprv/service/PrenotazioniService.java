@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
+import com.prenotazioni.exprivia.exprv.dto.CreatePrenotazioneDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
@@ -162,11 +163,11 @@ public class PrenotazioniService {
         Prenotazioni existingPrenotazioni = prenotazioniRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prenotazione con ID " + id + " non trovata"));
 
-        if (updates.containsKey("id")) {
-            Integer newId = (Integer) updates.get("id_stanza");
+        if (updates.containsKey("id_prenotazioni")) {
+            Integer newId = (Integer) updates.get("id_prenotazioni");
             Optional<Prenotazioni> prenotazioneWithSameId = prenotazioniRepository.findById(newId);
             if (prenotazioneWithSameId.isPresent() && !prenotazioneWithSameId.get().getId_prenotazioni().equals(id)) {
-                throw new IllegalArgumentException("id già in uso");
+                throw new IllegalArgumentException("ID prenotazione già in uso");
             }
         }
 
@@ -175,10 +176,10 @@ public class PrenotazioniService {
                 case "stato_prenotazione":
                     existingPrenotazioni.setStato_prenotazione(stato_prenotazione.valueOf(value.toString()));
                     break;
-                case "dataInizio":
+                case "data_inizio":
                     existingPrenotazioni.setDataInizio(LocalDateTime.parse(value.toString()));
                     break;
-                case "dataFine":
+                case "data_fine":
                     existingPrenotazioni.setDataFine(LocalDateTime.parse(value.toString()));
                     break;
                 case "postazione":
@@ -244,14 +245,11 @@ public class PrenotazioniService {
             throw new IllegalArgumentException("Non è possibile prenotare dopo le 18:00!");
         }
 
-        /*
-         * // Verifica che la prenotazione non sia nel passato
-         * if (startTime.isBefore(LocalDateTime.now())) {
-         * throw new
-         * IllegalArgumentException("Non è possibile effettuare prenotazioni nel passato!"
-         * );
-         * }
-         */
+        // Verifica che la prenotazione non sia nel passato
+        if (startTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Non è possibile effettuare prenotazioni nel passato!");
+        }
+
         // Verifica che la prenotazione sia in un giorno lavorativo
         if (startTime.getDayOfWeek() == DayOfWeek.SATURDAY || startTime.getDayOfWeek() == DayOfWeek.SUNDAY) {
             throw new IllegalArgumentException("Le prenotazioni sono disponibili solo nei giorni lavorativi!");
@@ -384,25 +382,35 @@ public class PrenotazioniService {
      * @return PrenotazioniDTO della prenotazione creata
      */
     @Transactional
-    public PrenotazioniDTO creaPrenotazione(PrenotazioniDTO request, String userEmail) {
+    public PrenotazioniDTO creaPrenotazione(CreatePrenotazioneDTO request, String userEmail) {
+        System.out.println("DEBUG - Inizio creazione prenotazione");
+        System.out.println("DEBUG - Dati ricevuti: " + request);
+        System.out.println("DEBUG - Email utente: " + userEmail);
+
         // Recupera l'utente dal database
         Users user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+        System.out.println("DEBUG - Utente trovato: " + user.getEmail());
 
         // Recupera la postazione
-        Postazioni postazione = postazioniRepository.findById(request.getPostazione().getId_postazione())
+        Postazioni postazione = postazioniRepository.findById(request.getId_postazione())
                 .orElseThrow(() -> new EntityNotFoundException("Postazione non trovata"));
+        System.out.println("DEBUG - Postazione trovata: " + postazione.getNomePostazione());
 
         // Recupera la stanza
-        Stanze stanza = stanzeRepository.findById(request.getStanze().getId_stanza())
+        Stanze stanza = stanzeRepository.findById(request.getId_stanza())
                 .orElseThrow(() -> new EntityNotFoundException("Stanza non trovata"));
+        System.out.println("DEBUG - Stanza trovata: " + stanza.getNome());
 
+        System.out.println("DEBUG - Date ricevute - Inizio: " + request.getData_inizio() + ", Fine: " + request.getData_fine());
         // Validazione delle date
         validateDates(request.getData_inizio(), request.getData_fine());
+        System.out.println("DEBUG - Date validate con successo");
 
         // Verifica sovrapposizioni
         checkOverlappingBookings(request.getData_inizio(), request.getData_fine(),
-                request.getPostazione().getId_postazione());
+                request.getId_postazione());
+        System.out.println("DEBUG - Nessuna sovrapposizione trovata");
 
         // Crea la prenotazione
         Prenotazioni prenotazione = new Prenotazioni();
@@ -412,12 +420,16 @@ public class PrenotazioniService {
         prenotazione.setDataInizio(request.getData_inizio());
         prenotazione.setDataFine(request.getData_fine());
         prenotazione.setStato_prenotazione(stato_prenotazione.Confermata);
+        System.out.println("DEBUG - Oggetto prenotazione creato: " + prenotazione);
 
         // Salva la prenotazione
         Prenotazioni savedPrenotazione = prenotazioniRepository.save(prenotazione);
+        System.out.println("DEBUG - Prenotazione salvata con ID: " + savedPrenotazione.getId_prenotazioni());
 
         // Converti e restituisci il DTO
-        return prenotazioniMapper.toDto(savedPrenotazione);
+        PrenotazioniDTO dto = prenotazioniMapper.toDto(savedPrenotazione);
+        System.out.println("DEBUG - DTO creato e pronto per essere restituito");
+        return dto;
     }
 
     /**

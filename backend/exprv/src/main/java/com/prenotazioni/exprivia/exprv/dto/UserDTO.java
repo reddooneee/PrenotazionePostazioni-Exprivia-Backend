@@ -3,9 +3,15 @@ package com.prenotazioni.exprivia.exprv.dto;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.prenotazioni.exprivia.exprv.entity.Authority;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "email"
+)
 public class UserDTO {
 
     private String nome;

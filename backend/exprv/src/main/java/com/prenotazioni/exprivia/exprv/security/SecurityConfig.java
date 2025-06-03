@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/postazioni/**").authenticated()
                         .requestMatchers("/api/stanze/**").authenticated()
                         .requestMatchers("/api/prenotazioni/**").authenticated()
+                        .requestMatchers("/api/cose-durata/**").authenticated()
                         .requestMatchers("/api/stats/prenotazioni**").authenticated()
                         .requestMatchers("/api/stats/stanze**").authenticated()
 

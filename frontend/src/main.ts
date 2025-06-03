@@ -50,6 +50,7 @@ import { provideHttpClient } from "@angular/common/http";
 import { AxiosService } from "./app/core/services/axios.service";
 import { UserService } from "./app/core/services/user.service";
 import { AuthService } from "./app/core/auth/auth.service";
+import { MessageService } from "primeng/api";
 
 // Importa la configurazione delle rotte
 
@@ -104,6 +105,7 @@ bootstrapApplication(AppComponent, {
     AxiosService,
     UserService,
     AuthService,
-    CalendarService
+    CalendarService,
+    MessageService
   ],
 }).catch((err) => console.error(err));

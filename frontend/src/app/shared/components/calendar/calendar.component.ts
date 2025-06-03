@@ -19,16 +19,15 @@ export class CalendarComponent implements OnInit {
     @Input() view: CalendarView = "month";
     @Input() multiSelect = true;
     @Input() maxSelections = 5;
+    @Input() selectedDates: Date[] = [];
     @Output() dateSelectionChange = new EventEmitter<Date[]>();
 
     readonly displayDays: Signal<CalendarDay[]>;
     readonly currentMonth;
-    readonly selectedDates;
 
     constructor(private calendarService: CalendarService) {
         this.displayDays = this.calendarService.calendarDays;
         this.currentMonth = this.calendarService.formattedCurrentMonth;
-        this.selectedDates = this.calendarService.getSelectedDates();
     }
 
     ngOnInit(): void {
@@ -60,7 +59,7 @@ export class CalendarComponent implements OnInit {
         if (day.isDisabled || day.isWeekend) return;
 
         if (this.multiSelect) {
-            const index = this.selectedDates().findIndex(
+            const index = this.selectedDates.findIndex(
                 (d) =>
                     d.getDate() === day.date.getDate() &&
                     d.getMonth() === day.date.getMonth() &&
@@ -68,23 +67,21 @@ export class CalendarComponent implements OnInit {
             );
 
             if (index === -1) {
-                if (this.selectedDates().length < this.maxSelections) {
-                    this.calendarService.selectDates([...this.selectedDates(), day.date]);
+                if (this.selectedDates.length < this.maxSelections) {
+                    this.selectedDates.push(day.date);
                 }
             } else {
-                const newDates = [...this.selectedDates()];
-                newDates.splice(index, 1);
-                this.calendarService.selectDates(newDates);
+                this.selectedDates.splice(index, 1);
             }
-            this.dateSelectionChange.emit(this.selectedDates());
+            this.dateSelectionChange.emit(this.selectedDates);
         } else {
-            this.calendarService.selectDates([day.date]);
-            this.dateSelectionChange.emit([day.date]);
+            this.selectedDates = [day.date];
+            this.dateSelectionChange.emit(this.selectedDates);
         }
     }
 
     isSelected(day: CalendarDay): boolean {
-        return this.selectedDates().some(
+        return this.selectedDates.some(
             (d) =>
                 d.getDate() === day.date.getDate() &&
                 d.getMonth() === day.date.getMonth() &&

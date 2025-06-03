@@ -2,10 +2,16 @@ package com.prenotazioni.exprivia.exprv.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 //import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.entity.StatoPostazione;
 
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_postazione"
+)
 public class PostazioniDTO {
 
     private Integer id_postazione;

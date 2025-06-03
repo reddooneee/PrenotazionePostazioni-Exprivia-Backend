@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
+import com.prenotazioni.exprivia.exprv.dto.CreatePrenotazioneDTO;
 import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -46,14 +47,20 @@ public class PrenotazioniController {
         return PrenotazioniService.cercaTutti();
     }
 
+    @GetMapping("/mie-prenotazioni")
+    public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniUtente(Authentication authentication) {
+        String userEmail = authentication.getName();
+        List<PrenotazioniDTO> prenotazioni = PrenotazioniService.cercaPrenotazioniUtente(userEmail);
+        return ResponseEntity.ok(prenotazioni);
+    }
+
     @GetMapping("/{idPrenotazioni}")
-    public ResponseEntity<PrenotazioniDTO> getPrenotazioniByID(
-            @PathVariable("id_prenotazioni") Integer id_prenotazioni) {
+    public ResponseEntity<?> getPrenotazioniByID(@PathVariable("id_prenotazioni") Integer id_prenotazioni) {
         try {
             PrenotazioniDTO prenotazioniDTO = PrenotazioniService.cercaSingolo(id_prenotazioni);
             return ResponseEntity.ok(prenotazioniDTO);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
@@ -109,7 +116,7 @@ public class PrenotazioniController {
     }
 
     @PostMapping("/prenota")
-    public ResponseEntity<?> creaPrenotazione(@RequestBody PrenotazioniDTO request, Authentication authentication) {
+    public ResponseEntity<?> creaPrenotazione(@RequestBody CreatePrenotazioneDTO request, Authentication authentication) {
         try {
             String userEmail = authentication.getName(); // Ottiene l'email dell'utente loggato
             PrenotazioniDTO newPrenotazione = PrenotazioniService.creaPrenotazione(request, userEmail);

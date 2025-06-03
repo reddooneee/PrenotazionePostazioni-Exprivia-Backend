@@ -1,14 +1,23 @@
 package com.prenotazioni.exprivia.exprv.dto;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.prenotazioni.exprivia.exprv.entity.CosaDurata;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
 import com.prenotazioni.exprivia.exprv.entity.Users;
 import com.prenotazioni.exprivia.exprv.enumerati.stato_prenotazione;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_prenotazioni"
+)
 public class PrenotazioniDTO {
 
     private Integer id_prenotazioni;
@@ -26,6 +35,8 @@ public class PrenotazioniDTO {
     private stato_prenotazione stato_prenotazione;
     private LocalDateTime data_inizio;
     private LocalDateTime data_fine;
+
+    private Set<CosaDurata> coseDurata = new HashSet<>();
 
     public PrenotazioniDTO() {
     }
@@ -132,5 +143,13 @@ public class PrenotazioniDTO {
 
     public void setData_fine(LocalDateTime data_fine) {
         this.data_fine = data_fine;
+    }
+
+    public Set<CosaDurata> getCoseDurata() {
+        return coseDurata;
+    }
+
+    public void setCoseDurata(Set<CosaDurata> coseDurata) {
+        this.coseDurata = coseDurata;
     }
 }

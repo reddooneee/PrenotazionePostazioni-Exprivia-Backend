@@ -1,10 +1,15 @@
 package com.prenotazioni.exprivia.exprv.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,10 +20,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_user"
+)
 public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +61,9 @@ public class Users {
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"), inverseJoinColumns = @JoinColumn(name = "authority_name", referencedColumnName = "authority_name"))
     private Set<Authority> authorities = new HashSet<>();
+
+    @OneToMany(mappedBy = "users")
+    private List<Prenotazioni> prenotazioni = new ArrayList<>();
 
     // Usare LocalDateTime cosi si tiene traccia anche del tempo.
     // Non vanno nel costruttore, ci pensa Hibernate a gestirli in autonomia
@@ -182,6 +195,14 @@ public class Users {
 
     public void setVerificationCodeExpiresAt(LocalDateTime verificationCodeExpiresAt) {
         this.verificationCodeExpiresAt = verificationCodeExpiresAt;
+    }
+
+    public List<Prenotazioni> getPrenotazioni() {
+        return prenotazioni;
+    }
+
+    public void setPrenotazioni(List<Prenotazioni> prenotazioni) {
+        this.prenotazioni = prenotazioni;
     }
 
 }

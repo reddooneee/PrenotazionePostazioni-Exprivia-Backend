@@ -23,7 +23,9 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, Inte
     @Query("SELECT p FROM Prenotazioni p WHERE p.postazione.id_postazione = :postazioneId " +
            "AND ((p.dataInizio BETWEEN :startTime AND :endTime) " +
            "OR (p.dataFine BETWEEN :startTime AND :endTime) " +
-           "OR (:startTime BETWEEN p.dataInizio AND p.dataFine))")
+           "OR (:startTime BETWEEN p.dataInizio AND p.dataFine) " +
+           "OR (:endTime BETWEEN p.dataInizio AND p.dataFine) " +
+           "OR (p.dataInizio <= :startTime AND p.dataFine >= :endTime))")
     List<Prenotazioni> findOverlappingBookings(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,

@@ -3,9 +3,15 @@ package com.prenotazioni.exprivia.exprv.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
 
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_stanza"
+)
 public class StanzeDTO {
     
     private Integer id_stanza;

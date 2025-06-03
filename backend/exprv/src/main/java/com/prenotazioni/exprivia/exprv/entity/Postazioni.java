@@ -2,13 +2,19 @@ package com.prenotazioni.exprivia.exprv.entity;
 
 //import LocalDateTime
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,8 +23,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.PropertyGenerator.class,
+    property = "id_postazione"
+)
 public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +50,10 @@ public class Postazioni {
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
     @JsonBackReference
     private Stanze stanze; // Relazione con la tabella Stanze
+
+    @OneToMany(mappedBy = "postazione")
+    @JsonIgnore
+    private List<Prenotazioni> prenotazioni = new ArrayList<>();
 
     @Column(name = "nome")
     private String nomePostazione;
@@ -125,4 +140,11 @@ public class Postazioni {
         this.nomePostazione = nomePostazione;
     }
 
+    public List<Prenotazioni> getPrenotazioni() {
+        return prenotazioni;
+    }
+
+    public void setPrenotazioni(List<Prenotazioni> prenotazioni) {
+        this.prenotazioni = prenotazioni;
+    }
 }
