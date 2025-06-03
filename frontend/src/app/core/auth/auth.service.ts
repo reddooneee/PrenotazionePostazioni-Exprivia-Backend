@@ -36,7 +36,7 @@ export class AuthService {
   private authenticationState$ = this.authenticationState.asObservable();
   private currentUser: User | null = null;
   private initialized = false;
-  private readonly baseUrl = "/api/auth";
+  private readonly baseUrl = "/auth";
 
   private authJwtService = inject(AuthJwtService);
   private axiosService = inject(AxiosService);

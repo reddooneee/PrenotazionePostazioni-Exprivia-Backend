@@ -396,6 +396,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       });
     }
   }
+  
 
   private resetForm(): void {
     this.bookingForm.reset();

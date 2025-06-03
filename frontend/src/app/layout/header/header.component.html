@@ -1,144 +1,101 @@
-<header class="w-full bg-white/95 backdrop-blur-md sticky top-0 z-[var(--z-50)] border-b border-gray-100/50 shadow-[var(--shadow-sm)]">
-    <div class="container mx-auto px-[var(--spacing-4)] md:px-[var(--spacing-6)] lg:px-[var(--spacing-8)]">
-        <div class="flex h-[var(--spacing-16)] md:h-[var(--spacing-20)] items-center justify-between">
-            <!-- Logo Section -->
-            <div class="flex items-center">
-                <a [routerLink]="['/']" class="flex items-center group">
-                    <img class="h-[var(--spacing-8)] md:h-[var(--spacing-10)] w-auto transition-[var(--transition-transform)] group-hover:scale-105" 
-                         src="LogoExprivia.svg" 
-                         alt="Exprivia Logo">
-                </a>
-            </div>
+<header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
+    <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
+        <!-- Logo -->
+        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/']" role="link" aria-label="Torna alla home">
+            <img class="h-6 sm:h-8 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo" width="120" height="32">
+        </div>
 
-            <!-- Navigation for authenticated users -->
-            <ng-container *ngIf="isAuthenticated">
-                <!-- Desktop Navigation -->
-                <nav class="hidden md:flex items-center space-x-[var(--spacing-1)]">
-                    <a [routerLink]="['/dashboard/prenotazione-posizione']"
-                       class="px-[var(--spacing-4)] py-[var(--spacing-2)] rounded-[var(--radius-lg)] text-gray-700 hover:bg-gray-100 transition-[var(--transition-all)] font-[var(--font-weight-medium)]"
-                       [class.bg-[var(--color-expriviaBlue)]]="isRouteActive('/dashboard/prenotazione-posizione')"
-                       [class.text-white]="isRouteActive('/dashboard/prenotazione-posizione')">
-                        <div class="flex items-center gap-[var(--spacing-2)]">
-                            <lucide-icon name="calendar" class="w-4 h-4" />
-                            <span>Prenota Postazione</span>
-                        </div>
-                    </a>
-                    <a [routerLink]="['/dashboard/bookings']"
-                       class="px-[var(--spacing-4)] py-[var(--spacing-2)] rounded-[var(--radius-lg)] text-gray-700 hover:bg-gray-100 transition-[var(--transition-all)] font-[var(--font-weight-medium)]"
-                       [class.bg-[var(--color-expriviaBlue)]]="isRouteActive('/dashboard/bookings')"
-                       [class.text-white]="isRouteActive('/dashboard/bookings')">
-                        <div class="flex items-center gap-[var(--spacing-2)]">
-                            <lucide-icon name="folder" class="w-4 h-4" />
-                            <span>Le mie Prenotazioni</span>
-                        </div>
-                    </a>
-                </nav>
-
-                <!-- User Menu Section -->
-                <div class="flex items-center gap-[var(--spacing-4)]">
-                    <!-- Desktop User Dropdown -->
-                    <div class="hidden md:block">
-                        <button mat-button [matMenuTriggerFor]="userMenu" 
-                            class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-3)] py-[var(--spacing-2)] rounded-[var(--radius-xl)] hover:bg-gray-100 transition-[var(--transition-all)] group">
-                            <div class="relative">
-                                <div class="w-[var(--spacing-10)] h-[var(--spacing-10)] rounded-full bg-[var(--color-expriviaBlue)] flex items-center justify-center text-white font-[var(--font-weight-semibold)] shadow-[var(--shadow-md)]">
-                                    {{ (currentUser?.nome || 'U')[0] }}{{ (currentUser?.cognome || '')[0] }}
+        <!-- Navigation for authenticated users -->
+        <ng-container *ngIf="isAuthenticated">
+            <!-- Desktop Navigation -->
+            <div class="flex items-center gap-4">
+                <!-- Desktop User Menu -->
+                <div class="hidden md:flex items-center gap-6">
+                    <!-- User Profile with Hover Effect -->
+                    <div class="flex items-center gap-4">
+                        <div class="relative group">
+                            <div class="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] cursor-pointer">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--color-expriviaBlue)] text-white font-medium">
+                                    {{ currentUser ? ((currentUser.nome ? (currentUser.nome | slice:0:1) : '') + (currentUser.cognome ? (currentUser.cognome | slice:0:1) : '')) : '' }}
                                 </div>
-                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs text-gray-500">Ciao! Benvenuto</span>
+                                    <span class="text-[var(--color-expriviaBlue)] font-medium text-sm">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
+                                </div>
                             </div>
-                            <div class="text-left">
-                                <p class="text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-gray-900">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
-                                <p class="text-[var(--font-size-xs)] text-gray-500">{{ currentUser?.email }}</p>
+
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-1 w-48 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[var(--transition-all)] z-50">
+                                <div class="py-1">
+                                    <a [routerLink]="['update-user']" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]">
+                                        <lucide-icon name="user" class="w-4 h-4 mr-3 text-gray-500" />
+                                        <span>Profilo</span>
+                                    </a>
+                                </div>
                             </div>
-                            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-[var(--transition-transform)] group-hover:translate-y-0.5" />
+                        </div>
+
+                        <!-- Logout Button -->
+                        <button (click)="logout()" class="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
+                            <lucide-icon name="log-out" class="w-5 h-5" />
+                            <span class="font-medium">Logout</span>
                         </button>
-
-                        <mat-menu #userMenu="matMenu" class="mt-[var(--spacing-2)]">
-                            <div class="px-[var(--spacing-4)] py-[var(--spacing-3)] border-b border-gray-100">
-                                <p class="text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-gray-900">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
-                                <p class="text-[var(--font-size-xs)] text-gray-500">{{ currentUser?.email }}</p>
-                            </div>
-                            <button mat-menu-item [routerLink]="['/dashboard/update-user']" 
-                                class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] text-gray-700 hover:bg-gray-50">
-                                <lucide-icon name="user" class="w-4 h-4" />
-                                <span>Il mio Profilo</span>
-                            </button>
-                            <div class="border-t border-gray-100">
-                                <button mat-menu-item (click)="logout()" 
-                                    class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] text-red-600 hover:bg-red-50">
-                                    <lucide-icon name="log-out" class="w-4 h-4" />
-                                    <span>Esci</span>
-                                </button>
-                            </div>
-                        </mat-menu>
                     </div>
+                </div>
 
-                    <!-- Mobile Menu Button -->
-                    <button class="md:hidden p-[var(--spacing-2)] rounded-[var(--radius-lg)] hover:bg-gray-100 transition-[var(--transition-colors)]"
-                        (click)="toggleMenu()">
-                        <lucide-icon [name]="isMenuOpen ? 'x' : 'menu'" class="w-6 h-6 text-gray-700" />
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button (click)="toggleMenu()" class="p-2 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)]">
+                        <lucide-icon name="menu" class="w-5 h-5 text-gray-700" />
                     </button>
                 </div>
-            </ng-container>
-
-            <!-- Navigation for non-authenticated users -->
-            <div *ngIf="!isAuthenticated" class="flex items-center gap-[var(--spacing-3)]">
-                <a [routerLink]="['/accedi']"
-                    class="px-[var(--spacing-5)] py-[var(--spacing-2)] text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-gray-700 hover:text-gray-900 transition-[var(--transition-colors)]">
-                    Accedi
-                </a>
-                <a [routerLink]="['/registrazione']"
-                    class="px-[var(--spacing-5)] py-[var(--spacing-2)] text-[var(--font-size-sm)] font-[var(--font-weight-semibold)] text-white bg-[var(--color-expriviaOrange)] rounded-[var(--radius-lg)] hover:bg-[var(--color-expriviaOrange600)] hover:shadow-[var(--shadow-lg)] transition-[var(--transition-all)] hover:-translate-y-0.5">
-                    Inizia Ora
-                </a>
             </div>
+        </ng-container>
+
+        <!-- Navigation for non-authenticated users -->
+        <div *ngIf="!isAuthenticated" class="flex items-center gap-3">
+            <a [routerLink]="['/accedi']" class="px-4 py-2 text-sm font-medium text-white bg-[var(--color-expriviaOrange)] rounded-[var(--radius-lg)] hover:bg-[var(--color-expriviaOrange400)] transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
+                Accedi
+            </a>
+            <a [routerLink]="['/registrazione']" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-all)] shadow-[var(--shadow-sm)]">
+                Registrati
+            </a>
         </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <div *ngIf="isMenuOpen && isAuthenticated" 
-        class="md:hidden fixed inset-0 z-[var(--z-50)] bg-black/50"
-        (click)="isMenuOpen = false">
-        <div class="absolute inset-x-0 top-[var(--spacing-16)] m-[var(--spacing-4)] bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] overflow-hidden transition-[var(--transition-all)]"
-            (click)="$event.stopPropagation()">
+    <!-- Mobile Menu (outside main container) -->
+    <div *ngIf="isMenuOpen && isAuthenticated" class="md:hidden fixed inset-0 z-[var(--z-50)] bg-black/50" (click)="isMenuOpen = false">
+        <div class="absolute inset-x-0 top-16 m-4 bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] overflow-hidden transition-[var(--transition-all)]" (click)="$event.stopPropagation()">
             <!-- User Info -->
-            <div class="p-[var(--spacing-6)] bg-[var(--color-expriviaBlue)] text-white">
-                <div class="flex items-center gap-[var(--spacing-4)]">
-                    <div class="w-[var(--spacing-16)] h-[var(--spacing-16)] rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-[var(--font-weight-bold)] text-[var(--font-size-xl)]">
+            <div class="p-6 bg-[var(--color-expriviaBlue)] text-white">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-xl">
                         {{ (currentUser?.nome || 'U')[0] }}{{ (currentUser?.cognome || '')[0] }}
                     </div>
                     <div>
-                        <p class="font-[var(--font-weight-semibold)] text-[var(--font-size-lg)]">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
-                        <p class="text-[var(--font-size-sm)] opacity-90">{{ currentUser?.email }}</p>
+                        <p class="font-semibold text-lg">{{ currentUser?.nome }} {{ currentUser?.cognome }}</p>
+                        <p class="text-sm opacity-90">{{ currentUser?.email }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="p-[var(--spacing-2)]">
-                <a [routerLink]="['/dashboard/prenotazione-posizione']"
-                    class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] rounded-[var(--radius-lg)] text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]"
-                    (click)="isMenuOpen = false">
-                    <lucide-icon name="calendar" class="w-5 h-5 text-[var(--color-expriviaBlue)]" />
-                    <span class="font-[var(--font-weight-medium)]">Prenota Postazione</span>
+            <!-- Mobile Menu Links -->
+            <nav class="p-2">
+                <a [routerLink]="['/dashboard/prenotazione-posizione']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="calendar-plus" class="w-5 h-5" />
+                    <span>Prenota</span>
                 </a>
-                <a [routerLink]="['/dashboard/bookings']"
-                    class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] rounded-[var(--radius-lg)] text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]"
-                    (click)="isMenuOpen = false">
-                    <lucide-icon name="folder" class="w-5 h-5 text-[var(--color-expriviaBlue)]" />
-                    <span class="font-[var(--font-weight-medium)]">Le mie Prenotazioni</span>
+                <a [routerLink]="['/dashboard/bookings']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="calendar" class="w-5 h-5" />
+                    <span>Le mie prenotazioni</span>
                 </a>
-                <a [routerLink]="['/dashboard/update-user']"
-                    class="flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] rounded-[var(--radius-lg)] text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]"
-                    (click)="isMenuOpen = false">
-                    <lucide-icon name="user" class="w-5 h-5 text-[var(--color-expriviaBlue)]" />
-                    <span class="font-[var(--font-weight-medium)]">Il mio Profilo</span>
+                <a [routerLink]="['/dashboard/profile']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                    <lucide-icon name="user" class="w-5 h-5" />
+                    <span>Profilo</span>
                 </a>
-                <div class="my-[var(--spacing-2)] border-t border-gray-100"></div>
-                <button (click)="logout()"
-                    class="w-full flex items-center gap-[var(--spacing-3)] px-[var(--spacing-4)] py-[var(--spacing-3)] rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-colors)]">
+                <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
                     <lucide-icon name="log-out" class="w-5 h-5" />
-                    <span class="font-[var(--font-weight-medium)]">Esci</span>
+                    <span>Logout</span>
                 </button>
             </nav>
         </div>
