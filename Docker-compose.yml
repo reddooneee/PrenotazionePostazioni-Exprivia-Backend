@@ -1,0 +1,40 @@
+services:
+
+  db:
+    image: postgres:16
+    restart: always
+    container_name: PrenotazioniDB
+    environment:
+      POSTGRES_DB: prenotazioni
+      POSTGRES_USER: smartcity
+      POSTGRES_PASSWORD: smartcity
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend/exprv
+    container_name: PrenotazioniBackend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prenotazioni
+      SPRING_DATASOURCE_USERNAME: smartcity
+      SPRING_DATASOURCE_PASSWORD: smartcity
+    depends_on:
+      - db
+
+#  frontend:
+#    build:
+#      context: ./frontend
+#    container_name: PrenotazioniFrontEnd
+#    ports:
+#      - "4200:80"
+#    depends_on:
+#      - backend
+
+volumes:
+  postgres_data:
