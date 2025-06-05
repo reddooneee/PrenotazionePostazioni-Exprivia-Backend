@@ -51,7 +51,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17
 WORKDIR /backend
 
-# Copia il JAR dalla build precedente
+#Copia il JAR dalla build precedente
 COPY --from=builder /app/target/exprv-0.0.1-SNAPSHOT.jar /backend/
 
 EXPOSE 8080
