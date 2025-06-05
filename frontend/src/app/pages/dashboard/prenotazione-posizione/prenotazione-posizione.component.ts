@@ -80,12 +80,11 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   private loadPrenotazioneInfo(): void {
     this.state.isLoading = true;
-    this.prenotazionePosizioneService.getPrenotazioneInfo()
+    this.prenotazionePosizioneService.getStanzeWithPostazioni()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ stanze, coseDurata }) => {
+        next: ({ stanze }) => {
           this.state.stanze = stanze;
-          this.coseDurata = coseDurata;
           this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean);
           this.state.isLoading = false;
         },
@@ -214,7 +213,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (slots) => {
           console.log('Slot disponibili ricevuti:', slots);
-          this.state.availableTimeSlots = slots;
+          this.state.availableTimeSlots = slots.map(slot => slot.start);
           console.log('Stato dopo aggiornamento:', {
             availableSlots: this.state.availableTimeSlots.length,
             hasPostazione: !!this.bookingForm.get('id_postazione')?.value
@@ -444,7 +443,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   private loadAllPrenotazioni(): void {
     this.state.isLoading = true;
-    this.prenotazionePosizioneService.getPrenotazioni()
+    this.prenotazionePosizioneService.getUserPrenotazioni()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (prenotazioni: Prenotazione[]) => {

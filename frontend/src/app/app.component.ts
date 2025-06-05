@@ -12,7 +12,7 @@ import { AuthService } from "./core/auth/auth.service";
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [CommonModule, RouterOutlet, FooterComponent, UpdateUserComponent, HeaderComponent],
+  imports: [CommonModule, RouterOutlet, FooterComponent],
   templateUrl: "./app.component.html",
 })
 export class AppComponent implements OnInit {
