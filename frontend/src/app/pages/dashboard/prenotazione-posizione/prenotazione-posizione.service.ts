@@ -8,7 +8,8 @@ import { StanzaService } from '@core/services/stanza.service';
 import { PostazioneService } from '@core/services/postazione.service';
 import { CosaDurataService } from '@core/services/cosa-durata.service';
 import { PrenotazioneService } from '@core/services/prenotazione.service';
-import { PostazioneWithStanza } from '@/app/core/models/postazione.model';
+import { PostazioneWithStanza } from '@/app/core/models';
+import { CosaDurata } from '@core/models/cosa-durata.model';
 
 @Injectable({
   providedIn: 'root'
@@ -114,6 +115,14 @@ export class PrenotazionePosizioneService {
         return day !== 0 && day !== 6; // 0 = Domenica, 6 = Sabato
     }
 
+    getPrenotazioneInfo(): Observable<{stanze: StanzaWithPostazioni[], coseDurata: CosaDurata[]}> {
+        return forkJoin({
+            stanze: this.stanzaService.getStanzeWithPostazioni(),
+            coseDurata: this.cosaDurataService.getAllCoseDurata()
+        });
+    }
 
-    
+    getPrenotazioni(): Observable<Prenotazione[]> {
+        return this.prenotazioneService.getPrenotazioni();
+    }
 } 

@@ -2,6 +2,7 @@ import { User, Postazione, Stanza, StatoPrenotazione, Prenotazione } from '@core
 import { StanzaWithPostazioni } from '@core/models/stanza.model';
 import { PostazioneWithStanza } from '@core/models/postazione.model';
 import { CosaDurata } from '@core/models/cosa-durata.model';
+import { TimeSlot } from '@core/models/prenotazione.model';
 
 export interface PrenotazionePosizione extends Omit<Prenotazione, 'users'> {
     users: Required<User>;
@@ -25,7 +26,7 @@ export interface BookingState {
     stanze: StanzaWithPostazioni[];
     postazioniDisponibili: PostazioneDisponibile[];
     selectedDates: Date[];
-    availableTimeSlots: string[];
+    availableTimeSlots: TimeSlot[];
     isLoading: boolean;
     errorMessage: string;
 }

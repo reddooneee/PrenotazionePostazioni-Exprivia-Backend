@@ -84,8 +84,11 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ stanze }) => {
+        next: ({ stanze, coseDurata }: { stanze: StanzaWithPostazioni[], coseDurata: CosaDurata[] }) => {
           this.state.stanze = stanze;
           this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean);
+          this.coseDurata = coseDurata;
+          this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean) as string[];
           this.state.isLoading = false;
         },
         error: (error: Error) => {
