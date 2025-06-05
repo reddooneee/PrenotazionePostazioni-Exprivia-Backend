@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable, from, forkJoin, throwError } from 'rxjs';
 import { map, switchMap, tap, catchError } from 'rxjs/operators';
 import { AxiosService } from '@core/services/axios.service';
-import { PrenotazioneRequest, Prenotazione } from '@core/models/prenotazione.model';
+import { PrenotazioneRequest, Prenotazione, TimeSlot } from '@core/models/prenotazione.model';
 import { StanzaWithPostazioni } from '@core/models/stanza.model';
 import { StanzaService } from '@core/services/stanza.service';
 import { PostazioneService } from '@core/services/postazione.service';
 import { CosaDurataService } from '@core/services/cosa-durata.service';
 import { PrenotazioneService } from '@core/services/prenotazione.service';
+import { PostazioneWithStanza } from '@/app/core/models';
+import { CosaDurata } from '@core/models/cosa-durata.model';
 
 @Injectable({
   providedIn: 'root'
@@ -94,7 +96,8 @@ export class PrenotazionePosizioneService {
             if (!isOccupied) {
                 slots.push({
                     start: `${hour.toString().padStart(2, '0')}:00`,
-                    end: `${(hour + 1).toString().padStart(2, '0')}:00`
+                    end: `${(hour + 1).toString().padStart(2, '0')}:00`,
+                    available: true
                 });
             }
         }
@@ -112,6 +115,14 @@ export class PrenotazionePosizioneService {
         return day !== 0 && day !== 6; // 0 = Domenica, 6 = Sabato
     }
 
+    getPrenotazioneInfo(): Observable<{stanze: StanzaWithPostazioni[], coseDurata: CosaDurata[]}> {
+        return forkJoin({
+            stanze: this.stanzaService.getStanzeWithPostazioni(),
+            coseDurata: this.cosaDurataService.getAllCoseDurata()
+        });
+    }
 
-    
+    getPrenotazioni(): Observable<Prenotazione[]> {
+        return this.prenotazioneService.getPrenotazioni();
+    }
 } 

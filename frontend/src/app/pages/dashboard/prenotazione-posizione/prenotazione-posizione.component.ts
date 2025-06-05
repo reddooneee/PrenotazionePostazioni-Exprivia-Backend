@@ -83,10 +83,10 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     this.prenotazionePosizioneService.getPrenotazioneInfo()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ stanze, coseDurata }) => {
+        next: ({ stanze, coseDurata }: { stanze: StanzaWithPostazioni[], coseDurata: CosaDurata[] }) => {
           this.state.stanze = stanze;
           this.coseDurata = coseDurata;
-          this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean);
+          this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean) as string[];
           this.state.isLoading = false;
         },
         error: (error: Error) => {
