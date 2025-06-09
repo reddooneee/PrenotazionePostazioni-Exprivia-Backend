@@ -15,6 +15,7 @@ import {
   PrenotazioneService,
   AxiosService,
   UtilsService,
+  AdminService,
 } from "@core/services";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatToolbarModule } from "@angular/material/toolbar";
@@ -53,6 +54,7 @@ import { UpdateUserComponent } from "../../account/update-user/update-user.compo
     PrenotazioneService,
     AxiosService,
     UtilsService,
+    AdminService,
   ],
 })
 export class DashboardComponent implements OnInit, OnDestroy {
@@ -70,9 +72,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Dati per la dashboard
   notificationCount = 0;
-  todayBookings = 0;
-  availableDesks = 0;
-  totalDesks = 0;
 
   constructor(
     private authService: AuthService,
@@ -82,7 +81,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private postazioneService: PostazioneService,
     private prenotazioneService: PrenotazioneService,
     private utilsService: UtilsService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private adminService: AdminService
   ) {}
 
   async ngOnInit() {
@@ -117,17 +117,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.currentTime = time;
       });
 
-    // Recupera le statistiche delle postazioni
-    // TODO: Implementare getDashboardDeskStats nel servizio
-    // this.dashboardService.getDashboardDeskStats().subscribe({
-    //   next: ({ total, available }) => {
-    //     this.totalDesks = total;
-    //     this.availableDesks = available;
-    //   },
-    //   error: (err) => {
-    //     console.error("Errore nel caricamento dei dati dashboard:", err);
-    //   },
-    // });
+    // Dashboard loaded
   }
 
   ngOnDestroy() {
@@ -192,8 +182,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  getAvailableDesksPercentage(): string {
-    if (this.totalDesks === 0) return "0%";
-    return `${Math.round((this.availableDesks / this.totalDesks) * 100)}%`;
-  }
+
 }

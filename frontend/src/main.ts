@@ -1,7 +1,9 @@
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { provideRouter } from "@angular/router";
-import { importProvidersFrom } from "@angular/core";
+import { importProvidersFrom, LOCALE_ID } from "@angular/core";
+import { registerLocaleData } from "@angular/common";
+import localeIt from "@angular/common/locales/it";
 import { AppComponent } from "./app/app.component";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -53,6 +55,9 @@ import { AuthService } from "./app/core/auth/auth.service";
 import { MessageService } from "primeng/api";
 
 // Importa la configurazione delle rotte
+
+// Register Italian locale
+registerLocaleData(localeIt);
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -106,6 +111,7 @@ bootstrapApplication(AppComponent, {
     UserService,
     AuthService,
     CalendarService,
-    MessageService
+    MessageService,
+    { provide: LOCALE_ID, useValue: 'it-IT' }
   ],
 }).catch((err) => console.error(err));

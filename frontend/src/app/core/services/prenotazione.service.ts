@@ -102,6 +102,19 @@ export class PrenotazioneService {
     }
 
     /**
+     * Crea una nuova prenotazione per un utente specifico (solo admin)
+     */
+    createPrenotazioneAdmin(prenotazione: PrenotazioneRequest & { id_user: number }): Observable<Prenotazione> {
+        return from(this.axiosService.post<Prenotazione>(`${this.BASE_URL}/admin/prenota`, prenotazione)).pipe(
+            catchError(error => {
+                console.error('Errore nella creazione della prenotazione admin:', error);
+                const message = error.response?.data?.message || 'Impossibile creare la prenotazione';
+                return throwError(() => new Error(message));
+            })
+        );
+    }
+
+    /**
      * Aggiorna una prenotazione esistente
      */
     updatePrenotazione(id: number, updates: Partial<Prenotazione>): Observable<Prenotazione> {

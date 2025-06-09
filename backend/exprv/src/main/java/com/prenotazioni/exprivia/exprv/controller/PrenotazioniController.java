@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
 import com.prenotazioni.exprivia.exprv.dto.CreatePrenotazioneDTO;
+import com.prenotazioni.exprivia.exprv.dto.AdminCreatePrenotazioneDTO;
 import com.prenotazioni.exprivia.exprv.service.PrenotazioniService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -137,6 +138,18 @@ public class PrenotazioniController {
         try {
             String userEmail = authentication.getName(); // Ottiene l'email dell'utente loggato
             PrenotazioniDTO newPrenotazione = PrenotazioniService.creaPrenotazione(request, userEmail);
+            return ResponseEntity.ok(newPrenotazione);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/admin/prenota")
+    public ResponseEntity<?> creaPrenotazioneAdmin(@RequestBody AdminCreatePrenotazioneDTO request, Authentication authentication) {
+        try {
+            PrenotazioniDTO newPrenotazione = PrenotazioniService.creaPrenotazioneAdmin(request);
             return ResponseEntity.ok(newPrenotazione);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

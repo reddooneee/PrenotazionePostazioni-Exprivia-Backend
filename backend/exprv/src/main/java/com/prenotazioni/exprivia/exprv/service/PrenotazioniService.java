@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
 import com.prenotazioni.exprivia.exprv.dto.CreatePrenotazioneDTO;
+import com.prenotazioni.exprivia.exprv.dto.AdminCreatePrenotazioneDTO;
 import com.prenotazioni.exprivia.exprv.entity.Postazioni;
 import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 import com.prenotazioni.exprivia.exprv.entity.Stanze;
@@ -488,6 +489,49 @@ public class PrenotazioniService {
         PrenotazioniDTO dto = prenotazioniMapper.toDto(savedPrenotazione);
         System.out.println("DEBUG - DTO creato e pronto per essere restituito");
         return dto;
+    }
+
+    /**
+     * Crea una nuova prenotazione per un utente specifico (solo admin)
+     * 
+     * @param request i dati della prenotazione incluso l'ID utente
+     * @return PrenotazioniDTO della prenotazione creata
+     */
+    @Transactional
+    public PrenotazioniDTO creaPrenotazioneAdmin(AdminCreatePrenotazioneDTO request) {
+        // Recupera l'utente specificato nel request
+        Users user = userRepository.findById(request.getId_user())
+                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato"));
+
+        // Recupera la postazione
+        Postazioni postazione = postazioniRepository.findById(request.getId_postazione())
+                .orElseThrow(() -> new EntityNotFoundException("Postazione non trovata"));
+
+        // Recupera la stanza
+        Stanze stanza = stanzeRepository.findById(request.getId_stanza())
+                .orElseThrow(() -> new EntityNotFoundException("Stanza non trovata"));
+
+        // Validazione delle date
+        validateDates(request.getData_inizio(), request.getData_fine());
+
+        // Verifica sovrapposizioni
+        checkOverlappingBookings(request.getData_inizio(), request.getData_fine(),
+                request.getId_postazione());
+
+        // Crea la prenotazione
+        Prenotazioni prenotazione = new Prenotazioni();
+        prenotazione.setUsers(user);
+        prenotazione.setPostazione(postazione);
+        prenotazione.setStanze(stanza);
+        prenotazione.setDataInizio(request.getData_inizio());
+        prenotazione.setDataFine(request.getData_fine());
+        prenotazione.setStato_prenotazione(stato_prenotazione.Confermata);
+
+        // Salva la prenotazione
+        Prenotazioni savedPrenotazione = prenotazioniRepository.save(prenotazione);
+
+        // Converti e restituisci il DTO
+        return prenotazioniMapper.toDto(savedPrenotazione);
     }
 
     /**

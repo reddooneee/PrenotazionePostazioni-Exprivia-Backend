@@ -9,18 +9,10 @@ import {
   type ValidationErrors,
 } from "@angular/forms"
 import { Router, RouterModule } from "@angular/router"
-import { RouterLink } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar"
-import { MatFormFieldModule } from "@angular/material/form-field"
-import { MatInputModule } from "@angular/material/input"
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner"
-import { MatButtonModule } from "@angular/material/button"
-import { MatIconModule } from "@angular/material/icon"
 import { Subject } from "rxjs"
-import { takeUntil, catchError, finalize } from "rxjs/operators"
+import { takeUntil, catchError, finalize, timeout } from "rxjs/operators"
 import { throwError } from "rxjs"
 import { authAnimations } from "../../shared/animations/auth.animations"
-import { HeaderComponent } from "../../layout/header/header.component"
 import { AuthService } from "../../core/auth/auth.service"
 import { UserService } from "../../core/services/user.service"
 import type { User } from "../../core/models"
@@ -35,14 +27,7 @@ import { DatePipe } from "@angular/common";
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    MatSnackBarModule,
-    MatFormFieldModule,
-    MatInputModule,
-    RouterModule,
-    MatProgressSpinnerModule,
-    MatButtonModule,
-    MatIconModule,
-],
+  ],
   animations: [authAnimations.fadeIn, authAnimations.slideUp, authAnimations.shake, authAnimations.scaleIn],
 })
 export class UpdateUserComponent implements OnInit, OnDestroy {
@@ -56,11 +41,18 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null
   private destroy$ = new Subject<void>()
 
+  // Password requirements tracking
+  passwordRequirements = {
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false
+  }
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
-    private snackBar: MatSnackBar,
     private router: Router,
   ) {
     this.userForm = this.fb.group({
@@ -76,7 +68,8 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
     })
 
     // Add password match validation when newPassword changes
-    this.userForm.get("newPassword")?.valueChanges.subscribe(() => {
+    this.userForm.get("newPassword")?.valueChanges.subscribe((password) => {
+      this.checkPasswordRequirements(password || '')
       this.userForm.get("confirmPassword")?.updateValueAndValidity()
     })
 
@@ -84,23 +77,84 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Initialize component state
+    this.isLoading = false
+    this.updateSuccess = false
+    this.errorMessage = null
+    
+    console.log("test");
     this.loadUserData()
   }
 
   private loadUserData(): void {
+    this.isLoading = true
+    this.errorMessage = null
+    
+    // Use the one-time identity method instead of the continuous observable
     this.authService
-      .getIdentity()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((user) => {
-        if (user) {
-          this.currentUser = user
-          this.userForm.patchValue({
-            nome: user.nome,
-            cognome: user.cognome,
-            email: user.email,
-          })
+      .identity(true) // Force fresh fetch
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isLoading = false
+        })
+      )
+      .subscribe({
+        next: (user) => {
+          if (user) {
+            this.currentUser = user
+            console.log("test 2" + this.currentUser?.id_user);
+            this.userForm.patchValue({
+              nome: user.nome,
+              cognome: user.cognome,
+              email: user.email,
+            })
+            console.log('User data loaded successfully:', user.nome, user.cognome)
+          } else {
+            this.errorMessage = 'Errore nel caricamento dei dati utente'
+            console.warn('User data is null')
+          }
+        },
+        error: (error) => {
+          console.error('Error loading user data:', error)
+          this.errorMessage = 'Errore nel caricamento dei dati utente'
+          this.isLoading = false // Backup safety
         }
       })
+  }
+
+  // Check password requirements in real-time
+  private checkPasswordRequirements(password: string): void {
+    this.passwordRequirements.minLength = password.length >= 6
+    this.passwordRequirements.hasUppercase = /[A-Z]/.test(password)
+    this.passwordRequirements.hasLowercase = /[a-z]/.test(password)
+    this.passwordRequirements.hasNumber = /\d/.test(password)
+  }
+
+  // Get overall password strength
+  get passwordStrength(): number {
+    const requirements = Object.values(this.passwordRequirements)
+    return requirements.filter(req => req).length
+  }
+
+  // Get password strength text
+  get passwordStrengthText(): string {
+    const strength = this.passwordStrength
+    if (strength === 0) return ''
+    if (strength === 1) return 'Molto debole'
+    if (strength === 2) return 'Debole'
+    if (strength === 3) return 'Buona'
+    return 'Forte'
+  }
+
+  // Get password strength color
+  get passwordStrengthColor(): string {
+    const strength = this.passwordStrength
+    if (strength === 0) return 'text-gray-400'
+    if (strength === 1) return 'text-red-500'
+    if (strength === 2) return 'text-orange-500'
+    if (strength === 3) return 'text-yellow-500'
+    return 'text-green-500'
   }
 
   // Password match validator
@@ -204,18 +258,21 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
   getCurrentPasswordErrorMessage(): string {
     const control = this.userForm.get("currentPassword")
     if (control?.hasError("required")) {
-      return "La password attuale è obbligatoria per modificare la password"
+      return "La password attuale è richiesta per modificare la password"
     }
     return ""
   }
 
   getNewPasswordErrorMessage(): string {
     const control = this.userForm.get("newPassword")
+    if (control?.hasError("required")) {
+      return "La nuova password è obbligatoria"
+    }
     if (control?.hasError("minlength")) {
       return "La password deve contenere almeno 6 caratteri"
     }
     if (control?.hasError("pattern")) {
-      return "La password deve contenere almeno una lettera maiuscola, una minuscola e un numero"
+      return "La password deve contenere almeno una maiuscola, una minuscola e un numero"
     }
     return ""
   }
@@ -223,114 +280,138 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
   getConfirmPasswordErrorMessage(): string {
     const control = this.userForm.get("confirmPassword")
     if (control?.hasError("required")) {
-      return "La conferma della password è obbligatoria"
+      return "Conferma la nuova password"
     }
     if (control?.hasError("passwordMismatch")) {
-      return "Le password non coincidono"
+      return "Le password non corrispondono"
     }
     return ""
   }
 
   onSubmit(): void {
-    if (this.userForm.invalid) {
-      // Mark all fields as touched to show errors
-      Object.keys(this.userForm.controls).forEach((key) => {
-        const control = this.userForm.get(key)
-        control?.markAsTouched()
-      })
+    if (this.userForm.invalid || this.isLoading) {
       return
     }
 
     this.isLoading = true
+    this.errorMessage = null
+    this.updateSuccess = false
+
+    const formValue = this.userForm.value
+    const updateData: any = {
+      nome: formValue.nome,
+      cognome: formValue.cognome,
+      email: formValue.email,
+    }
+
+    // Only include password fields if they are filled
+    if (formValue.newPassword && formValue.currentPassword) {
+      updateData.password = formValue.newPassword
+    }
+
+    console.log(this.currentUser?.id_user);
+
+    // Use current user ID for the update
+    if (!this.currentUser?.id_user) {
+      this.errorMessage = "Errore: dati utente non disponibili"
+      this.isLoading = false
+      return
+    }
+
+    this.userService
+      .updateUser(this.currentUser.id_user, updateData)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((error) => {
+          console.error("Update error:", error)
+          if (error.status === 400) {
+            this.errorMessage = "Dati non validi. Controlla i campi inseriti."
+          } else if (error.status === 401) {
+            this.errorMessage = "Password attuale non corretta."
+          } else if (error.status === 409) {
+            this.errorMessage = "L'email inserita è già in uso."
+          } else {
+            this.errorMessage = "Errore durante l'aggiornamento del profilo. Riprova più tardi."
+          }
+          return throwError(() => error)
+        }),
+        finalize(() => {
+          this.isLoading = false
+        }),
+      )
+      .subscribe({
+        next: (updatedUser: any) => {
+          this.updateSuccess = true
+          this.currentUser = updatedUser
+          
+          // Clear password fields after successful update
+          this.userForm.patchValue({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+          })
+          
+          // Update the auth service with new user data
+          this.authService.authenticate(updatedUser)
+          
+          // Auto-hide success message after 5 seconds
+          setTimeout(() => {
+            this.updateSuccess = false
+          }, 5000)
+        },
+        error: () => {
+          // Error already handled in catchError
+        },
+      })
+  }
+
+  // Force reset all states (for debugging)
+  forceReset(): void {
+    console.log('Force reset called - before:', { isLoading: this.isLoading, currentUser: !!this.currentUser })
+    this.isLoading = false
     this.updateSuccess = false
     this.errorMessage = null
-
-    const formData = this.userForm.value
-    const updateData: any = {
-      nome: formData.nome,
-      cognome: formData.cognome,
-      email: formData.email,
-    }
-
-    // Add password only if it was entered
-    if (formData.newPassword) {
-      updateData.currentPassword = formData.currentPassword
-      updateData.newPassword = formData.newPassword
-    }
-
-    if (this.currentUser?.id_user) {
-      this.userService
-        .updateUser(this.currentUser.id_user as unknown as number, updateData)
-        .pipe(
-          catchError((error) => {
-            console.error("Update error:", error)
-            const message =
-              error.response?.data?.message || "Errore durante l'aggiornamento del profilo. Riprova più tardi."
-            this.snackBar.open(message, "Chiudi", {
-              duration: 5000,
-              horizontalPosition: "center",
-              verticalPosition: "top",
-              panelClass: ["error-snackbar"],
-            })
-            this.errorMessage = message
-            return throwError(() => new Error(message))
-          }),
-          finalize(() => {
-            this.isLoading = false
-          }),
-          takeUntil(this.destroy$),
-        )
-        .subscribe({
-          next: (updatedUser) => {
-            this.updateSuccess = true
-
-            // Update user identity in auth service
-            this.authService.updateUserIdentity({
-              ...this.currentUser,
-              nome: formData.nome,
-              cognome: formData.cognome,
-              email: formData.email,
-            })
-
-            this.snackBar.open("Profilo aggiornato con successo!", "Chiudi", {
-              duration: 5000,
-              horizontalPosition: "center",
-              verticalPosition: "top",
-              panelClass: ["success-snackbar"],
-            })
-
-            // Reset password fields
-            this.userForm.patchValue({
-              currentPassword: "",
-              newPassword: "",
-              confirmPassword: "",
-            })
-
-            // Reset field states
-            this.userForm.get("currentPassword")?.markAsUntouched()
-            this.userForm.get("newPassword")?.markAsUntouched()
-            this.userForm.get("confirmPassword")?.markAsUntouched()
-          },
-        })
-    }
+    console.log('Force reset called - after:', { isLoading: this.isLoading, currentUser: !!this.currentUser })
   }
 
   resetForm(): void {
+    console.log('Reset form called - before:', { isLoading: this.isLoading, currentUser: !!this.currentUser })
+    
     if (this.currentUser) {
       this.userForm.patchValue({
         nome: this.currentUser.nome,
         cognome: this.currentUser.cognome,
         email: this.currentUser.email,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
       })
-
-      this.userForm.markAsPristine()
-      this.userForm.markAsUntouched()
-      this.updateSuccess = false
-      this.errorMessage = null
     }
+    
+    // Reset password requirements
+    this.passwordRequirements = {
+      minLength: false,
+      hasUppercase: false,
+      hasLowercase: false,
+      hasNumber: false
+    }
+    
+    // Reset component state
+    this.errorMessage = null
+    this.updateSuccess = false
+    this.isLoading = false
+    
+    // Reset form validation state
+    this.userForm.markAsUntouched()
+    this.userForm.markAsPristine()
+    
+    // Reset specific field errors
+    Object.keys(this.userForm.controls).forEach(key => {
+      const control = this.userForm.get(key)
+      control?.setErrors(null)
+    })
+    
+    console.log('Reset form called - after:', { isLoading: this.isLoading, currentUser: !!this.currentUser })
   }
 
   ngOnDestroy(): void {

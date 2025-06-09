@@ -47,6 +47,7 @@ export class NavigationService {
       label: "Statistiche",
       icon: "ChartBar",
       route: "/dashboard/statistiche",
+      adminOnly: true,
       authorities: ["ROLE_ADMIN"],
     },
     {
@@ -76,12 +77,13 @@ export class NavigationService {
 
     const routeMap: { [key: string]: (route: string) => boolean } = {
       "": () => currentRoute === "" || currentRoute === "/",
-      "/dashboard": () => currentRoute.startsWith("/dashboard"),
+      "/dashboard": () => currentRoute === "/dashboard",
       "/dashboard/user-management": () =>
         currentRoute === "/dashboard/user-management",
       "/dashboard/bookings": () => currentRoute === "/dashboard/bookings",
       "/dashboard/prenotazione-posizione": () =>
         currentRoute === "/dashboard/prenotazione-posizione",
+      "/dashboard/statistiche": () => currentRoute === "/dashboard/statistiche",
       "/dashboard/management": () =>
         currentRoute.startsWith("/dashboard/management"),
     };

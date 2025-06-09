@@ -1,93 +1,140 @@
-<div class="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-  <div class="bg-white rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] w-full max-w-3xl overflow-hidden">
-    <!-- Header --->
-    <div class=" bg-[var(--color-expriviaBlue)] p-6 text-center">
-      <div class="inline-flex items-center justify-center w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full mb-3">
-        <mat-icon class="text-white !w-6 !h-6" aria-hidden="true">account_circle</mat-icon>
+<!-- Main Container -->
+<div class="max-w-7xl mx-auto p-4 sm:p-6">
+  <!-- Header Section -->
+  <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="fas fa-user-edit text-blue-600 mr-3"></i>
+          Aggiorna Profilo
+        </h1>
+        <p class="text-gray-600 mt-1">
+          Gestisci le tue informazioni personali e le impostazioni dell'account
+        </p>
       </div>
-      <h1 class="text-2xl font-bold text-white">Aggiorna il tuo profilo</h1>
-      <p class="text-sm text-white/90 mt-1">Gestisci le tue informazioni personali</p>
+      <div class="flex items-center space-x-4">
+        <button 
+          type="button" 
+          (click)="resetForm()"
+          [disabled]="isLoading"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-undo mr-2"></i>
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Form Section -->
+  <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    <!-- Loading State -->
+    <div *ngIf="isLoading && !currentUser" class="flex justify-center items-center py-12">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-500">Caricamento dati profilo...</p>
+      </div>
     </div>
 
-    <!-- Form di modifica -->
-    <div class="bg-white/95 backdrop-blur-md rounded-[var(--radius-2xl)] shadow-[var(--shadow-xl)] p-6 md:p-8" [@slideUp]>
-      <h2 class="text-[var(--font-size-2xl)] font-[var(--font-weight-semibold)] text-gray-900 mb-6">
-        Modifica informazioni
-      </h2>
-
-      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Informazioni personali -->
-        <div class="space-y-4">
-          <h3 class="text-[var(--font-size-lg)] font-[var(--font-weight-medium)] text-[var(--color-expriviaBlue)]">
-            Informazioni personali
-          </h3>
+    <!-- Form Content -->
+    <div *ngIf="!isLoading || currentUser">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="divide-y divide-gray-200">
+        
+        <!-- Personal Information Section -->
+        <div class="p-6">
+          <div class="flex items-center mb-6">
+            <div class="p-2 bg-blue-100 rounded-lg mr-3">
+              <i class="fas fa-user text-blue-600"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Informazioni Personali</h3>
+              <p class="text-sm text-gray-500">Aggiorna i tuoi dati anagrafici</p>
+            </div>
+          </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Nome -->
             <div>
-              <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="nome">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="nome">
                 Nome <span class="text-red-500">*</span>
               </label>
               <input 
                 id="nome" 
                 formControlName="nome" 
                 type="text"
-                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
+                placeholder="Inserisci il tuo nome"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
                 [class.border-red-500]="nomeInvalid"
+                [class.focus:ring-red-200]="nomeInvalid"
+                [class.focus:border-red-500]="nomeInvalid"
               />
-              <div *ngIf="nomeInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+              <div *ngIf="nomeInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>
                 {{ getNomeErrorMessage() }}
               </div>
             </div>
 
             <!-- Cognome -->
             <div>
-              <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="cognome">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="cognome">
                 Cognome <span class="text-red-500">*</span>
               </label>
               <input 
                 id="cognome" 
                 formControlName="cognome" 
                 type="text"
-                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
+                placeholder="Inserisci il tuo cognome"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
                 [class.border-red-500]="cognomeInvalid"
+                [class.focus:ring-red-200]="cognomeInvalid"
+                [class.focus:border-red-500]="cognomeInvalid"
               />
-              <div *ngIf="cognomeInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+              <div *ngIf="cognomeInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>
                 {{ getCognomeErrorMessage() }}
               </div>
             </div>
           </div>
 
           <!-- Email -->
-          <div>
-            <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="email">
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2" for="email">
               Email <span class="text-red-500">*</span>
             </label>
-            <input 
-              id="email" 
-              formControlName="email" 
-              type="email"
-              class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
-              [class.border-red-500]="emailInvalid"
-            />
-            <div *ngIf="emailInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+            <div class="relative">
+              <input 
+                id="email" 
+                formControlName="email" 
+                type="email"
+                placeholder="inserisci@example.com"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-10 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                [class.border-red-500]="emailInvalid"
+                [class.focus:ring-red-200]="emailInvalid"
+                [class.focus:border-red-500]="emailInvalid"
+              />
+              <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <div *ngIf="emailInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+              <i class="fas fa-exclamation-circle mr-1"></i>
               {{ getEmailErrorMessage() }}
             </div>
           </div>
         </div>
 
-        <!-- Cambio Password -->
-        <div class="pt-6 border-t border-gray-200 space-y-4">
-          <h3 class="text-[var(--font-size-lg)] font-[var(--font-weight-medium)] text-[var(--color-expriviaBlue)]">
-            Cambio Password
-          </h3>
-          <p class="text-[var(--font-size-sm)] text-gray-500">
-            Lascia vuoti questi campi se non desideri cambiare la password.
-          </p>
+        <!-- Password Change Section -->
+        <div class="p-6">
+          <div class="flex items-center mb-6">
+            <div class="p-2 bg-orange-100 rounded-lg mr-3">
+              <i class="fas fa-lock text-orange-600"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">Cambio Password</h3>
+              <p class="text-sm text-gray-500">Lascia vuoti questi campi se non desideri modificare la password</p>
+            </div>
+          </div>
 
           <!-- Password Attuale -->
-          <div>
-            <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="currentPassword">
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2" for="currentPassword">
               Password Attuale
             </label>
             <div class="relative">
@@ -95,52 +142,84 @@
                 id="currentPassword" 
                 [type]="hideCurrentPwd ? 'password' : 'text'"
                 formControlName="currentPassword"
-                class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 pr-10 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
+                placeholder="Inserisci la password attuale"
+                class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-10 pr-12 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
                 [class.border-red-500]="currentPasswordInvalid"
+                [class.focus:ring-red-200]="currentPasswordInvalid"
+                [class.focus:border-red-500]="currentPasswordInvalid"
               />
+              <i class="fas fa-key absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
               <button 
                 type="button" 
                 (click)="hideCurrentPwd = !hideCurrentPwd"
-                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-orange-500 transition-[var(--transition-colors)]"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <mat-icon class="text-[20px]">{{ hideCurrentPwd ? 'visibility_off' : 'visibility' }}</mat-icon>
+                <i class="fas" [class.fa-eye]="hideCurrentPwd" [class.fa-eye-slash]="!hideCurrentPwd"></i>
               </button>
             </div>
-            <div *ngIf="currentPasswordInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+            <div *ngIf="currentPasswordInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+              <i class="fas fa-exclamation-circle mr-1"></i>
               {{ getCurrentPasswordErrorMessage() }}
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Nuova Password -->
             <div>
-              <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="newPassword">
-                Nuova Password
-              </label>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700" for="newPassword">
+                  Nuova Password
+                </label>
+                <div class="flex items-center" *ngIf="userForm.get('newPassword')?.value && passwordStrengthText">
+                  <div class="flex space-x-1 mr-2">
+                    <div class="w-1.5 h-1.5 rounded-full" 
+                         [class]="passwordStrength >= 1 ? 'bg-red-400' : 'bg-gray-200'"></div>
+                    <div class="w-1.5 h-1.5 rounded-full" 
+                         [class]="passwordStrength >= 2 ? 'bg-orange-400' : 'bg-gray-200'"></div>
+                    <div class="w-1.5 h-1.5 rounded-full" 
+                         [class]="passwordStrength >= 3 ? 'bg-yellow-400' : 'bg-gray-200'"></div>
+                    <div class="w-1.5 h-1.5 rounded-full" 
+                         [class]="passwordStrength >= 4 ? 'bg-green-400' : 'bg-gray-200'"></div>
+                  </div>
+                  <span class="text-xs font-medium" [class]="passwordStrengthColor">{{ passwordStrengthText }}</span>
+                </div>
+              </div>
               <div class="relative">
                 <input 
                   id="newPassword" 
                   [type]="hideNewPwd ? 'password' : 'text'"
                   formControlName="newPassword"
-                  class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 pr-10 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
+                  placeholder="Inserisci nuova password"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-10 pr-12 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
                   [class.border-red-500]="newPasswordInvalid"
+                  [class.focus:ring-red-200]="newPasswordInvalid"
+                  [class.focus:border-red-500]="newPasswordInvalid"
+                  [class.border-green-500]="passwordStrength === 4 && userForm.get('newPassword')?.value"
+                  [class.focus:ring-green-200]="passwordStrength === 4 && userForm.get('newPassword')?.value"
+                  [class.focus:border-green-500]="passwordStrength === 4 && userForm.get('newPassword')?.value"
                 />
+                <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <div class="absolute right-12 top-1/2 transform -translate-y-1/2">
+                  <i *ngIf="passwordStrength === 4 && userForm.get('newPassword')?.value" 
+                     class="fas fa-check-circle text-green-500 text-sm"></i>
+                </div>
                 <button 
                   type="button" 
                   (click)="hideNewPwd = !hideNewPwd"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-orange-500 transition-[var(--transition-colors)]"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <mat-icon class="text-[20px]">{{ hideNewPwd ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  <i class="fas" [class.fa-eye]="hideNewPwd" [class.fa-eye-slash]="!hideNewPwd"></i>
                 </button>
               </div>
-              <div *ngIf="newPasswordInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+              <div *ngIf="newPasswordInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>
                 {{ getNewPasswordErrorMessage() }}
               </div>
             </div>
 
             <!-- Conferma Password -->
             <div>
-              <label class="block text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 mb-1" for="confirmPassword">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="confirmPassword">
                 Conferma Password
               </label>
               <div class="relative">
@@ -148,62 +227,138 @@
                   id="confirmPassword" 
                   [type]="hideConfirmPwd ? 'password' : 'text'"
                   formControlName="confirmPassword"
-                  class="w-full border border-gray-300 rounded-[var(--radius-lg)] px-3 py-2 pr-10 text-[var(--font-size-sm)] focus:outline-none focus:border-[var(--color-expriviaBlue)] focus:ring-1 focus:ring-[var(--color-expriviaBlue)] transition-[var(--transition-colors)]"
+                  placeholder="Conferma nuova password"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 pl-10 pr-12 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
                   [class.border-red-500]="confirmPasswordInvalid"
+                  [class.focus:ring-red-200]="confirmPasswordInvalid"
+                  [class.focus:border-red-500]="confirmPasswordInvalid"
                 />
+                <i class="fas fa-shield-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 <button 
                   type="button" 
                   (click)="hideConfirmPwd = !hideConfirmPwd"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-orange-500 transition-[var(--transition-colors)]"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <mat-icon class="text-[20px]">{{ hideConfirmPwd ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  <i class="fas" [class.fa-eye]="hideConfirmPwd" [class.fa-eye-slash]="!hideConfirmPwd"></i>
                 </button>
               </div>
-              <div *ngIf="confirmPasswordInvalid" class="text-[var(--font-size-xs)] text-red-600 mt-1">
+              <div *ngIf="confirmPasswordInvalid" class="text-xs text-red-600 mt-1 flex items-center">
+                <i class="fas fa-exclamation-circle mr-1"></i>
                 {{ getConfirmPasswordErrorMessage() }}
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Messaggi di stato -->
-        <div *ngIf="errorMessage" 
-             class="p-4 bg-red-50 border border-red-200 rounded-[var(--radius-lg)] flex items-start gap-3" 
-             [@shake]>
-          <mat-icon class="text-red-500 mt-0.5">error</mat-icon>
-          <div class="flex-1">
-            <p class="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-red-800">Errore</p>
-            <p class="text-[var(--font-size-sm)] text-red-600">{{ errorMessage }}</p>
+          <!-- Password Requirements -->
+          <div class="mt-4 p-4 bg-gray-50 rounded-lg" *ngIf="userForm.get('newPassword')?.value">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-sm font-medium text-gray-700">Requisiti password:</h4>
+              <div class="flex items-center" *ngIf="passwordStrengthText">
+                <span class="text-xs font-medium mr-2">Forza:</span>
+                <span class="text-xs font-semibold" [class]="passwordStrengthColor">{{ passwordStrengthText }}</span>
+              </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mb-3">
+              <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div 
+                  class="h-1.5 rounded-full transition-all duration-300"
+                  [style.width.%]="(passwordStrength / 4) * 100"
+                  [class]="passwordStrength === 1 ? 'bg-red-400' : 
+                           passwordStrength === 2 ? 'bg-orange-400' : 
+                           passwordStrength === 3 ? 'bg-yellow-400' : 
+                           passwordStrength === 4 ? 'bg-green-400' : 'bg-gray-200'">
+                </div>
+              </div>
+            </div>
+
+            <ul class="text-xs space-y-1">
+              <li class="flex items-center transition-colors duration-200">
+                <i class="fas mr-2 w-3" 
+                   [class]="passwordRequirements.minLength ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'"></i>
+                <span [class]="passwordRequirements.minLength ? 'text-green-700' : 'text-gray-500'">
+                  Almeno 6 caratteri
+                </span>
+              </li>
+              <li class="flex items-center transition-colors duration-200">
+                <i class="fas mr-2 w-3" 
+                   [class]="passwordRequirements.hasUppercase ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'"></i>
+                <span [class]="passwordRequirements.hasUppercase ? 'text-green-700' : 'text-gray-500'">
+                  Almeno una lettera maiuscola
+                </span>
+              </li>
+              <li class="flex items-center transition-colors duration-200">
+                <i class="fas mr-2 w-3" 
+                   [class]="passwordRequirements.hasLowercase ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'"></i>
+                <span [class]="passwordRequirements.hasLowercase ? 'text-green-700' : 'text-gray-500'">
+                  Almeno una lettera minuscola
+                </span>
+              </li>
+              <li class="flex items-center transition-colors duration-200">
+                <i class="fas mr-2 w-3" 
+                   [class]="passwordRequirements.hasNumber ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300'"></i>
+                <span [class]="passwordRequirements.hasNumber ? 'text-green-700' : 'text-gray-500'">
+                  Almeno un numero
+                </span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div *ngIf="updateSuccess" 
-             class="p-4 bg-green-50 border border-green-200 rounded-[var(--radius-lg)] flex items-start gap-3" 
-             [@scaleIn]>
-          <mat-icon class="text-green-500 mt-0.5">check_circle</mat-icon>
-          <div class="flex-1">
-            <p class="text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-green-800">Successo</p>
-            <p class="text-[var(--font-size-sm)] text-green-600">Profilo aggiornato con successo!</p>
+        <!-- Messages Section -->
+        <div *ngIf="errorMessage || updateSuccess" class="p-6">
+          <!-- Error Message -->
+          <div *ngIf="errorMessage" 
+               class="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 mb-4" 
+               [@shake]>
+            <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-red-800">Errore nell'aggiornamento</p>
+              <p class="text-sm text-red-600">{{ errorMessage }}</p>
+            </div>
+            <button type="button" (click)="errorMessage = null" class="text-red-400 hover:text-red-600">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Success Message -->
+          <div *ngIf="updateSuccess" 
+               class="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3" 
+               [@scaleIn]>
+            <i class="fas fa-check-circle text-green-500 mt-0.5"></i>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-green-800">Aggiornamento completato</p>
+              <p class="text-sm text-green-600">Le modifiche sono state salvate con successo</p>
+            </div>
+            <button type="button" (click)="updateSuccess = false" class="text-green-400 hover:text-green-600">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </div>
 
-        <!-- Bottoni -->
-        <div class="flex flex-col sm:flex-row gap-3 pt-4">
-          <button 
-            type="button" 
-            (click)="resetForm()"
-            class="px-6 py-2.5 text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-gray-700 bg-white border border-gray-300 rounded-[var(--radius-lg)] hover:bg-gray-50 transition-[var(--transition-colors)]"
-          >
-            Annulla modifiche
-          </button>
-          <button 
-            type="submit"
-            [disabled]="userForm.invalid || isLoading"
-            class="flex-1 sm:flex-initial px-6 py-2.5 text-[var(--font-size-sm)] font-[var(--font-weight-medium)] text-white bg-orange-500 rounded-[var(--radius-lg)] hover:bg-orange-600 transition-[var(--transition-all)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
-            <span>{{ isLoading ? 'Salvataggio...' : 'Salva modifiche' }}</span>
-          </button>
+        <!-- Form Actions -->
+        <div class="px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end items-center gap-4">
+          <div class="flex space-x-3">
+            <button 
+              type="button" 
+              routerLink="/dashboard"
+              class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+              <i class="fas fa-arrow-left mr-2"></i>
+              Torna alla Dashboard
+            </button>
+            
+            <button 
+              type="submit"
+              [disabled]="userForm.invalid || isLoading"
+              class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center">
+              <span *ngIf="isLoading" class="mr-2">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+              <i *ngIf="!isLoading" class="fas fa-save mr-2"></i>
+              {{ isLoading ? 'Salvataggio...' : 'Salva Modifiche' }}
+            </button>
+          </div>
         </div>
       </form>
     </div>

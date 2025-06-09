@@ -50,6 +50,7 @@ public class SecurityConfig {
 
                         // Admin only endpoints
                         .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                        .requestMatchers("/api/prenotazioni/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
                         .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
 
                         // Authenticated user endpoints

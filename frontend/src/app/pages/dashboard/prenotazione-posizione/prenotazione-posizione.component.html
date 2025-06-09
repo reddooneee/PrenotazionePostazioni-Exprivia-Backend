@@ -188,10 +188,10 @@
               <div class="flex items-center">
                 <div class="text-sm">
                   <div class="font-medium text-gray-900">
-                    {{ prenotazione.users?.nome || 'N/A' }} {{ prenotazione.users?.cognome || '' }}
+                    {{ prenotazione.users.nome || 'N/A' }} {{ prenotazione.users.cognome || '' }}
                   </div>
                   <div class="text-gray-500">
-                    {{ prenotazione.users?.email || 'N/A' }}
+                    {{ prenotazione.users.email || 'N/A' }}
                   </div>
                 </div>
               </div>
@@ -201,10 +201,10 @@
             <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
               <div class="text-sm">
                 <div class="font-medium text-gray-900">
-                  {{ prenotazione.stanze?.nome }}
+                  {{ prenotazione.stanze.nome }}
                 </div>
                 <div class="text-gray-500">
-                  ID: {{ prenotazione.stanze?.id_stanza }}
+                  ID: {{ prenotazione.stanze.id_stanza }}
                 </div>
               </div>
             </td>
@@ -213,10 +213,10 @@
             <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
               <div class="text-sm">
                 <div class="font-medium text-gray-900">
-                  {{ prenotazione.postazione?.nomePostazione }}
+                  {{ prenotazione.postazione.nomePostazione }}
                 </div>
                 <div class="text-gray-500">
-                  ID: {{ prenotazione.postazione?.id_postazione }}
+                  ID: {{ prenotazione.postazione.id_postazione }}
                 </div>
               </div>
             </td>

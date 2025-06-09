@@ -50,81 +50,74 @@
       <div
         class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70"
       >
-        <!-- Admin Dashboard -->
-        <ng-container *ngIf="isAdmin && isHomeRoute()">
-          <!-- KPI Stats Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Today's Bookings -->
-            <div
-              class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
-            >
-              <div class="flex items-center justify-between">
-                <div class="space-y-1">
-                  <p class="text-sm font-medium text-gray-600">
-                    Prenotazioni Oggi
-                  </p>
-                  <h3 class="text-2xl font-semibold text-gray-900">
-                    {{ todayBookings }}
-                  </h3>
+                  <!-- Dashboard Overview -->
+          <ng-container *ngIf="isHomeRoute()">
+            <!-- Welcome Header -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 class="text-3xl font-bold text-gray-900 mb-2">Dashboard Amministratore</h2>
+                  <p class="text-gray-600">Panoramica completa del sistema di prenotazioni</p>
                 </div>
-                <div class="p-3 bg-blue-50 rounded-lg">
-                  <lucide-icon name="calendar" class="w-6 h-6 text-blue-600" />
-                </div>
+
               </div>
             </div>
 
-            <!-- Available Desks -->
-            <div
-              class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
-            >
-              <div class="flex items-center justify-between">
-                <div class="space-y-1">
-                  <p class="text-sm font-medium text-gray-600">
-                    Postazioni Disponibili
-                  </p>
-                  <h3 class="text-2xl font-semibold text-gray-900">
-                    {{ availableDesks }}/{{ totalDesks }}
-                  </h3>
+                      
+
+                      <!-- Main Actions Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              <!-- New Booking -->
+              <button routerLink="prenotazione-posizione" class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all text-left group cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                    <lucide-icon name="plus" class="w-6 h-6 text-blue-600" />
+                  </div>
+                  <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
                 </div>
-                <div class="p-3 bg-green-50 rounded-lg">
-                  <lucide-icon
-                    name="layout-dashboard"
-                    class="w-6 h-6 text-green-600"
-                  />
+                <h3 class="font-semibold text-gray-900 mb-2">Nuova Prenotazione</h3>
+                <p class="text-sm text-gray-500">Crea prenotazioni per utenti del sistema</p>
+              </button>
+
+              <!-- Manage Bookings -->
+              <button routerLink="bookings" class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all text-left group cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors">
+                    <lucide-icon name="calendar" class="w-6 h-6 text-green-600" />
+                  </div>
+                  <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
                 </div>
-              </div>
-              <div class="mt-4">
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    class="bg-green-600 h-2 rounded-full"
-                    [style.width]="getAvailableDesksPercentage()"
-                  ></div>
+                <h3 class="font-semibold text-gray-900 mb-2">Gestione Prenotazioni</h3>
+                <p class="text-sm text-gray-500">Visualizza e gestisci tutte le prenotazioni del sistema</p>
+              </button>
+
+              <!-- User Management -->
+              <button routerLink="user-management" class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all text-left group cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
+                    <lucide-icon name="users" class="w-6 h-6 text-purple-600" />
+                  </div>
+                  <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
                 </div>
-              </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Gestione Utenti</h3>
+                <p class="text-sm text-gray-500">Amministra utenti, ruoli e permessi del sistema</p>
+              </button>
             </div>
 
-            <!-- Quick Actions -->
-            <div
-              class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
-            >
-              <div class="space-y-3">
-                <button
-                  routerLink="prenotazione-posizione"
-                  class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <lucide-icon name="plus" class="w-5 h-5" />
-                  Nuova Prenotazione
-                </button>
-                <button
-                  routerLink="user-management"
-                  class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <lucide-icon name="users" class="w-5 h-5" />
-                  Gestione Utenti
-                </button>
-              </div>
+                      <!-- Statistics Section -->
+            <div class="grid grid-cols-1 gap-6">
+              <!-- Statistics -->
+              <button routerLink="statistiche" class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all text-left group cursor-pointer">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="p-3 bg-orange-50 rounded-lg group-hover:bg-orange-100 transition-colors">
+                    <i class="fas fa-chart-bar text-orange-600 text-xl"></i>
+                  </div>
+                  <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">Statistiche Avanzate</h3>
+                <p class="text-sm text-gray-500">Visualizza report dettagliati e analisi del sistema di prenotazioni</p>
+              </button>
             </div>
-          </div>
         </ng-container>
         
         <!-- Router outlet per i componenti child -->
@@ -135,3 +128,4 @@
     </main>
   </div>
 </div>
+

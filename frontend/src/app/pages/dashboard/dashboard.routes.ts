@@ -26,6 +26,15 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [UserRouteAccessService],
       },
       {
+        path: "bookings",
+        loadComponent: () =>
+          import("./user-bookings/user-bookings.component").then(
+            (m) => m.UserBookingsComponent
+          ),
+        data: { authorities: ["ROLE_USER", "ROLE_ADMIN"] },
+        canActivate: [UserRouteAccessService],
+      },
+      {
         path: "update-user",
         loadComponent: () =>
           import("../../account/update-user/update-user.component").then(
@@ -35,10 +44,15 @@ export const DASHBOARD_ROUTES: Routes = [
         canActivate: [UserRouteAccessService],
       },
       {
-        path: "",
-        redirectTo: "prenotazione-posizione",
-        pathMatch: "full"
-      }
+        path: "statistiche",
+        loadComponent: () =>
+          import("./stats/stats.component").then(
+            (m) => m.StatsComponent
+          ),
+        data: { authorities: ["ROLE_ADMIN"] },
+        canActivate: [UserRouteAccessService],
+      },
+
     ],
   },
 ];
