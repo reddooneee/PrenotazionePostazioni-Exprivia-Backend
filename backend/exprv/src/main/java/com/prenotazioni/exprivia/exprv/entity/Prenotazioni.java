@@ -22,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "prenotazioni")
@@ -32,17 +33,17 @@ public class Prenotazioni {
     @Column(name = "id_prenotazione")
     private Integer id_prenotazioni;
 
-    @ManyToOne // Si passano gli oggetti interi, non solo delle variabili
+    @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user")
-    private Users users; // FK Chiave esterna che collega la prenotazione all'utente che l'ha effettuata.
+    private Users users;
 
     @ManyToOne
     @JoinColumn(name = "id_postazione", referencedColumnName = "id_postazione")
-    private Postazioni postazione; // FK Chiave esterna che collega la prenotazione alla postazione prenotata.
+    private Postazioni postazione;
 
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
-    private Stanze stanze; // FK Chiave esterna che collega la prenotazione alla stanza prenotata.
+    private Stanze stanze;
 
     @Enumerated(EnumType.STRING)
     private stato_prenotazione stato_prenotazione;
@@ -54,6 +55,7 @@ public class Prenotazioni {
     private LocalDateTime dataFine;
 
     @ManyToMany(mappedBy = "prenotazioni")
+    @JsonIgnore
     private Set<CosaDurata> coseDurata = new HashSet<>();
 
     // JPA richiede un costruttore senza argomenti affinché possa creare istanze
@@ -134,4 +136,11 @@ public class Prenotazioni {
         this.dataFine = dataFine;
     }
 
+    public Set<CosaDurata> getCoseDurata() {
+        return coseDurata;
+    }
+
+    public void setCoseDurata(Set<CosaDurata> coseDurata) {
+        this.coseDurata = coseDurata;
+    }
 }

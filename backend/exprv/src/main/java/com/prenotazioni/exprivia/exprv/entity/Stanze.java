@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prenotazioni.exprivia.exprv.enumerati.tipo_stanza;
 
 import jakarta.persistence.CascadeType;
@@ -19,12 +19,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_stanza"
-)
+@Table(name = "stanze")
 public class Stanze {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +33,11 @@ public class Stanze {
     private String nome;
 
     @OneToMany(mappedBy = "stanze", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Postazioni> postazioni = new ArrayList<>();
 
     @OneToMany(mappedBy = "stanze")
+    @JsonIgnore
     private List<Prenotazioni> prenotazioni = new ArrayList<>();
 
     // Enum tipo_stanza (MeetingRoom, OpenSpace, Ufficio)
@@ -50,7 +50,7 @@ public class Stanze {
     @Column(name = "creatoil")
     private LocalDateTime creatoIl;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "aggiornatoil")
     private LocalDateTime aggiornatoIl;
     // Creato Il, Aggioranto il (TIMESTAMP)

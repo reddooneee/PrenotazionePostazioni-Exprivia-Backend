@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.prenotazioni.exprivia.exprv.dto.PrenotazioniDTO;
 import com.prenotazioni.exprivia.exprv.dto.SelectOptionDTO;
@@ -38,10 +39,8 @@ import com.prenotazioni.exprivia.exprv.repository.StanzeRepository;
 import com.prenotazioni.exprivia.exprv.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 
 @Service
-@Transactional
 public class PrenotazioniService {
 
     @Autowired
@@ -218,9 +217,68 @@ public class PrenotazioniService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<PrenotazioniDTO> cercaPrenotazioniUtente(String email) {
+        System.out.println("DEBUG - Fetching prenotazioni for email: " + email);
         List<Prenotazioni> prenotazioni = prenotazioniRepository.findByUserEmail(email);
-        return prenotazioniMapper.toDtoList(prenotazioni);
+        System.out.println("DEBUG - Found " + prenotazioni.size() + " prenotazioni");
+        
+        // Debug each prenotazione
+        prenotazioni.forEach(p -> {
+            System.out.println("\nDEBUG - Prenotazione ID: " + p.getId_prenotazioni());
+            System.out.println("DEBUG - User object: " + (p.getUsers() != null ? p.getUsers().toString() : "null"));
+            System.out.println("DEBUG - User ID: " + (p.getUsers() != null ? p.getUsers().getId_user() : "null"));
+            System.out.println("DEBUG - User Email: " + (p.getUsers() != null ? p.getUsers().getEmail() : "null"));
+            System.out.println("DEBUG - User Name: " + (p.getUsers() != null ? p.getUsers().getNome() : "null"));
+            System.out.println("DEBUG - User Surname: " + (p.getUsers() != null ? p.getUsers().getCognome() : "null"));
+            System.out.println("DEBUG - Postazione: " + (p.getPostazione() != null ? p.getPostazione().getNomePostazione() : "null"));
+            System.out.println("DEBUG - Stanza: " + (p.getStanze() != null ? p.getStanze().getNome() : "null"));
+        });
+
+        // Force initialization of lazy-loaded collections
+        prenotazioni.forEach(p -> {
+            if (p.getUsers() != null) {
+                System.out.println("DEBUG - Initializing user data for prenotazione " + p.getId_prenotazioni());
+                // Force access to all user properties
+                p.getUsers().getEmail();
+                p.getUsers().getNome();
+                p.getUsers().getCognome();
+                p.getUsers().getId_user();
+            }
+            if (p.getPostazione() != null) p.getPostazione().getNomePostazione();
+            if (p.getStanze() != null) p.getStanze().getNome();
+        });
+
+        List<PrenotazioniDTO> dtos = prenotazioniMapper.toDtoList(prenotazioni);
+        
+        // Debug the DTOs before returning
+        System.out.println("\n=== FINAL DTO DEBUG ===");
+        dtos.forEach(dto -> {
+            System.out.println("\nDEBUG - DTO ID: " + dto.getId_prenotazioni());
+            if (dto.getUsers() != null) {
+                System.out.println("DEBUG - DTO User ID: " + dto.getUsers().getId_user());
+                System.out.println("DEBUG - DTO User Email: " + dto.getUsers().getEmail());
+                System.out.println("DEBUG - DTO User Name: " + dto.getUsers().getNome());
+                System.out.println("DEBUG - DTO User Surname: " + dto.getUsers().getCognome());
+            } else {
+                System.out.println("DEBUG - DTO User is NULL!");
+            }
+            
+            if (dto.getPostazione() != null) {
+                System.out.println("DEBUG - DTO Postazione: " + dto.getPostazione().getNomePostazione());
+            } else {
+                System.out.println("DEBUG - DTO Postazione is NULL!");
+            }
+            
+            if (dto.getStanze() != null) {
+                System.out.println("DEBUG - DTO Stanza: " + dto.getStanze().getNome());
+            } else {
+                System.out.println("DEBUG - DTO Stanza is NULL!");
+            }
+        });
+        System.out.println("=== END DTO DEBUG ===\n");
+
+        return dtos;
     }
 
     /*

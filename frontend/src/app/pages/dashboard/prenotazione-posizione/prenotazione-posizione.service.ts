@@ -39,7 +39,7 @@ export class PrenotazionePosizioneService {
   }
 
     getUserPrenotazioni(): Observable<Prenotazione[]> {
-        return this.prenotazioneService.getPrenotazioni();
+        return this.prenotazioneService.getMiePrenotazioni();
     }
 
     getPostazioniByStanza(stanzaId: number, stanze: StanzaWithPostazioni[]): PostazioneWithStanza[] {
@@ -95,9 +95,8 @@ export class PrenotazionePosizioneService {
 
             if (!isOccupied) {
                 slots.push({
-                    start: `${hour.toString().padStart(2, '0')}:00`,
-                    end: `${(hour + 1).toString().padStart(2, '0')}:00`,
-                    available: true
+                    startTime: `${hour.toString().padStart(2, '0')}:00`,
+                    endTime: `${(hour + 1).toString().padStart(2, '0')}:00`
                 });
             }
         }
@@ -128,5 +127,9 @@ export class PrenotazionePosizioneService {
 
     getMiePrenotazioni(): Observable<Prenotazione[]> {
         return this.prenotazioneService.getMiePrenotazioni();
+    }
+
+    deletePrenotazione(id: number): Observable<void> {
+        return this.prenotazioneService.deletePrenotazione(id);
     }
 } 

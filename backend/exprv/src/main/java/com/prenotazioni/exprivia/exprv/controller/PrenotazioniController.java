@@ -49,9 +49,26 @@ public class PrenotazioniController {
 
     @GetMapping("/mie-prenotazioni")
     public ResponseEntity<List<PrenotazioniDTO>> getPrenotazioniUtente(Authentication authentication) {
-        String userEmail = authentication.getName();
-        List<PrenotazioniDTO> prenotazioni = PrenotazioniService.cercaPrenotazioniUtente(userEmail);
-        return ResponseEntity.ok(prenotazioni);
+        try {
+            String userEmail = authentication.getName();
+            System.out.println("CONTROLLER DEBUG - Request for user: " + userEmail);
+            
+            List<PrenotazioniDTO> prenotazioni = PrenotazioniService.cercaPrenotazioniUtente(userEmail);
+            
+            System.out.println("CONTROLLER DEBUG - Returning " + prenotazioni.size() + " prenotazioni");
+            prenotazioni.forEach(p -> {
+                System.out.println("CONTROLLER DEBUG - Prenotazione ID: " + p.getId_prenotazioni());
+                System.out.println("CONTROLLER DEBUG - User: " + (p.getUsers() != null ? p.getUsers().getEmail() : "null"));
+                System.out.println("CONTROLLER DEBUG - Postazione: " + (p.getPostazione() != null ? p.getPostazione().getNomePostazione() : "null"));
+                System.out.println("CONTROLLER DEBUG - Stanza: " + (p.getStanze() != null ? p.getStanze().getNome() : "null"));
+            });
+            
+            return ResponseEntity.ok(prenotazioni);
+        } catch (Exception e) {
+            System.err.println("CONTROLLER ERROR: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/{idPrenotazioni}")

@@ -100,8 +100,8 @@
               [disabled]="!bookingForm.get('id_postazione')?.value || state.availableTimeSlots.length === 0"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
               <option value="">Seleziona fascia oraria</option>
-              <option *ngFor="let slot of state.availableTimeSlots" [value]="slot.start + ' - ' + slot.end">
-                {{ slot.start }} - {{ slot.end }}
+              <option *ngFor="let slot of state.availableTimeSlots" [value]="slot.startTime + ' - ' + slot.endTime">
+                {{ slot.startTime }} - {{ slot.endTime }}
               </option>
             </select>
           </div>
@@ -167,6 +167,7 @@
             <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stanza</th>
             <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Postazione</th>
             <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato</th>
+            <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
@@ -192,11 +193,6 @@
                   <div class="text-gray-500">
                     {{ prenotazione.users?.email || 'N/A' }}
                   </div>
-                  <ng-container *ngIf="prenotazione.users?.authorities as authorities">
-                    <div class="text-xs text-gray-400" *ngIf="authorities.length > 0">
-                      {{ authorities[0] }}
-                    </div>
-                  </ng-container>
                 </div>
               </div>
             </td>
@@ -236,11 +232,23 @@
                 {{ prenotazione.stato_prenotazione }}
               </span>
             </td>
+
+            <!-- Azioni -->
+            <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button 
+                type="button"
+                (click)="deletePrenotazione(prenotazione)"
+                [disabled]="state.isLoading"
+                class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+                <i class="fas fa-trash mr-1"></i>
+                Elimina
+              </button>
+            </td>
           </tr>
 
           <!-- Empty State -->
           <tr *ngIf="!prenotazioni?.length && !state.isLoading">
-            <td colspan="6" class="px-4 sm:px-6 py-8 text-center text-sm text-gray-500">
+            <td colspan="7" class="px-4 sm:px-6 py-8 text-center text-sm text-gray-500">
               <div class="flex flex-col items-center justify-center space-y-2">
                 <i class="fas fa-calendar-times text-gray-400 text-2xl"></i>
                 <p>Nessuna prenotazione trovata</p>

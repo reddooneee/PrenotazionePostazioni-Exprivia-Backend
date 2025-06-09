@@ -26,30 +26,22 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_postazione"
-)
 public class Postazioni {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    // @JsonProperty("id_postazione")
-    // per specificare i nomi esatti che Jackson deve utilizzare durante la
-    // deserializzazione:
     private Integer id_postazione;
 
     // Relazione Per Stato Postazione
     @ManyToOne
     @JoinColumn(name = "stato_postazione_name")
-    @JsonBackReference
+    @JsonIgnore
     private StatoPostazione statoPostazione;
 
-    // @JsonProperty("stanze")
     @ManyToOne
     @JoinColumn(name = "id_stanza", referencedColumnName = "id_stanza")
-    @JsonBackReference
-    private Stanze stanze; // Relazione con la tabella Stanze
+    @JsonIgnore
+    private Stanze stanze;
 
     @OneToMany(mappedBy = "postazione")
     @JsonIgnore
@@ -80,17 +72,18 @@ public class Postazioni {
         this.id_postazione = id_postazione;
     }
 
-    // Costruttore
-    public Postazioni(Integer id_postazione, Stanze stanze, StatoPostazione statoPostazione, LocalDateTime creatoIl,
-            LocalDateTime aggiornatoIl, String nomePostazione) {
+    // Costruttore completo
+    public Postazioni(Integer id_postazione, String nomePostazione, StatoPostazione statoPostazione, 
+                     Stanze stanze, LocalDateTime creatoIl, LocalDateTime aggiornatoIl) {
         this.id_postazione = id_postazione;
-        this.stanze = stanze;
+        this.nomePostazione = nomePostazione;
         this.statoPostazione = statoPostazione;
+        this.stanze = stanze;
         this.creatoIl = creatoIl;
         this.aggiornatoIl = aggiornatoIl;
-        this.nomePostazione = nomePostazione;
     }
 
+    // Getters and Setters
     public Integer getId_postazione() {
         return id_postazione;
     }
@@ -99,12 +92,12 @@ public class Postazioni {
         this.id_postazione = id_postazione;
     }
 
-    public Stanze getStanze() {
-        return stanze;
+    public String getNomePostazione() {
+        return nomePostazione;
     }
 
-    public void setstanze(Stanze stanze) {
-        this.stanze = stanze;
+    public void setNomePostazione(String nomePostazione) {
+        this.nomePostazione = nomePostazione;
     }
 
     public StatoPostazione getStatoPostazione() {
@@ -115,7 +108,22 @@ public class Postazioni {
         this.statoPostazione = statoPostazione;
     }
 
-    // TIMESTAMP
+    public Stanze getStanze() {
+        return stanze;
+    }
+
+    public void setStanze(Stanze stanze) {
+        this.stanze = stanze;
+    }
+
+    public List<Prenotazioni> getPrenotazioni() {
+        return prenotazioni;
+    }
+
+    public void setPrenotazioni(List<Prenotazioni> prenotazioni) {
+        this.prenotazioni = prenotazioni;
+    }
+
     public LocalDateTime getCreatoIl() {
         return creatoIl;
     }
@@ -130,21 +138,5 @@ public class Postazioni {
 
     public void setAggiornatoIl(LocalDateTime aggiornatoIl) {
         this.aggiornatoIl = aggiornatoIl;
-    }
-
-    public String getNomePostazione() {
-        return nomePostazione;
-    }
-
-    public void setNomePostazione(String nomePostazione) {
-        this.nomePostazione = nomePostazione;
-    }
-
-    public List<Prenotazioni> getPrenotazioni() {
-        return prenotazioni;
-    }
-
-    public void setPrenotazioni(List<Prenotazioni> prenotazioni) {
-        this.prenotazioni = prenotazioni;
     }
 }

@@ -9,7 +9,7 @@ import { Prenotazione, StatoPrenotazione } from "@core/models/prenotazione.model
 import { CosaDurata } from "@core/models/cosa-durata.model";
 import { PrenotazionePosizioneService } from "./prenotazione-posizione.service";
 import { Postazione } from "@/app/core/models/postazione.model";
-import { StanzaWithPostazioni } from "@core/models/stanza.model";
+import { Stanza, StanzaWithPostazioni } from "@core/models/stanza.model";
 import { MessageService } from "primeng/api";
 import { ToastModule } from 'primeng/toast';
 
@@ -214,9 +214,8 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         next: (slots) => {
           console.log('Slot disponibili ricevuti:', slots);
           this.state.availableTimeSlots = slots.map(slot => ({
-            start: slot.start,
-            end: slot.end,
-            available: true
+            startTime: (slot as any).start || slot.startTime,
+            endTime: (slot as any).end || slot.endTime
           }));
           console.log('Stato dopo aggiornamento:', {
             availableSlots: this.state.availableTimeSlots.length,
@@ -356,7 +355,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
                 detail: 'Prenotazione creata con successo'
               });
               this.resetForm();
-              this.loadAllPrenotazioni();
+              this.loadMiePrenotazioni();
               this.state.isLoading = false;
             },
             error: (error) => {
@@ -508,14 +507,35 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (prenotazioni: Prenotazione[]) => {
-          // Parse e formatta le date
+          console.group('Prenotazioni Utente');
+          console.log('Raw prenotazioni data:', prenotazioni);
+          
+          // Process the prenotazioni with the new simplified structure
           this.prenotazioni = prenotazioni.map(p => ({
             ...p,
             data_inizio: this.parseDate(p.data_inizio),
             data_fine: this.parseDate(p.data_fine),
-            stato_prenotazione: p.stato_prenotazione || StatoPrenotazione.Confermata
+            stato_prenotazione: p.stato_prenotazione || StatoPrenotazione.Confermata,
+            users: {
+              id_user: p.users?.id_user || 0,
+              nome: p.users?.nome || 'N/A',
+              cognome: p.users?.cognome || 'N/A',
+              email: p.users?.email || 'N/A',
+              enabled: p.users?.enabled || false
+            },
+            postazione: {
+              id_postazione: p.postazione?.id_postazione || 0,
+              nomePostazione: p.postazione?.nomePostazione || 'N/A'
+            },
+            stanze: {
+              id_stanza: p.stanze?.id_stanza || 0,
+              nome: p.stanze?.nome || 'N/A',
+              tipo_stanza: p.stanze?.tipo_stanza || 'N/A'
+            }
           }));
 
+          console.log('Processed prenotazioni:', this.prenotazioni);
+          console.groupEnd();
           this.state.isLoading = false;
         },
         error: (error: Error) => {
@@ -531,7 +551,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   }
 
   private parseDate(dateValue: any): Date {
-    console.log('Parsing date value:', dateValue);
+    //console.log('Parsing date value:', dateValue);
     
     if (dateValue instanceof Date) {
       console.log('Value is already a Date');
@@ -543,7 +563,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         // Array format: [year, month, day, hours, minutes, seconds, nanoseconds]
         const [year, month, day, hours, minutes] = dateValue;
         const date = new Date(year, month - 1, day, hours, minutes);
-        console.log('Parsed array date:', date);
+        //console.log('Parsed array date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing array date:', error);
@@ -557,7 +577,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         try {
           const [year, month, day, hours, minutes] = dateValue.split(',').map(Number);
           const date = new Date(year, month - 1, day, hours, minutes);
-          console.log('Parsed comma-separated date:', date);
+          //console.log('Parsed comma-separated date:', date);
           return date;
         } catch (error) {
           console.error('Error parsing comma-separated date:', error);
@@ -568,7 +588,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       // Prova a parsare la stringa ISO
       try {
         const date = new Date(dateValue);
-        console.log('Parsed ISO date:', date);
+        //console.log('Parsed ISO date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing ISO date:', error);
@@ -603,5 +623,52 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   isValidTimeSlot(): boolean {
     const selectedTimeSlot = this.bookingForm.get('timeSlot')?.value;
     return !!(selectedTimeSlot && selectedTimeSlot.start && selectedTimeSlot.end);
+  }
+
+  deletePrenotazione(prenotazione: Prenotazione): void {
+    if (!prenotazione.id_prenotazioni) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Errore',
+        detail: 'ID prenotazione non valido'
+      });
+      return;
+    }
+
+    // Conferma eliminazione
+    const conferma = confirm(
+      `Sei sicuro di voler eliminare la prenotazione del ${this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy')} alle ${this.getFormattedTimeRange(prenotazione.data_inizio, prenotazione.data_fine)}?`
+    );
+
+    if (!conferma) {
+      return;
+    }
+
+    this.state.isLoading = true;
+
+    this.prenotazionePosizioneService.deletePrenotazione(prenotazione.id_prenotazioni)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Successo',
+            detail: 'Prenotazione eliminata con successo'
+          });
+          
+          // Rimuovi la prenotazione dalla lista locale
+          this.prenotazioni = this.prenotazioni.filter(p => p.id_prenotazioni !== prenotazione.id_prenotazioni);
+          this.state.isLoading = false;
+        },
+        error: (error: Error) => {
+          console.error('Errore nell\'eliminazione della prenotazione:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Errore',
+            detail: error.message || 'Errore nell\'eliminazione della prenotazione'
+          });
+          this.state.isLoading = false;
+        }
+      });
   }
 }

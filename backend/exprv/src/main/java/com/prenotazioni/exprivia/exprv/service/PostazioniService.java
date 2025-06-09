@@ -76,7 +76,7 @@ public class PostazioniService {
         updates.forEach((key, value) -> {
             switch (key) {
                 case "stanze":
-                    postazione.setstanze(new Stanze((Integer) value));
+                    postazione.setStanze(new Stanze((Integer) value));
                     break;
                 case "statoPostazione":
                     // postazione.setStato_postazione(stato_postazione.valueOf((String) value));

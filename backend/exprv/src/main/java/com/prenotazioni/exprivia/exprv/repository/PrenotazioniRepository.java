@@ -12,7 +12,14 @@ import com.prenotazioni.exprivia.exprv.entity.Prenotazioni;
 
 @Repository
 public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, Integer> {
-    @Query("SELECT p FROM Prenotazioni p WHERE p.users.email = :email")
+    @Query("SELECT DISTINCT p FROM Prenotazioni p " +
+           "LEFT JOIN FETCH p.users u " +
+           "LEFT JOIN FETCH u.authorities " +
+           "LEFT JOIN FETCH p.postazione po " +
+           "LEFT JOIN FETCH p.stanze s " +
+           "LEFT JOIN FETCH p.coseDurata " +
+           "WHERE u.email = :email " +
+           "ORDER BY p.dataInizio DESC")
     List<Prenotazioni> findByUserEmail(@Param("email") String email);
 
     @Query("SELECT p FROM Prenotazioni p WHERE p.dataInizio BETWEEN :startDate AND :endDate")
@@ -24,8 +31,7 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, Inte
            "AND ((p.dataInizio BETWEEN :startTime AND :endTime) " +
            "OR (p.dataFine BETWEEN :startTime AND :endTime) " +
            "OR (:startTime BETWEEN p.dataInizio AND p.dataFine) " +
-           "OR (:endTime BETWEEN p.dataInizio AND p.dataFine) " +
-           "OR (p.dataInizio <= :startTime AND p.dataFine >= :endTime))")
+           "OR (:endTime BETWEEN p.dataInizio AND p.dataFine))")
     List<Prenotazioni> findOverlappingBookings(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,

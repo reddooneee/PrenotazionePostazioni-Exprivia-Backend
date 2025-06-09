@@ -8,8 +8,11 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,10 +28,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-@JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "id_user"
-)
 public class Users {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,14 +44,17 @@ public class Users {
     private String email;
 
     @Column(name = "password_hash", length = 60, nullable = false)
+    @JsonIgnore
     private String password;
 
     // Verify Code
     @Column(name = "verification_code")
+    @JsonIgnore
     private String verificationCode;
 
     // Expiration Code
     @Column(name = "verification_expiration")
+    @JsonIgnore
     private LocalDateTime verificationCodeExpiresAt;
 
     @Column(name = "enabled")
@@ -63,6 +65,7 @@ public class Users {
     private Set<Authority> authorities = new HashSet<>();
 
     @OneToMany(mappedBy = "users")
+    @JsonIgnore
     private List<Prenotazioni> prenotazioni = new ArrayList<>();
 
     // Usare LocalDateTime cosi si tiene traccia anche del tempo.
