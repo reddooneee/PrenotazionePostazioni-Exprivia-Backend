@@ -70,7 +70,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadPrenotazioneInfo();
     this.setupFormSubscriptions();
-    this.loadAllPrenotazioni(); // Carica tutte le prenotazioni all'avvio
+    this.loadMiePrenotazioni(); // Carica tutte le prenotazioni all'avvio
   }
 
   ngOnDestroy(): void {
@@ -286,7 +286,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       const selectedDate = formData.selectedDate;
       const selectedTimeSlot = formData.timeSlot;
 
-      if (!selectedTimeSlot || !selectedTimeSlot.start || !selectedTimeSlot.end) {
+      if (!selectedTimeSlot) {
         this.messageService.add({
           severity: 'error',
           summary: 'Errore',
@@ -302,8 +302,8 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         const startDateTime = new Date(selectedDate);
         const endDateTime = new Date(selectedDate);
         
-        const [startHour, startMinute] = selectedTimeSlot.start.split(':');
-        const [endHour, endMinute] = selectedTimeSlot.end.split(':');
+        const [startHour, startMinute] = selectedTimeSlot.split(' - ')[0].split(':');
+        const [endHour, endMinute] = selectedTimeSlot.split(' - ')[1].split(':');
 
         startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
         endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
@@ -428,7 +428,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     // Check if the form is valid (this includes required field validation)
     const formValid = this.bookingForm.valid;
 
-    console.log('Form validation state:', {
+    /*console.log('Form validation state:', {
       hasRequiredFields,
       formValid,
       formValues: this.bookingForm.value,
@@ -440,7 +440,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         selectedDate: formControls['selectedDate'].value,
         timeSlot: formControls['timeSlot'].value
       }
-    });
+    });*/
 
     return hasRequiredFields && formValid;
   }
@@ -502,6 +502,34 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadMiePrenotazioni(): void {
+    this.state.isLoading = true;
+    this.prenotazionePosizioneService.getUserPrenotazioni()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (prenotazioni: Prenotazione[]) => {
+          // Parse e formatta le date
+          this.prenotazioni = prenotazioni.map(p => ({
+            ...p,
+            data_inizio: this.parseDate(p.data_inizio),
+            data_fine: this.parseDate(p.data_fine),
+            stato_prenotazione: p.stato_prenotazione || StatoPrenotazione.Confermata
+          }));
+
+          this.state.isLoading = false;
+        },
+        error: (error: Error) => {
+          console.error('Errore nel caricamento delle prenotazioni:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Errore',
+            detail: 'Errore nel caricamento delle prenotazioni'
+          });
+          this.state.isLoading = false;
+        }
+      });
+  }
+
   private parseDate(dateValue: any): Date {
     console.log('Parsing date value:', dateValue);
     
@@ -513,8 +541,8 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     if (Array.isArray(dateValue)) {
       try {
         // Array format: [year, month, day, hours, minutes, seconds, nanoseconds]
-        const [year, month, day, hours, minutes, seconds] = dateValue;
-        const date = new Date(year, month - 1, day, hours, minutes, seconds);
+        const [year, month, day, hours, minutes] = dateValue;
+        const date = new Date(year, month - 1, day, hours, minutes);
         console.log('Parsed array date:', date);
         return date;
       } catch (error) {
@@ -527,8 +555,8 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       // Se è una stringa che contiene virgole, è un array di numeri
       if (dateValue.includes(',')) {
         try {
-          const [year, month, day, hours, minutes, seconds] = dateValue.split(',').map(Number);
-          const date = new Date(year, month - 1, day, hours, minutes, seconds);
+          const [year, month, day, hours, minutes] = dateValue.split(',').map(Number);
+          const date = new Date(year, month - 1, day, hours, minutes);
           console.log('Parsed comma-separated date:', date);
           return date;
         } catch (error) {
