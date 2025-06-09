@@ -3,7 +3,8 @@ services:
   db:
     image: postgres:16
     restart: always
-    container_name: PrenotazioniDB
+    container_name: PrenotazioniDB0
+#    Commentato perché serve connessione remota e non locale
     environment:
       POSTGRES_DB: prenotazioni
       POSTGRES_USER: smartcity
@@ -23,12 +24,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prenotazioni
-      SPRING_DATASOURCE_USERNAME: smartcity
-      SPRING_DATASOURCE_PASSWORD: smartcity
-    depends_on:
-      - db
+      SPRING_PROFILES_ACTIVE: prod
+#    Commentato perché serve connessione remota e non locale
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prenotazioni
+#      SPRING_DATASOURCE_USERNAME: smartcity
+#      SPRING_DATASOURCE_PASSWORD: smartcity
+#    depends_on:
+#      - db
     networks:
       #prenotazioni-net:
       - prenotazioni-net
