@@ -31,7 +31,7 @@ export const DASHBOARD_ROUTES: Routes = [
           import("./user-bookings/user-bookings.component").then(
             (m) => m.UserBookingsComponent
           ),
-        data: { authorities: ["ROLE_USER", "ROLE_ADMIN"] },
+        data: { authorities: ["ROLE_ADMIN"] },
         canActivate: [UserRouteAccessService],
       },
       {

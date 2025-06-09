@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { PrenotazioneService } from '@core/services/prenotazione.service';
 import { AuthService } from '@core/auth/auth.service';
+import { AdminService } from '@core/services/admin.service';
 import { Prenotazione } from '@core/models/prenotazione.model';
 
 interface StatsData {
@@ -14,6 +15,7 @@ interface StatsData {
   mostPopularTimeSlot: string;
   avgBookingDuration: number;
   totalUsers: number;
+  usersWithBookings: number;
   roomUtilization: { roomName: string; percentage: number }[];
   timeSlotDistribution: { timeSlot: string; count: number }[];
   weeklyTrend: { day: string; count: number }[];
@@ -39,6 +41,7 @@ export class StatsComponent implements OnInit, OnDestroy {
     mostPopularTimeSlot: '',
     avgBookingDuration: 0,
     totalUsers: 0,
+    usersWithBookings: 0,
     roomUtilization: [],
     timeSlotDistribution: [],
     weeklyTrend: [],
@@ -51,7 +54,8 @@ export class StatsComponent implements OnInit, OnDestroy {
 
   constructor(
     private prenotazioneService: PrenotazioneService,
-    private authService: AuthService
+    private authService: AuthService,
+    private adminService: AdminService
   ) {}
 
   ngOnInit(): void {
@@ -79,33 +83,33 @@ export class StatsComponent implements OnInit, OnDestroy {
       this.isLoading = true;
     }
     
-    const statsObservable = this.isAdmin 
-      ? this.prenotazioneService.getPrenotazioni()
-      : this.prenotazioneService.getMiePrenotazioni();
-
-    statsObservable
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (prenotazioni: Prenotazione[]) => {
-          this.calculateStats(prenotazioni);
-          if (isRefresh) {
-            this.isRefreshing = false;
-          } else {
-            this.isLoading = false;
-          }
-        },
-        error: (error) => {
-          console.error('Error loading stats:', error);
-          if (isRefresh) {
-            this.isRefreshing = false;
-          } else {
-            this.isLoading = false;
-          }
+    // Fetch both bookings and users data (admin-only page)
+    forkJoin({
+      prenotazioni: this.prenotazioneService.getPrenotazioni(),
+      users: this.adminService.getAllUsers()
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: ({ prenotazioni, users }) => {
+        this.calculateStats(prenotazioni, users.length);
+        if (isRefresh) {
+          this.isRefreshing = false;
+        } else {
+          this.isLoading = false;
         }
-      });
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error);
+        if (isRefresh) {
+          this.isRefreshing = false;
+        } else {
+          this.isLoading = false;
+        }
+      }
+    });
   }
 
-  private calculateStats(prenotazioni: Prenotazione[]): void {
+  private calculateStats(prenotazioni: Prenotazione[], totalUsersCount: number): void {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -126,9 +130,12 @@ export class StatsComponent implements OnInit, OnDestroy {
     this.stats.weekBookings = parsedPrenotazioni.filter(p => p.data_inizio >= weekAgo).length;
     this.stats.monthBookings = parsedPrenotazioni.filter(p => p.data_inizio >= monthAgo).length;
 
-    // Unique users count
+    // Users with bookings count
     const uniqueUsers = new Set(parsedPrenotazioni.map(p => p.users?.id_user));
-    this.stats.totalUsers = uniqueUsers.size;
+    this.stats.usersWithBookings = uniqueUsers.size;
+    
+    // Total users count
+    this.stats.totalUsers = totalUsersCount;
 
     // Most popular room
     const roomCounts = new Map<string, number>();
