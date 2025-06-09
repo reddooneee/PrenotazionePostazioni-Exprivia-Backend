@@ -70,7 +70,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadPrenotazioneInfo();
     this.setupFormSubscriptions();
-    this.loadMiePrenotazioni(); // Carica tutte le prenotazioni all'avvio
+    this.loadAllPrenotazioni(); // Carica tutte le prenotazioni all'avvio
   }
 
   ngOnDestroy(): void {
@@ -83,16 +83,13 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     this.prenotazionePosizioneService.getStanzeWithPostazioni()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ stanze }) => {
-        next: ({ stanze, coseDurata }: { stanze: StanzaWithPostazioni[], coseDurata: CosaDurata[] }) => {
-          this.state.stanze = stanze;
-          this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean);
-          this.coseDurata = coseDurata;
-          this.tipiStanza = [...new Set(stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean) as string[];
+        next: (response: { stanze: StanzaWithPostazioni[] }) => {
+          this.state.stanze = response.stanze;
+          this.tipiStanza = [...new Set(response.stanze.map((s: StanzaWithPostazioni) => s.tipo_stanza))].filter(Boolean) as string[];
           this.state.isLoading = false;
         },
-        error: (error: Error) => {
-          console.error('Errore nel caricamento delle informazioni:', error);
+        error: (err: Error) => {
+          console.error('Errore nel caricamento delle informazioni:', err);
           this.state.errorMessage = "Errore nel caricamento delle informazioni";
           this.state.isLoading = false;
         }
@@ -216,15 +213,19 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (slots) => {
           console.log('Slot disponibili ricevuti:', slots);
-          this.state.availableTimeSlots = slots.map(slot => slot.start);
+          this.state.availableTimeSlots = slots.map(slot => ({
+            start: slot.start,
+            end: slot.end,
+            available: true
+          }));
           console.log('Stato dopo aggiornamento:', {
             availableSlots: this.state.availableTimeSlots.length,
             hasPostazione: !!this.bookingForm.get('id_postazione')?.value
           });
           this.state.isLoading = false;
         },
-        error: (error: Error) => {
-          console.error('Errore nel caricamento degli orari:', error);
+        error: (err: Error) => {
+          console.error('Errore nel caricamento degli orari:', err);
           this.state.errorMessage = "Errore nel caricamento degli orari disponibili";
           this.state.isLoading = false;
         }
@@ -283,9 +284,9 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     if (this.bookingForm.valid) {
       const formData = this.bookingForm.value;
       const selectedDate = formData.selectedDate;
-      const selectedTimeSlot = this.timeSlots.find(slot => slot.label === formData.timeSlot);
+      const selectedTimeSlot = formData.timeSlot;
 
-      if (!selectedTimeSlot) {
+      if (!selectedTimeSlot || !selectedTimeSlot.start || !selectedTimeSlot.end) {
         this.messageService.add({
           severity: 'error',
           summary: 'Errore',
@@ -427,7 +428,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     // Check if the form is valid (this includes required field validation)
     const formValid = this.bookingForm.valid;
 
-    /*console.log('Form validation state:', {
+    console.log('Form validation state:', {
       hasRequiredFields,
       formValid,
       formValues: this.bookingForm.value,
@@ -439,7 +440,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         selectedDate: formControls['selectedDate'].value,
         timeSlot: formControls['timeSlot'].value
       }
-    });*/
+    });
 
     return hasRequiredFields && formValid;
   }
@@ -501,65 +502,8 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadMiePrenotazioni(): void {
-    this.state.isLoading = true;
-    this.prenotazionePosizioneService.getMiePrenotazioni()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (prenotazioni: Prenotazione[]) => {
-          console.log('Numero totale prenotazioni:', prenotazioni.length);
-
-          // Parse e formatta le date
-          this.prenotazioni = prenotazioni.map(p => ({
-            ...p,
-            data_inizio: this.parseDate(p.data_inizio),
-            data_fine: this.parseDate(p.data_fine),
-            stato_prenotazione: p.stato_prenotazione || StatoPrenotazione.Confermata
-          }));
-
-          console.log('Prenotazioni:', this.prenotazioni);
-
-          prenotazioni.forEach((p, index) => {
-            console.group(`Prenotazione #${index + 1}`);
-            console.log('ID:', p.id_prenotazioni);
-            console.log('Data Inizio (raw):', p.data_inizio);
-            console.log('Data Fine (raw):', p.data_fine);
-            console.log('Stato:', p.stato_prenotazione);
-            console.log('Utente:', {
-              id: p.users?.id_user,
-              email: p.users?.email,
-              nome: p.users?.nome,
-              cognome: p.users?.cognome
-            });
-            console.log('Stanza:', {
-              id: p.stanze?.id_stanza,
-              nome: p.stanze?.nome
-            });
-            console.log('Postazione:', {
-              id: p.postazione?.id_postazione,
-              nome: p.postazione?.nomePostazione
-            });
-            console.groupEnd();
-          });
-
-          console.log('Prenotazioni:', this.prenotazioni);
-
-          this.state.isLoading = false;
-        },
-        error: (error: Error) => {
-          console.error('Errore nel caricamento delle prenotazioni:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Errore',
-            detail: 'Errore nel caricamento delle prenotazioni'
-          });
-          this.state.isLoading = false;
-        }
-      });
-  }
-
   private parseDate(dateValue: any): Date {
-    //console.log('Parsing date value:', dateValue);
+    console.log('Parsing date value:', dateValue);
     
     if (dateValue instanceof Date) {
       console.log('Value is already a Date');
@@ -568,9 +512,10 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     
     if (Array.isArray(dateValue)) {
       try {
-        const [year, month, day, hours, minutes] = dateValue;
-        const date = new Date(year, month - 1, day, hours, minutes);
-        //console.log('Parsed array date:', date);
+        // Array format: [year, month, day, hours, minutes, seconds, nanoseconds]
+        const [year, month, day, hours, minutes, seconds] = dateValue;
+        const date = new Date(year, month - 1, day, hours, minutes, seconds);
+        console.log('Parsed array date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing array date:', error);
@@ -582,9 +527,9 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       // Se è una stringa che contiene virgole, è un array di numeri
       if (dateValue.includes(',')) {
         try {
-          const [year, month, day, hours, minutes] = dateValue.split(',').map(Number);
-          const date = new Date(year, month - 1, day, hours, minutes);
-          //console.log('Parsed comma-separated date:', date);
+          const [year, month, day, hours, minutes, seconds] = dateValue.split(',').map(Number);
+          const date = new Date(year, month - 1, day, hours, minutes, seconds);
+          console.log('Parsed comma-separated date:', date);
           return date;
         } catch (error) {
           console.error('Error parsing comma-separated date:', error);
@@ -595,7 +540,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       // Prova a parsare la stringa ISO
       try {
         const date = new Date(dateValue);
-        //console.log('Parsed ISO date:', date);
+        console.log('Parsed ISO date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing ISO date:', error);
@@ -629,6 +574,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   isValidTimeSlot(): boolean {
     const selectedTimeSlot = this.bookingForm.get('timeSlot')?.value;
-    return selectedTimeSlot && this.timeSlots.some(slot => slot.label === selectedTimeSlot);
+    return !!(selectedTimeSlot && selectedTimeSlot.start && selectedTimeSlot.end);
   }
 }
