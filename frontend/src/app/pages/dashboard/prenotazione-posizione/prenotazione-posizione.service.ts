@@ -125,4 +125,8 @@ export class PrenotazionePosizioneService {
     getPrenotazioni(): Observable<Prenotazione[]> {
         return this.prenotazioneService.getPrenotazioni();
     }
+
+    getMiePrenotazioni(): Observable<Prenotazione[]> {
+        return this.prenotazioneService.getMiePrenotazioni();
+    }
 } 

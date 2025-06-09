@@ -100,8 +100,8 @@
               [disabled]="!bookingForm.get('id_postazione')?.value || state.availableTimeSlots.length === 0"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
               <option value="">Seleziona fascia oraria</option>
-              <option *ngFor="let slot of state.availableTimeSlots" [value]="slot">
-                {{ slot }}
+              <option *ngFor="let slot of state.availableTimeSlots" [value]="slot.start + ' - ' + slot.end">
+                {{ slot.start }} - {{ slot.end }}
               </option>
             </select>
           </div>
