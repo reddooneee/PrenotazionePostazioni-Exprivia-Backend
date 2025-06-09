@@ -82,7 +82,6 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
     this.updateSuccess = false
     this.errorMessage = null
     
-    console.log("test");
     this.loadUserData()
   }
 
@@ -103,20 +102,19 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
         next: (user) => {
           if (user) {
             this.currentUser = user
-            console.log("test 2" + this.currentUser?.id_user);
             this.userForm.patchValue({
               nome: user.nome,
               cognome: user.cognome,
               email: user.email,
             })
-            console.log('User data loaded successfully:', user.nome, user.cognome)
+            console.log('Utente caricato correttamente:', user.nome, user.cognome)
           } else {
             this.errorMessage = 'Errore nel caricamento dei dati utente'
-            console.warn('User data is null')
+            console.warn('Utente non trovato')
           }
         },
         error: (error) => {
-          console.error('Error loading user data:', error)
+          console.error('Errore nel caricamento dei dati utente:', error)
           this.errorMessage = 'Errore nel caricamento dei dati utente'
           this.isLoading = false // Backup safety
         }
@@ -307,9 +305,8 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
     // Only include password fields if they are filled
     if (formValue.newPassword && formValue.currentPassword) {
       updateData.password = formValue.newPassword
+      updateData.currentPassword = formValue.currentPassword
     }
-
-    console.log(this.currentUser?.id_user);
 
     // Use current user ID for the update
     if (!this.currentUser?.id_user) {
@@ -317,6 +314,8 @@ export class UpdateUserComponent implements OnInit, OnDestroy {
       this.isLoading = false
       return
     }
+
+    console.log(updateData);
 
     this.userService
       .updateUser(this.currentUser.id_user, updateData)

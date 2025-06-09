@@ -104,6 +104,25 @@ public class UserService {
             }
         }
 
+        // Verifica password attuale se si sta tentando di cambiare la password
+        if (updates.containsKey("password")) {
+            String currentPassword = (String) updates.get("currentPassword");
+            String newPassword = (String) updates.get("password");
+            
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                throw new IllegalArgumentException("La password attuale è richiesta per modificare la password");
+            }
+            
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                throw new IllegalArgumentException("La nuova password non può essere vuota");
+            }
+            
+            // Verifica che la password attuale corrisponda a quella nel database
+            if (!passwordEncoder.matches(currentPassword, existingUser.getPassword())) {
+                throw new IllegalArgumentException("Password attuale non corretta");
+            }
+        }
+
         // Aggiorna i campi
         updates.forEach((key, value) -> {
             switch (key) {
@@ -118,6 +137,9 @@ public class UserService {
                     break;
                 case "password":
                     existingUser.setPassword(passwordEncoder.encode((String) value));
+                    break;
+                case "currentPassword":
+                    // Non fare nulla - questo campo è solo per la verifica
                     break;
                 default:
                     throw new IllegalArgumentException("Campo non valido per l'aggiornamento: " + key);

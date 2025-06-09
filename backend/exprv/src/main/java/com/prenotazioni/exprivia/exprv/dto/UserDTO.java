@@ -14,6 +14,7 @@ import com.prenotazioni.exprivia.exprv.entity.Users;
 )
 public class UserDTO {
 
+    private Integer id_user;
     private String nome;
     private String cognome;
     private String email;
@@ -24,13 +25,15 @@ public class UserDTO {
     }
 
     // Costruttore con parametri
-    public UserDTO( String nome, String cognome, String email, String password, Boolean enabled) {
+    public UserDTO(Integer id_user, String nome, String cognome, String email, String password, Boolean enabled) {
+        this.id_user = id_user;
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;
     }
 
     public UserDTO(Users user) {
+        this.id_user = user.getId_user();
         this.nome = user.getNome();
         this.cognome = user.getCognome();
         this.email = user.getEmail();
@@ -39,6 +42,13 @@ public class UserDTO {
                 .collect(Collectors.toSet());
     }
 
+    public Integer getId_user() {
+        return id_user;
+    }
+
+    public void setId_user(Integer id_user) {
+        this.id_user = id_user;
+    }
 
     public String getNome() {
         return nome;

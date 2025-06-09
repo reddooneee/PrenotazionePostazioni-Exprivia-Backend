@@ -26,6 +26,7 @@ public interface UserMapper {
     /**
      * Converte un'entità Users in UserDTO.
      */
+    @Mapping(target = "id_user", source = "id_user")
     @Mapping(target = "nome", source = "nome")
     @Mapping(target = "cognome", source = "cognome")
     @Mapping(target = "email", source = "email")
