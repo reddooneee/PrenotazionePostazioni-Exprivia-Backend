@@ -1,20 +1,9 @@
 import {
   Component,
   OnInit,
-  ViewChild,
   OnDestroy,
-  AfterViewInit,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { MatTableModule, MatTableDataSource } from "@angular/material/table";
-import { MatSortModule, MatSort } from "@angular/material/sort";
-import { MatPaginatorModule, MatPaginator } from "@angular/material/paginator";
-import { MatInputModule } from "@angular/material/input";
-import { MatFormFieldModule } from "@angular/material/form-field";
-import { MatButtonModule } from "@angular/material/button";
-import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { MatTooltipModule } from "@angular/material/tooltip";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { LucideAngularModule } from "lucide-angular";
 import { FormsModule } from "@angular/forms";
@@ -28,57 +17,70 @@ import { UserFormDialogComponent } from "./user-form-dialog.component";
   selector: "app-user-list",
   templateUrl: "./user-list.component.html",
   standalone: true,
+  styles: [`
+    :host {
+      display: block;
+      min-height: 100vh;
+    }
+    
+    /* Prevent layout shift by always reserving scrollbar space */
+    :host ::ng-deep body {
+      overflow-y: scroll;
+    }
+  `],
   imports: [
     CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatDialogModule,
     MatSnackBarModule,
     LucideAngularModule,
     FormsModule,
+    UserFormDialogComponent,
   ],
 })
-export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
-  displayedColumns: string[] = ["id", "nome", "cognome", "email", "ruolo", "azioni"];
-  dataSource: MatTableDataSource<User>;
+export class UserListComponent implements OnInit, OnDestroy {
+  users: User[] = [];
+  filteredUsers: User[] = [];
+  paginatedUsers: User[] = [];
   loading$: Observable<boolean>;
   searchTerm = "";
   private destroy$ = new Subject<void>();
   currentFilter: 'all' | 'admin' | 'user' = 'all';
 
-  @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  // Pagination properties
+  currentPage = 1;
+  itemsPerPage = 25;
+  totalItems = 0;
+  totalPages = 0;
+  pageOptions = [10, 25, 50, 100];
+  
+  // Pagination helper arrays
+  pageNumbers: number[] = [];
+
+  // Modal state
+  showModal = false;
+  isModalLoading = false;
+  modalData: { title: string; user: Partial<User> } = { title: '', user: {} };
 
   constructor(
     private userManagementService: UserManagementService,
-    private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
-    this.dataSource = new MatTableDataSource<User>([]);
     this.loading$ = this.userManagementService.loading$;
   }
 
   ngOnInit(): void {
     this.loadUsers();
 
+    // Initialize pagination
+    this.updatePagination();
+
     // Sottoscrizione agli utenti filtrati
     this.userManagementService
       .getFilteredUsers()
       .pipe(takeUntil(this.destroy$))
       .subscribe((users) => {
-        this.dataSource.data = users;
+        this.users = users;
+        this.applyCurrentFilter();
       });
-  }
-
-  ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
   }
 
   async loadUsers(): Promise<void> {
@@ -92,48 +94,74 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.searchTerm = filterValue;
-    
-    // First apply role filter
-    this.filterByRole(this.currentFilter);
-    
-    // Then apply search filter
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.applyCurrentFilter();
   }
 
-  async createUser(): Promise<void> {
-    const dialogRef = this.dialog.open(UserFormDialogComponent, {
-      width: "500px",
-      data: { title: "Nuovo Utente", user: {} },
-    });
+  private applyCurrentFilter(): void {
+    // Start with all users
+    let filtered = [...this.users];
 
-    dialogRef.afterClosed().subscribe(async (result) => {
-      if (result) {
-        try {
-          await this.userManagementService.createUser(result);
-          this.showSuccessMessage("Utente creato con successo");
-        } catch (error) {
-          this.showErrorMessage("Errore durante la creazione dell'utente");
-        }
-      }
-    });
+    // Apply role filter
+    if (this.currentFilter === 'admin') {
+      filtered = filtered.filter(user => user.authorities?.includes('ROLE_ADMIN'));
+    } else if (this.currentFilter === 'user') {
+      filtered = filtered.filter(user => !user.authorities?.includes('ROLE_ADMIN'));
+    }
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(user =>
+        user.nome?.toLowerCase().includes(searchLower) ||
+        user.cognome?.toLowerCase().includes(searchLower) ||
+        user.email?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    this.filteredUsers = filtered;
+    this.currentPage = 1; // Reset to first page when filtering
+    this.updatePagination();
   }
 
-  async editUser(user: User): Promise<void> {
-    const dialogRef = this.dialog.open(UserFormDialogComponent, {
-      width: "500px",
-      data: { title: "Modifica Utente", user: { ...user } },
-    });
+  createUser(): void {
+    this.modalData = { title: "Nuovo Utente", user: {} };
+    this.showModal = true;
+  }
 
-    dialogRef.afterClosed().subscribe(async (result) => {
-      if (result) {
-        try {
-          await this.userManagementService.updateUser(user.id_user!, result);
-          this.showSuccessMessage("Utente aggiornato con successo");
-        } catch (error) {
-          this.showErrorMessage("Errore durante l'aggiornamento dell'utente");
-        }
+  async onModalSubmit(userData: any): Promise<void> {
+    if (!userData) {
+      this.closeModal();
+      return;
+    }
+
+    try {
+      this.isModalLoading = true;
+      if (this.modalData.user.id_user) {
+        // Edit mode
+        await this.userManagementService.updateUser(this.modalData.user.id_user!, userData);
+        this.showSuccessMessage("Utente aggiornato con successo");
+      } else {
+        // Create mode
+        await this.userManagementService.createUser(userData);
+        this.showSuccessMessage("Utente creato con successo");
       }
-    });
+      this.closeModal();
+    } catch (error) {
+      this.showErrorMessage(this.modalData.user.id_user ? "Errore durante l'aggiornamento dell'utente" : "Errore durante la creazione dell'utente");
+    } finally {
+      this.isModalLoading = false;
+    }
+  }
+
+  editUser(user: User): void {
+    this.modalData = { title: "Modifica Utente", user: { ...user } };
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.isModalLoading = false;
+    this.modalData = { title: '', user: {} };
   }
 
   async deleteUser(user: User): Promise<void> {
@@ -176,17 +204,17 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // User counting methods
   getTotalUsers(): number {
-    return this.dataSource.data.length;
+    return this.users.length;
   }
 
   getAdminCount(): number {
-    return this.dataSource.data.filter(user => 
+    return this.users.filter(user => 
       user.authorities?.includes('ROLE_ADMIN')
     ).length;
   }
 
   getUserCount(): number {
-    return this.dataSource.data.filter(user => 
+    return this.users.filter(user => 
       !user.authorities?.includes('ROLE_ADMIN')
     ).length;
   }
@@ -194,18 +222,81 @@ export class UserListComponent implements OnInit, AfterViewInit, OnDestroy {
   // Role filtering
   filterByRole(role: 'all' | 'admin' | 'user'): void {
     this.currentFilter = role;
-    
-    if (role === 'all') {
-      this.dataSource.data = this.userManagementService.getOriginalUsers();
-    } else {
-      const isAdmin = role === 'admin';
-      this.dataSource.data = this.userManagementService.getOriginalUsers().filter(user =>
-        isAdmin ? user.authorities?.includes('ROLE_ADMIN') : !user.authorities?.includes('ROLE_ADMIN')
-      );
-    }
+    this.applyCurrentFilter();
+  }
 
-    if (this.searchTerm) {
-      this.applyFilter({ target: { value: this.searchTerm } } as any);
+  // Pagination methods
+  updatePagination(): void {
+    this.totalItems = this.filteredUsers.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    
+    // Ensure current page is valid
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
     }
+    
+    // Calculate start and end indices
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    
+    // Get paginated items
+    this.paginatedUsers = this.filteredUsers.slice(startIndex, endIndex);
+    
+    // Generate page numbers for pagination controls
+    this.generatePageNumbers();
+  }
+
+  generatePageNumbers(): void {
+    const maxVisiblePages = 5;
+    this.pageNumbers = [];
+    
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      this.pageNumbers.push(i);
+    }
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  onItemsPerPageChange(newSize: number): void {
+    this.itemsPerPage = newSize;
+    this.currentPage = 1; // Reset to first page
+    this.updatePagination();
+  }
+
+  goToFirstPage(): void {
+    this.onPageChange(1);
+  }
+
+  goToLastPage(): void {
+    this.onPageChange(this.totalPages);
+  }
+
+  goToPreviousPage(): void {
+    this.onPageChange(this.currentPage - 1);
+  }
+
+  goToNextPage(): void {
+    this.onPageChange(this.currentPage + 1);
+  }
+
+  getStartIndex(): number {
+    return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+  }
+
+  getEndIndex(): number {
+    return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
   }
 }

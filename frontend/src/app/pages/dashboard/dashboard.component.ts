@@ -27,6 +27,7 @@ import { MatDividerModule } from "@angular/material/divider";
 import { DashboardService } from "./dashboard.service";
 import { PrenotazionePosizioneComponent } from "./prenotazione-posizione/prenotazione-posizione.component";
 import { UpdateUserComponent } from "../../account/update-user/update-user.component";
+import { SidebarService } from "../../shared/services/sidebar.service";
 
 @Component({
   selector: "app-dashboard",
@@ -37,6 +38,7 @@ import { UpdateUserComponent } from "../../account/update-user/update-user.compo
     RouterModule,
     LucideAngularModule,
     SidebarComponent,
+    PrenotazionePosizioneComponent,
     HeaderComponent,
     MatSidenavModule,
     MatToolbarModule,
@@ -72,6 +74,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Dati per la dashboard
   notificationCount = 0;
+  
+  // Sidebar state
+  isSidebarCollapsed = false;
 
   constructor(
     private authService: AuthService,
@@ -82,7 +87,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private prenotazioneService: PrenotazioneService,
     private utilsService: UtilsService,
     private dashboardService: DashboardService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private sidebarService: SidebarService
   ) {}
 
   async ngOnInit() {
@@ -116,6 +122,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe((time) => {
         this.currentTime = time;
       });
+
+    // Subscribe to sidebar state changes
+    this.sidebarService.isCollapsed$.subscribe(isCollapsed => {
+      this.isSidebarCollapsed = isCollapsed;
+    });
 
     // Dashboard loaded
   }

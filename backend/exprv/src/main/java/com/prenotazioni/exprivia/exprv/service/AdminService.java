@@ -161,12 +161,19 @@ public class AdminService {
                     break;
                 case "authorities":
                     Set<String> authoritiesSet;
-                    if (value instanceof Set) {
-                        authoritiesSet = (Set<String>) value;
-                    } else if (value instanceof List) {
-                        authoritiesSet = new HashSet<>((List<String>) value);
+                    if (value instanceof Set<?>) {
+                        @SuppressWarnings("unchecked")
+                        Set<String> temp = (Set<String>) value;
+                        authoritiesSet = temp;
+                    } else if (value instanceof List<?>) {
+                        @SuppressWarnings("unchecked")
+                        List<String> temp = (List<String>) value;
+                        authoritiesSet = new HashSet<>(temp);
                     } else if (value instanceof String[]) {
                         authoritiesSet = new HashSet<>(Arrays.asList((String[]) value));
+                    } else if (value instanceof String) {
+                        authoritiesSet = new HashSet<>();
+                        authoritiesSet.add((String) value);
                     } else {
                         throw new IllegalArgumentException("Formato authorities non valido");
                     }

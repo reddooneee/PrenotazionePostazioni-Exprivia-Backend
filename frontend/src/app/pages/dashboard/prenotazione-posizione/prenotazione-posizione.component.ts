@@ -18,7 +18,198 @@ import { ToastModule } from 'primeng/toast';
   imports: [CommonModule, ReactiveFormsModule, CalendarComponent, ToastModule],
   providers: [MessageService, DatePipe],
   selector: "app-prenotazione-posizione",
-  templateUrl: "./prenotazione-posizione.component.html"
+  templateUrl: "./prenotazione-posizione.component.html",
+  styles: [`
+    /* Custom Toast Styles */
+    :host ::ng-deep .p-toast {
+      z-index: 9999;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message {
+      margin: 0 0 0.5rem 0;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border-radius: 0.75rem;
+      border: none;
+      backdrop-filter: blur(8px);
+      animation: slideInRight 0.3s ease-out;
+      min-width: 320px;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.95);
+      transform-origin: right center;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave {
+      animation: slideOutRight 0.25s ease-in forwards !important;
+      overflow: hidden !important;
+    }
+    
+    /* Force all child elements to move with the container */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave,
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *,
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *::before,
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *::after {
+      transform: none !important;
+      transition: none !important;
+      animation: none !important;
+    }
+    
+    /* Override the leave animation entirely */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave {
+      animation: slideOutRight 0.25s ease-in forwards !important;
+    }
+    
+    /* Success Toast */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-success {
+      border-left: 4px solid #10b981;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon {
+      color: #10b981;
+      background: #dcfce7;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Error Toast */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-error {
+      border-left: 4px solid #ef4444;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon {
+      color: #ef4444;
+      background: #fee2e2;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Info Toast */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-info {
+      border-left: 4px solid #3b82f6;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon {
+      color: #3b82f6;
+      background: #dbeafe;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Warning Toast */
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn {
+      border-left: 4px solid #f59e0b;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
+      color: #f59e0b;
+      background: #fef3c7;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    /* Ensure proper spacing for all toast icons */
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-icon {
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    /* Fix content area to not overlap with icons */
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-text {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOutRight {
+      0% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-content {
+      padding: 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: transparent;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-summary {
+      font-weight: 500;
+      color: #111827;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+      line-height: 1.4;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-detail {
+      color: #6b7280;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    
+    /* Ensure proper stacking and positioning */
+    :host ::ng-deep .p-toast-top-right {
+      top: 1rem;
+      right: 1rem;
+    }
+    
+    /* Hover effects */
+    :host ::ng-deep .p-toast .p-toast-message:hover {
+      transform: translateY(-1px);
+      transition: transform 0.2s ease;
+    }
+    
+    /* Close button styling */
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-icon-close {
+      color: #9ca3af;
+      background: transparent;
+      border: none;
+      padding: 0.375rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    :host ::ng-deep .p-toast .p-toast-message .p-toast-icon-close:hover {
+      color: #4b5563;
+      background: #f3f4f6;
+    }
+  `]
 })
 export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   bookingForm: FormGroup;
@@ -33,8 +224,13 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   tipiStanza: string[] = [];
   prenotazioni: Prenotazione[] = [];
+  sortedPrenotazioni: Prenotazione[] = [];
   coseDurata: CosaDurata[] = [];
   private destroy$ = new Subject<void>();
+
+  // Sorting properties
+  sortColumn: string = 'data_inizio'; // Default sort by date
+  sortDirection: 'asc' | 'desc' = 'desc'; // Default to descending (latest first)
 
   // Predefined time slots
   timeSlots = [
@@ -91,6 +287,10 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         error: (err: Error) => {
           console.error('Errore nel caricamento delle informazioni:', err);
           this.state.errorMessage = "Errore nel caricamento delle informazioni";
+          this.showErrorToast(
+            'Errore di Caricamento', 
+            'Impossibile caricare le informazioni delle stanze. Ricarica la pagina per riprovare.'
+          );
           this.state.isLoading = false;
         }
       });
@@ -226,6 +426,10 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         error: (err: Error) => {
           console.error('Errore nel caricamento degli orari:', err);
           this.state.errorMessage = "Errore nel caricamento degli orari disponibili";
+          this.showErrorToast(
+            'Orari Non Disponibili', 
+            'Impossibile caricare gli orari disponibili per questa postazione. Prova a selezionare un\'altra postazione.'
+          );
           this.state.isLoading = false;
         }
       });
@@ -286,15 +490,14 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       const selectedTimeSlot = formData.timeSlot;
 
       if (!selectedTimeSlot) {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Errore',
-          detail: 'Seleziona un orario valido'
-        });
+        this.showErrorToast('Selezione Incompleta', 'Seleziona un orario per completare la prenotazione');
         return;
       }
 
       this.state.isLoading = true;
+      
+      // Show info toast while processing
+      this.showInfoToast('Elaborazione in corso', 'Stiamo creando la tua prenotazione...');
 
       try {
         // Create start and end dates
@@ -349,40 +552,43 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
           .subscribe({
             next: (response) => {
               console.log('Prenotazione creata:', response);
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Successo',
-                detail: 'Prenotazione creata con successo'
-              });
+              this.clearAllToasts(); // Clear any existing toasts
+              this.showSuccessToast(
+                'Prenotazione Confermata!', 
+                `La tua postazione è stata prenotata per ${this.formatDate(selectedDate, 'dd/MM/yyyy')} dalle ${selectedTimeSlot}`
+              );
               this.resetForm();
-              this.loadMiePrenotazioni();
+              this.loadMiePrenotazioni(); // This will call applySorting internally
               this.state.isLoading = false;
             },
             error: (error) => {
               console.error('Errore completo nella creazione della prenotazione:', error);
-              let errorMessage = 'Errore nella creazione della prenotazione';
+              this.clearAllToasts(); // Clear any existing toasts
+              
+              let errorMessage = 'Si è verificato un errore durante la creazione della prenotazione';
+              let errorSummary = 'Errore nella Prenotazione';
               
               if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
               } else if (error.message) {
                 errorMessage = error.message;
+                if (error.message.includes('già prenotata')) {
+                  errorSummary = 'Postazione Non Disponibile';
+                  errorMessage = 'La postazione selezionata è già prenotata per questo orario. Seleziona un altro orario o postazione.';
+                }
               }
 
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Errore',
-                detail: errorMessage
-              });
+              this.showErrorToast(errorSummary, errorMessage);
               this.state.isLoading = false;
             }
           });
       } catch (error) {
         console.error('Errore nella preparazione della prenotazione:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Errore',
-          detail: error instanceof Error ? error.message : 'Errore nella preparazione della prenotazione'
-        });
+        this.clearAllToasts();
+        this.showErrorToast(
+          'Errore di Validazione', 
+          error instanceof Error ? error.message : 'I dati inseriti non sono validi. Controlla i campi e riprova.'
+        );
         this.state.isLoading = false;
       }
     } else {
@@ -391,11 +597,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       if (this.state.selectedDates.length === 0) errors.push('Seleziona una data');
       if (!this.bookingForm.get('timeSlot')?.value) errors.push('Seleziona un orario');
 
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Errore',
-        detail: errors.join(', ')
-      });
+      this.showWarningToast('Campi Mancanti', errors.join(', '));
     }
   }
   
@@ -491,11 +693,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         },
         error: (error: Error) => {
           console.error('Errore nel caricamento delle prenotazioni:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Errore',
-            detail: 'Errore nel caricamento delle prenotazioni'
-          });
+          this.showErrorToast('Errore', 'Errore nel caricamento delle prenotazioni');
           this.state.isLoading = false;
         }
       });
@@ -536,15 +734,14 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
           console.log('Processed prenotazioni:', this.prenotazioni);
           console.groupEnd();
+          
+          // Apply sorting after loading data
+          this.applySorting();
           this.state.isLoading = false;
         },
         error: (error: Error) => {
           console.error('Errore nel caricamento delle prenotazioni:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Errore',
-            detail: 'Errore nel caricamento delle prenotazioni'
-          });
+          this.showErrorToast('Errore', 'Errore nel caricamento delle prenotazioni');
           this.state.isLoading = false;
         }
       });
@@ -627,17 +824,21 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   deletePrenotazione(prenotazione: Prenotazione): void {
     if (!prenotazione.id_prenotazioni) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Errore',
-        detail: 'ID prenotazione non valido'
-      });
+      this.showErrorToast('Errore di Sistema', 'Impossibile identificare la prenotazione da eliminare');
       return;
     }
 
     // Conferma eliminazione
+    const dataFormatted = this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy');
+    const orarioFormatted = this.getFormattedTimeRange(prenotazione.data_inizio, prenotazione.data_fine);
+    const postazioneNome = prenotazione.postazione?.nomePostazione || 'N/A';
+    
     const conferma = confirm(
-      `Sei sicuro di voler eliminare la prenotazione del ${this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy')} alle ${this.getFormattedTimeRange(prenotazione.data_inizio, prenotazione.data_fine)}?`
+      `Sei sicuro di voler eliminare la prenotazione?\n\n` +
+      `📅 Data: ${dataFormatted}\n` +
+      `⏰ Orario: ${orarioFormatted}\n` +
+      `💺 Postazione: ${postazioneNome}\n\n` +
+      `Questa azione non può essere annullata.`
     );
 
     if (!conferma) {
@@ -645,30 +846,140 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     }
 
     this.state.isLoading = true;
+    
+    // Show info toast while processing
+    this.showInfoToast('Eliminazione in corso', 'Stiamo cancellando la tua prenotazione...');
 
     this.prenotazionePosizioneService.deletePrenotazione(prenotazione.id_prenotazioni)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Successo',
-            detail: 'Prenotazione eliminata con successo'
-          });
+          this.clearAllToasts(); // Clear any existing toasts
+          this.showSuccessToast(
+            'Prenotazione Cancellata', 
+            `La prenotazione del ${dataFormatted} è stata eliminata con successo`
+          );
           
           // Rimuovi la prenotazione dalla lista locale
           this.prenotazioni = this.prenotazioni.filter(p => p.id_prenotazioni !== prenotazione.id_prenotazioni);
+          // Update sorted array as well
+          this.applySorting();
           this.state.isLoading = false;
         },
         error: (error: Error) => {
           console.error('Errore nell\'eliminazione della prenotazione:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Errore',
-            detail: error.message || 'Errore nell\'eliminazione della prenotazione'
-          });
+          this.clearAllToasts();
+          
+          let errorMessage = 'Si è verificato un errore durante l\'eliminazione della prenotazione';
+          if (error.message?.includes('non trovata')) {
+            errorMessage = 'La prenotazione non è più disponibile o è già stata eliminata';
+          } else if (error.message?.includes('non autorizzato')) {
+            errorMessage = 'Non hai i permessi per eliminare questa prenotazione';
+          }
+          
+          this.showErrorToast('Errore nell\'Eliminazione', errorMessage);
           this.state.isLoading = false;
         }
       });
+  }
+
+  // Toast utility methods for consistent styling and messaging
+  private showSuccessToast(summary: string, detail: string): void {
+    this.messageService.add({
+      severity: 'success',
+      summary,
+      detail,
+      life: 5000 // Auto-dismiss after 5 seconds
+    });
+  }
+
+  private showErrorToast(summary: string, detail: string): void {
+    this.messageService.add({
+      severity: 'error',
+      summary,
+      detail,
+      life: 8000 // Keep error messages longer
+    });
+  }
+
+  private showInfoToast(summary: string, detail: string): void {
+    this.messageService.add({
+      severity: 'info',
+      summary,
+      detail,
+      life: 6000
+    });
+  }
+
+  private showWarningToast(summary: string, detail: string): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary,
+      detail,
+      life: 7000
+    });
+  }
+
+  // Clear all existing toasts
+  private clearAllToasts(): void {
+    this.messageService.clear();
+  }
+
+  // Sorting methods
+  sortTable(column: string): void {
+    if (this.sortColumn === column) {
+      // Toggle direction if same column
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      // New column, default to ascending
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.applySorting();
+  }
+
+  private applySorting(): void {
+    this.sortedPrenotazioni = [...this.prenotazioni].sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.sortColumn) {
+        case 'data_inizio':
+          valueA = new Date(a.data_inizio);
+          valueB = new Date(b.data_inizio);
+          break;
+        case 'orario':
+          // For time sorting, we'll use the start time
+          valueA = new Date(a.data_inizio);
+          valueB = new Date(b.data_inizio);
+          break;
+        case 'utente':
+          // Sort by full name (nome + cognome)
+          valueA = `${a.users?.nome || ''} ${a.users?.cognome || ''}`.trim().toLowerCase();
+          valueB = `${b.users?.nome || ''} ${b.users?.cognome || ''}`.trim().toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) {
+      return 'fas fa-sort text-gray-400';
+    }
+    return this.sortDirection === 'asc' ? 'fas fa-sort-up text-blue-600' : 'fas fa-sort-down text-blue-600';
+  }
+
+  isSortedColumn(column: string): boolean {
+    return this.sortColumn === column;
   }
 }

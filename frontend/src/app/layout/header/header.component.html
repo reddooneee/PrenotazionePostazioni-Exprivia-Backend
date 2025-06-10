@@ -1,7 +1,7 @@
 <header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
     <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
         <!-- Logo -->
-        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/']" role="link" aria-label="Torna alla home">
+        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/dashboard/']" role="link" aria-label="Torna alla home">
             <img class="h-6 sm:h-8 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo" width="120" height="32">
         </div>
 
@@ -19,7 +19,7 @@
                                     {{ currentUser ? ((currentUser.nome ? (currentUser.nome | slice:0:1) : '') + (currentUser.cognome ? (currentUser.cognome | slice:0:1) : '')) : '' }}
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="text-xs text-gray-500">Ciao! Benvenuto</span>
+                                    <span class="text-xs text-gray-500">Benvenuto,</span>
                                     <span class="text-[var(--color-expriviaBlue)] font-medium text-sm">{{ currentUser?.nome }} {{ currentUser?.cognome }}</span>
                                 </div>
                             </div>
@@ -36,7 +36,7 @@
                         </div>
 
                         <!-- Logout Button -->
-                        <button (click)="logout()" class="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
+                        <button (click)="logout()" class="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)] cursor-pointer">
                             <lucide-icon name="log-out" class="w-5 h-5" />
                             <span class="font-medium">Logout</span>
                         </button>
@@ -81,7 +81,7 @@
 
             <!-- Mobile Menu Links -->
             <nav class="p-2">
-                <a [routerLink]="['/dashboard/prenotazione-posizione']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                <a [routerLink]="['/dashboard/']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
                     <lucide-icon name="calendar-plus" class="w-5 h-5" />
                     <span>Prenota</span>
                 </a>
@@ -93,9 +93,9 @@
                     <lucide-icon name="user" class="w-5 h-5" />
                     <span>Profilo</span>
                 </a>
-                <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)]">
+                <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)] cursor-pointer">
                     <lucide-icon name="log-out" class="w-5 h-5" />
-                    <span>Logout</span>
+                    <span>Disconnetti</span>
                 </button>
             </nav>
         </div>

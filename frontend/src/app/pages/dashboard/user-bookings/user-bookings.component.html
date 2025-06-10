@@ -13,12 +13,12 @@
       </div>
       <div class="flex items-center space-x-4">
         <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-          {{ prenotazioni.length || 0 }} prenotazioni
+          {{ filteredPrenotazioni.length || 0 }}{{ searchTerm ? ' di ' + (prenotazioni.length || 0) : '' }} prenotazioni
         </span>
         <button 
           (click)="loadPrenotazioni()"
           [disabled]="isLoading"
-          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
           <i class="fas fa-refresh mr-2" [class.fa-spin]="isLoading"></i>
           Aggiorna
         </button>
@@ -40,14 +40,32 @@
     <div *ngIf="!isLoading || prenotazioni.length > 0">
       <!-- Filters and Actions -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <div class="flex items-center space-x-4">
-          <!-- Filter buttons could be added here in the future -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 flex-1">
+          <!-- Search Bar -->
+          <div class="relative w-full sm:w-96">
+            <input 
+              type="text" 
+              [(ngModel)]="searchTerm" 
+              (keyup)="applySearchFilter()"
+              placeholder="Cerca per utente, stanza, postazione, data..." 
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" />
+            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+              <button 
+                *ngIf="searchTerm" 
+                (click)="searchTerm = ''; applySearchFilter()"
+                class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                title="Cancella ricerca">
+                <i class="fas fa-times text-sm"></i>
+              </button>
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+          </div>
         </div>
         
         <div class="flex items-center space-x-4">
           <button 
             (click)="openNewBookingModal()"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 cursor-pointer">
             <i class="fas fa-plus mr-2"></i>
             Nuova Prenotazione
           </button>
@@ -173,7 +191,7 @@
               type="button"
               (click)="deletePrenotazione(prenotazione)"
               [disabled]="isLoading"
-              class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+              class="inline-flex items-center px-3 py-2 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200">
               <i class="fas fa-trash mr-1"></i>
               Elimina
             </button>
@@ -181,15 +199,26 @@
         </div>
         
         <!-- Empty State for Mobile -->
-        <div *ngIf="!prenotazioni?.length && !isLoading" class="text-center py-12">
+        <div *ngIf="!paginatedPrenotazioni?.length && !isLoading" class="text-center py-12">
           <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100 mb-4">
-            <i class="fas fa-calendar-times text-gray-400 text-xl"></i>
+            <i [class]="searchTerm ? 'fas fa-search text-gray-400 text-xl' : 'fas fa-calendar-times text-gray-400 text-xl'"></i>
           </div>
-          <h3 class="text-sm font-medium text-gray-900 mb-1">Nessuna prenotazione trovata</h3>
+          <h3 class="text-sm font-medium text-gray-900 mb-1">
+            {{ searchTerm ? 'Nessun risultato trovato' : 'Nessuna prenotazione trovata' }}
+          </h3>
           <p class="text-sm text-gray-500 mb-4">
-            {{ isAdmin ? 'Non ci sono prenotazioni nel sistema.' : 'Non hai ancora effettuato prenotazioni.' }}
+            <span *ngIf="searchTerm">
+              Prova a modificare i termini di ricerca o 
+              <button (click)="searchTerm = ''; applySearchFilter()" class="text-blue-600 hover:text-blue-800 underline">
+                cancella i filtri
+              </button>
+            </span>
+            <span *ngIf="!searchTerm">
+              {{ isAdmin ? 'Non ci sono prenotazioni nel sistema.' : 'Non hai ancora effettuato prenotazioni.' }}
+            </span>
           </p>
           <button 
+            *ngIf="!searchTerm"
             (click)="openNewBookingModal()"
             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
             <i class="fas fa-plus mr-2"></i>
@@ -204,9 +233,36 @@
           <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Data</th>
-              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Orario</th>
-              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48 hidden lg:table-cell" *ngIf="isAdmin">Utente</th>
+              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                <button 
+                  type="button"
+                  (click)="sortTable('data_inizio')"
+                  class="flex items-center space-x-1 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                  [class.text-blue-600]="isSortedColumn('data_inizio')">
+                  <span>Data</span>
+                  <i [class]="getSortIcon('data_inizio')"></i>
+                </button>
+              </th>
+              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                <button 
+                  type="button"
+                  (click)="sortTable('orario')"
+                  class="flex items-center space-x-1 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                  [class.text-blue-600]="isSortedColumn('orario')">
+                  <span>Orario</span>
+                  <i [class]="getSortIcon('orario')"></i>
+                </button>
+              </th>
+              <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48 hidden lg:table-cell" *ngIf="isAdmin">
+                <button 
+                  type="button"
+                  (click)="sortTable('utente')"
+                  class="flex items-center space-x-1 hover:text-gray-700 focus:outline-none transition-colors duration-200"
+                  [class.text-blue-600]="isSortedColumn('utente')">
+                  <span>Utente</span>
+                  <i [class]="getSortIcon('utente')"></i>
+                </button>
+              </th>
               <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Stanza</th>
               <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 hidden md:table-cell">Postazione</th>
               <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Stato</th>
@@ -285,7 +341,7 @@
                   type="button"
                   (click)="deletePrenotazione(prenotazione)"
                   [disabled]="isLoading"
-                  class="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  class="inline-flex items-center p-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-1 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200"
                   title="Elimina prenotazione">
                   <i class="fas fa-trash text-xs"></i>
                   <span class="ml-1 hidden sm:inline">Elimina</span>
@@ -294,25 +350,35 @@
             </tr>
 
             <!-- Empty State -->
-            <tr *ngIf="!prenotazioni?.length && !isLoading">
+            <tr *ngIf="!paginatedPrenotazioni?.length && !isLoading">
               <td [attr.colspan]="isAdmin ? 7 : 6" class="px-3 py-12 text-center">
                 <div class="flex flex-col items-center justify-center space-y-4">
                   <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100">
-                    <i class="fas fa-calendar-times text-gray-400 text-xl"></i>
+                    <i [class]="searchTerm ? 'fas fa-search text-gray-400 text-xl' : 'fas fa-calendar-times text-gray-400 text-xl'"></i>
                   </div>
                   <div class="text-center">
-                    <h3 class="text-sm font-medium text-gray-900">Nessuna prenotazione trovata</h3>
+                    <h3 class="text-sm font-medium text-gray-900">
+                      {{ searchTerm ? 'Nessun risultato trovato' : 'Nessuna prenotazione trovata' }}
+                    </h3>
                     <p class="mt-1 text-sm text-gray-500">
-                      {{ isAdmin ? 'Non ci sono prenotazioni nel sistema.' : 'Non hai ancora effettuato prenotazioni.' }}
+                      <span *ngIf="searchTerm">
+                        Prova a modificare i termini di ricerca o 
+                        <button (click)="searchTerm = ''; applySearchFilter()" class="text-blue-600 hover:text-blue-800 underline cursor-pointer">
+                          cancella i filtri
+                        </button>
+                      </span>
+                      <span *ngIf="!searchTerm">
+                        {{ isAdmin ? 'Non ci sono prenotazioni nel sistema.' : 'Non hai ancora effettuato prenotazioni.' }}
+                      </span>
                     </p>
                   </div>
-                  <div class="mt-4">
-                               <button 
-             (click)="openNewBookingModal()"
-             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-             <i class="fas fa-plus mr-2"></i>
-             Crea la tua prima prenotazione
-           </button>
+                  <div class="mt-4" *ngIf="!searchTerm">
+                    <button 
+                      (click)="openNewBookingModal()"
+                      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                      <i class="fas fa-plus mr-2"></i>
+                      Crea la tua prima prenotazione
+                    </button>
                   </div>
                 </div>
               </td>
@@ -424,15 +490,56 @@
       <div class="px-6 py-4 max-h-96 overflow-y-auto">
         <div class="space-y-4">
           <!-- User Selection (for admins) -->
-          <div *ngIf="isAdmin">
+          <div *ngIf="isAdmin" class="relative">
             <label class="block text-sm font-medium text-gray-700 mb-1">Utente</label>
-            <select formControlName="userId" 
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">Seleziona utente</option>
-              <option *ngFor="let user of users" [value]="user.id_user">
-                {{ user.nome }} {{ user.cognome }} ({{ user.email }})
-              </option>
-            </select>
+            <div class="relative">
+              <input type="text" 
+                     [(ngModel)]="userSearchTerm"
+                     (ngModelChange)="filterUsers()"
+                     (focus)="showUserDropdown = true"
+                     (blur)="onUserInputBlur()"
+                     placeholder="Cerca utente per nome, cognome o email..."
+                     class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     [ngModelOptions]="{standalone: true}">
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                <button 
+                  *ngIf="userSearchTerm" 
+                  type="button"
+                  (click)="clearUserSearch()"
+                  class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                  title="Cancella ricerca">
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+            </div>
+            
+            <!-- User Dropdown -->
+            <div *ngIf="showUserDropdown && filteredUsers.length > 0" 
+                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+              <div *ngFor="let user of filteredUsers; trackBy: trackByUser" 
+                   (click)="selectUser(user)"
+                   class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                <div class="font-medium text-gray-900">
+                  {{ user.nome }} {{ user.cognome }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ user.email }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- No results message -->
+            <div *ngIf="showUserDropdown && userSearchTerm && filteredUsers.length === 0" 
+                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
+              <div class="text-sm text-gray-500 text-center">
+                Nessun utente trovato per "{{ userSearchTerm }}"
+              </div>
+            </div>
+            
+            <!-- Hidden form control for validation -->
+            <input type="hidden" formControlName="userId">
+            
             <div *ngIf="bookingForm.get('userId')?.invalid && bookingForm.get('userId')?.touched" 
                  class="text-sm text-red-600 mt-1">
               Seleziona un utente
@@ -528,12 +635,12 @@
         <button type="button" 
                 (click)="closeModal()"
                 [disabled]="isModalLoading"
-                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 cursor-pointer">
           Annulla
         </button>
         <button type="submit" 
                 [disabled]="isModalLoading || bookingForm.invalid"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
           <span *ngIf="isModalLoading" class="mr-2">
             <i class="fas fa-spinner fa-spin"></i>
           </span>

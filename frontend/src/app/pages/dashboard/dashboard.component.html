@@ -12,8 +12,10 @@
     <!-- Sidebar per admin -->
     <app-sidebar *ngIf="isAdmin"></app-sidebar>
     
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col bg-white">
+    <!-- Main Content with margin for fixed sidebar -->
+    <main class="flex-1 flex flex-col bg-white transition-all duration-200" 
+          [class.ml-64]="isAdmin && !isSidebarCollapsed" 
+          [class.ml-18]="isAdmin && isSidebarCollapsed">
       <!-- Header Section per admin -->
       <div
         *ngIf="isAdmin"
@@ -46,9 +48,23 @@
         </div>
       </div>
 
+
+      <div
+      *ngIf="!isAdmin" class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70"
+      >
+        <ng-container *ngIf="isHomeRoute()">
+          <app-prenotazione-posizione></app-prenotazione-posizione>
+        </ng-container>
+
+        <!-- Router outlet per i componenti child -->
+        <div class="w-full">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+
       <!-- Dashboard Content -->
       <div
-        class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70"
+        *ngIf="isAdmin" class="flex-1 p-6 space-y-6 overflow-auto bg-gradient-to-br from-expriviaBlue to-expriviaBlue/70"
       >
                   <!-- Dashboard Overview -->
           <ng-container *ngIf="isHomeRoute()">
@@ -75,8 +91,8 @@
                   </div>
                   <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">Nuova Prenotazione</h3>
-                <p class="text-sm text-gray-500">Crea prenotazioni per utenti del sistema</p>
+                <h3 class="font-semibold text-gray-900 mb-2">Nuova Prenotazione Personale</h3>
+                <p class="text-sm text-gray-500">Crea prenotazioni personali</p>
               </button>
 
               <!-- Manage Bookings -->

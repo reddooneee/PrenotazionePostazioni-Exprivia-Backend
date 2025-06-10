@@ -10,6 +10,7 @@ import { User } from "../../../core/models";
 import { AuthService } from "../../../core/auth/auth.service";
 import { LoginService } from "../../../login/login.service";
 import { NavigationService, NavItem } from "@core/services/navigation.service";
+import { SidebarService } from "../../services/sidebar.service";
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 const SIDEBAR_STATE_KEY = 'sidebarCollapsed';
@@ -58,25 +59,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   onResize() {
-    this.checkWindowSize();
-  }
-
-  private checkWindowSize(): void {
-    this.isCollapsed = window.innerWidth < this.COLLAPSE_WIDTH;
+    this.sidebarService.updateForWindowResize();
   }
 
   constructor(
     private authService: AuthService,
     private loginService: LoginService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private sidebarService: SidebarService
   ) {
-    // Check window size immediately
-    this.checkWindowSize();
+    // Sync with sidebar service
+    this.isCollapsed = this.sidebarService.isCollapsed;
   }
 
   // Toggle sidebar collapse
   toggleSidebar(): void {
-    this.isCollapsed = !this.isCollapsed;
+    this.sidebarService.toggleSidebar();
   }
 
   // Metodo per convertire i ruoli in nomi visualizzabili
@@ -95,8 +93,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Check initial window size
-    this.checkWindowSize();
+    // Subscribe to sidebar state changes
+    this.sidebarService.isCollapsed$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isCollapsed => {
+        this.isCollapsed = isCollapsed;
+      });
 
     // Sottoscrizione allo stato di autenticazione
     this.authService
