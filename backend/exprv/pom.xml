@@ -17,7 +17,7 @@
     <groupId>com.prenotazioni.exprivia</groupId>
     <artifactId>exprv</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging> <!-- Questo indica che il pacchetto finale sarà un file WAR -->
+    <packaging>jar</packaging> <!-- Questo indica che il pacchetto finale sarà un file WAR -->
     <name>exprv</name>
     <description>Demo project for Spring Boot</description>
     <url />
@@ -65,12 +65,14 @@
 
         <!-- Dipendenza per il server Tomcat, configurato come 'provided' per non essere incluso nel
         WAR finale -->
-        <dependency>
+
+        <!-- Rimossa perché il Jar non parte altrimenti -->
+        <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope> <!-- Questa dipendenza viene fornita dal container in cui il WAR verrà
-            eseguito -->
-        </dependency>
+            <scope>provided</scope>  Questa dipendenza viene fornita dal container in cui il WAR verrà
+            eseguito 
+        </dependency>  -->
 
         <!-- Dipendenza per il testing (JUnit, Mockito, etc.) -->
         <dependency>
@@ -192,6 +194,12 @@
                 </annotationProcessorPaths>
             </configuration>
         </plugin>
+
+        <plugin>  <!-- Opzionale, ma meglio specificarlo per evitare errori -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+
     </plugins>
 </build>
 

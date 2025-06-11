@@ -38,3 +38,6 @@ frontend/.angular/
 
 # App Properties Secure
 backend/exprv/src/main/resources/application-secrets.properties
+
+#Non si caricano le application-secrets.properties
+src/main/resources/application-secrets.properties

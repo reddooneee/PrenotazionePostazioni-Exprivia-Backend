@@ -1,0 +1,598 @@
+sucirtyconfig:
+
+package com.prenotazioni.exprivia.exprv.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthFilter;
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthenticationEntryPoint;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@Order(1) // Priorità più alta rispetto a SwaggerSecurityConfig
+public class SecurityConfig {
+
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint, JwtAuthFilter jwtAuthFilter) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/api/**") // esclude rotte Swagger
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(handling -> handling
+                .authenticationEntryPoint(authenticationEntryPoint))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // Public endpoints
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/stats/prenotazioni**").permitAll()
+                .requestMatchers("/api/stats/stanze**").permitAll()
+
+                // Admin only endpoints
+                .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+                .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
+
+                // Authenticated user endpoints
+                .requestMatchers("/api/utenti/**").authenticated()
+                .requestMatchers("/api/postazioni/**").authenticated()
+                .requestMatchers("/api/stanze/**").authenticated()
+                .requestMatchers("/api/prenotazioni/**").authenticated()
+
+                // Fallback: everything else requires authentication
+                .anyRequest().authenticated());
+
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+
+
+
+
+template/swagger/login.html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Swagger Login</title>
+    <style>
+        :root {
+          /* Brand Colors */
+          --color-expriviaBlue: #004C6A;
+          --color-expriviaOrange: #E9500E;
+          --color-expriviaOrange400: #F09151;
+          --color-expriviaOrange600: #D1430A;
+        }
+
+        html, body {
+          height: 100%;
+          margin: 0;
+          font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+          background-color: var(--color-expriviaBlue);
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .login-container {
+          background: white;
+          padding: 2rem 3rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+          width: 320px;
+          color: #004C6A; /* testo scuro per leggibilità */
+          box-sizing: border-box;
+        }
+
+        .login-container h2 {
+          margin-bottom: 1.5rem;
+          font-weight: 700;
+          font-size: 1.8rem;
+          text-align: center;
+          color: var(--color-expriviaBlue);
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+        }
+
+        label {
+          margin-bottom: 0.4rem;
+          font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+          padding: 0.6rem 0.8rem;
+          margin-bottom: 1.2rem;
+          border: 1px solid var(--color-expriviaBlue);
+          border-radius: 4px;
+          font-size: 1rem;
+          outline-offset: 2px;
+          transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+          border-color: var(--color-expriviaOrange);
+        }
+
+        button {
+          background-color: var(--color-expriviaOrange);
+          color: white;
+          font-weight: 700;
+          border: none;
+          padding: 0.7rem;
+          border-radius: 4px;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+          background-color: var(--color-expriviaOrange600);
+        }
+
+        p {
+          margin-top: 1rem;
+          font-size: 0.9rem;
+          text-align: center;
+          color: var(--color-expriviaOrange400);
+          font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login per accedere a Swagger</h2>
+        <form th:action="@{/swagger/login}" method="post">
+            <label for="username">Email:</label>
+            <input type="text" name="username" id="username" required autofocus />
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required />
+            <button type="submit">Login</button>
+        </form>
+
+        <p th:if="${param.error}">Credenziali non valide</p>
+        <p th:if="${param.logout}">Logout effettuato</p>
+    </div>
+</body>
+</html>
+
+
+
+
+securityConfig:
+package com.prenotazioni.exprivia.exprv.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthFilter;
+import com.prenotazioni.exprivia.exprv.security.jwt.JwtAuthenticationEntryPoint;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@Order(1) // 👈 Priorità più alta rispetto a SwaggerSecurityConfig
+public class SecurityConfig {
+
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint, JwtAuthFilter jwtAuthFilter) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/api/**", "/auth/**") // esclude rotte Swagger
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling(handling -> handling.authenticationEntryPoint(authenticationEntryPoint))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // Public endpoints
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/stats/prenotazioni**").permitAll()
+                .requestMatchers("/api/stats/stanze**").permitAll()
+
+                // Admin only endpoints
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/prenotazioni/export/giorno/**").hasAuthority(AuthoritiesConstants.ADMIN)
+
+                // Authenticated user endpoints
+                .requestMatchers("/api/utenti/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/api/postazioni/**").authenticated()
+                .requestMatchers("/api/stanze/**").authenticated()
+                .requestMatchers("/api/prenotazioni/**").permitAll()
+
+                //Script JS
+                //.requestMatchers("/swagger-inject.js").permitAll()
+
+                // Fallback: everything else requires authentication
+                .anyRequest().authenticated());
+
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+JwtAuthFilter:
+package com.prenotazioni.exprivia.exprv.security.jwt;
+
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class JwtAuthFilter extends OncePerRequestFilter {
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
+        try {
+            // Log request details
+            logger.info("Processing request: {} {}", request.getMethod(), request.getRequestURI());
+            
+            String jwt = getJwtFromRequest(request);
+            logger.info("JWT from request: {}", jwt != null ? "present" : "not present");
+            
+            if (StringUtils.hasText(jwt)) {
+                logger.info("Validating JWT token");
+                boolean isValid = tokenProvider.validateToken(jwt);
+                logger.info("JWT validation result: {}", isValid);
+                
+                if (isValid) {
+                    String username = tokenProvider.getUsernameFromToken(jwt);
+                    String roles = tokenProvider.getRolesFromToken(jwt);
+                    logger.info("Username from token: {}, Roles: {}", username, roles);
+                    
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    logger.info("User authorities: {}", userDetails.getAuthorities());
+                    
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.info("Authentication set in SecurityContext for user: {}", username);
+                } else {
+                    logger.warn("Invalid JWT token");
+                }
+            } else {
+                logger.info("No JWT token found in request");
+            }
+        } catch (Exception e) {
+            logger.error("Cannot set user authentication: {}", e.getMessage(), e);
+        }
+        filterChain.doFilter(request, response);
+    }
+
+    private String getJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        logger.info("Authorization header: {}", bearerToken);
+        
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            String token = bearerToken.substring(7);
+            logger.info("Extracted token: {}", token.substring(0, Math.min(token.length(), 10)) + "...");
+            return token;
+        }
+        return null;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+
+        return path.startsWith("/swagger-ui") || 
+            path.startsWith("/v3/api-docs") || 
+            path.startsWith("/swagger-resources") ||
+            path.startsWith("/webjars/swagger-ui") || 
+            path.equals("/favicon.ico");
+    }
+
+}
+
+SwaggerSecurityConfig:
+package com.prenotazioni.exprivia.exprv.swagger.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@Profile("dev")
+@EnableWebSecurity
+@EnableMethodSecurity
+@Order(0) // 👈 Priorità più alta di SecurityConfig
+public class SwaggerSecurityConfig {
+
+    @Bean
+    public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**", "/swagger/login", "/swagger/login.html")
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/swagger/login", "/swagger/login.html").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").hasAuthority("ROLE_ADMIN")
+            )
+            .formLogin(form -> form
+                .loginPage("/swagger/login")
+                .defaultSuccessUrl("/swagger-ui/index.html", true)
+                .permitAll())
+            .logout(logout -> logout
+                .logoutUrl("/swagger/logout")
+                .logoutSuccessUrl("/swagger/login?logout=true"))
+            .csrf(csrf -> csrf.disable());
+
+        return http.build();
+    }
+}
+
+SwaggerConfig:
+package com.prenotazioni.exprivia.exprv.swagger.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SwaggerConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        final String securitySchemeName = "JWT";
+
+        return new OpenAPI()
+            .info(new Info()
+                .title("API Exprivia")
+                .version("v1")
+                .description("Documentazione delle API con protezione JWT"))
+            .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+            .components(new io.swagger.v3.oas.models.Components()
+                .addSecuritySchemes(securitySchemeName,
+                    new SecurityScheme()
+                        .name(securitySchemeName)
+                        .type(SecurityScheme.Type.APIKEY)
+                        .in(SecurityScheme.In.HEADER)
+                        .bearerFormat("JWT")
+                        .scheme("bearer")
+                        .name("Authorization")
+                )
+            );
+    }
+}
+
+application.properties:
+# Nome dell'app
+spring.application.name=exprv
+
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.show-sql=true
+
+# Stringa per log di security (Per Debug)
+logging.level.org.springframework.security=DEBUG
+
+# Configurazione della piattaforma JTA
+spring.jpa.properties.hibernate.transaction.jta.platform=org.hibernate.service.jta.platform.internal.JBossAppServerJtaPlatform
+
+spring.jpa.properties.hibernate.type.preferred_enum_type=string 
+
+#Swagger Config
+#springdoc.api-docs.path=/v3/api-docs
+
+#Cambiato path swagger da /swagger-ui/ a /swagger-ui/index.html
+#springdoc.swagger-ui.path=/swagger-ui/index.html
+
+springdoc.api-docs.enabled=true
+springdoc.swagger-ui.path=/swagger-ui/index.html
+springdoc.swagger-ui.operationsSorter=alpha
+springdoc.swagger-ui.tagsSorter=alpha
+springdoc.swagger-ui.persistAuthorization=true
+springdoc.swagger-ui.init.script=/swagger-inject.js
+springdoc.swagger-ui.additional-resources=/swagger-inject.js
+
+#Profilo DEV
+spring.profiles.active=dev
+
+# JWT Properties
+app.jwt-expiration-milliseconds=86400000
+
+# Mail (le credenziali sono nel file dei segreti)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+spring.profiles.include=secrets
+
+login.html:
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Swagger Login</title>
+    <style>
+        :root {
+          --color-expriviaBlue: #004C6A;
+          --color-expriviaOrange: #E9500E;
+        }
+
+        html, body {
+          height: 100%;
+          margin: 0;
+          background-color: var(--color-expriviaBlue);
+          font-family: sans-serif;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .login-container {
+          background: white;
+          color: #004C6A;
+          padding: 2rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+          width: 320px;
+        }
+
+        h2 {
+          text-align: center;
+        }
+
+        form {
+          display: flex;
+          flex-direction: column;
+        }
+
+        input {
+          margin-bottom: 1rem;
+          padding: 0.5rem;
+          border: 1px solid #004C6A;
+          border-radius: 4px;
+        }
+
+        button {
+          background-color: var(--color-expriviaOrange);
+          color: white;
+          padding: 0.6rem;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+
+        p {
+          text-align: center;
+          color: var(--color-expriviaOrange);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login Swagger</h2>
+        <form onsubmit="handleLogin(event)">
+            <label>Email:</label>
+            <input type="text" id="username" required />
+            <label>Password:</label>
+            <input type="password" id="password" required />
+            <button type="submit">Login</button>
+        </form>
+        <p id="error-msg" style="display:none;">Credenziali non valide</p>
+    </div>
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('jwt', data.token);
+                window.location.href = '/swagger-ui/index.html';
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
+
+swagger-inject.js:
+window.onload = function() {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt && window.ui) {
+        ui.preauthorizeApiKey("JWT", jwt);
+    }
+};
