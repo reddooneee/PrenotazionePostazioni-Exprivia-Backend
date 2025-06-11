@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,20 +43,27 @@ export class LoginComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   iconName: string = 'eye-off';
   private destroy$ = new Subject<void>();
+  private preventNextErrorClear = false;
 
   private loginService = inject(LoginService);
   private formBuilder = inject(FormBuilder);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.loginForm = this.formBuilder.group({
       email: ['', { validators: [Validators.required, Validators.email], nonNullable: true }],
-      password: ['', { validators: [Validators.required, Validators.minLength(6)], nonNullable: true }]
+      password: ['', { validators: [Validators.required], nonNullable: true }]
     });
 
     this.loginForm.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
+        if (this.preventNextErrorClear) {
+          this.preventNextErrorClear = false;
+          return;
+        }
+        
         if (this.errorMessage) {
           this.errorMessage = null;
         }
@@ -84,6 +91,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           takeUntil(this.destroy$),
           finalize(() => {
             this.isLoading = false;
+            // Prevent error clearing when form is re-enabled programmatically
+            this.preventNextErrorClear = true;
             this.loginForm.enable();
           })
         )
@@ -95,13 +104,11 @@ export class LoginComponent implements OnInit, OnDestroy {
             }
           },
           error: (error) => {
-            console.error('Login error:', {
-              message: error.message,
-              originalError: error.originalError,
-              timestamp: new Date().toISOString()
-            });
-            
             this.errorMessage = error.message;
+            
+            // Force change detection
+            this.cdr.detectChanges();
+            
             this.loginForm.markAsPristine();
             
             if (error.originalError?.response?.status === 400) {
@@ -131,5 +138,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   get passwordInvalid(): boolean {
     const control = this.loginForm.get('password');
     return control ? (control.dirty || control.touched) && control.invalid : false;
+  }
+
+  dismissError(): void {
+    this.errorMessage = null;
   }
 }

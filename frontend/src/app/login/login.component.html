@@ -58,9 +58,6 @@
             <ng-container *ngIf="loginForm.get('password')?.hasError('required')">
               La password è obbligatoria.
             </ng-container>
-            <ng-container *ngIf="loginForm.get('password')?.hasError('minlength')">
-              La password deve essere di almeno 6 caratteri.
-            </ng-container>
           </div>
         </div>
 
@@ -76,13 +73,23 @@
         </div>
 
         <!-- Messaggio errore -->
-        <div *ngIf="errorMessage"
-          class="p-4 text-sm text-red-600 bg-red-50 rounded-[var(--radius-lg)] border border-red-100" [@shake]
-          role="alert" aria-live="assertive">
-          <div class="flex items-center gap-2">
-            <mat-icon class="text-red-500 animate-pulse" aria-hidden="true">error</mat-icon>
-            <span>{{ errorMessage }}</span>
+        <div *ngIf="errorMessage" 
+             class="p-4 bg-red-50 border border-red-200 rounded-[var(--radius-lg)] flex items-start gap-3" 
+             [@shake]
+             role="alert" 
+             aria-live="assertive">
+          <mat-icon class="text-red-500 mt-0.5" aria-hidden="true">warning</mat-icon>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-red-800">Errore di accesso</p>
+            <p class="text-sm text-red-600">{{ errorMessage }}</p>
           </div>
+          <button type="button" 
+                  (click)="dismissError()" 
+                  class="text-red-400 hover:text-red-600 transition-[var(--transition-colors)] cursor-pointer"
+                  [attr.aria-label]="'Chiudi messaggio di errore'"
+                  [disabled]="isLoading">
+            <mat-icon class="w-5 h-5" aria-hidden="true">close</mat-icon>
+          </button>
         </div>
 
         <!-- Bottone Accedi -->

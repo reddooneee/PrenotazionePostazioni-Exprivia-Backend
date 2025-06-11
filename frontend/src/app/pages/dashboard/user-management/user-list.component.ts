@@ -4,10 +4,11 @@ import {
   OnDestroy,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import { LucideAngularModule } from "lucide-angular";
 import { FormsModule } from "@angular/forms";
 import { Subject, takeUntil, Observable } from "rxjs";
+import { ToastModule } from 'primeng/toast';
+import { ToastService } from '../../../shared/services/toast.service';
 
 import { User } from "@core/models";
 import { UserManagementService } from "./user-management.service";
@@ -30,11 +31,13 @@ import { UserFormDialogComponent } from "./user-form-dialog.component";
   `],
   imports: [
     CommonModule,
-    MatSnackBarModule,
     LucideAngularModule,
     FormsModule,
     UserFormDialogComponent,
+    ToastModule,
   ],
+  providers: [],
+  styleUrls: ['../../../shared/styles/toast.styles.css']
 })
 export class UserListComponent implements OnInit, OnDestroy {
   users: User[] = [];
@@ -62,7 +65,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   constructor(
     private userManagementService: UserManagementService,
-    private snackBar: MatSnackBar
+    private toastService: ToastService
   ) {
     this.loading$ = this.userManagementService.loading$;
   }
@@ -87,7 +90,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     try {
       await this.userManagementService.loadUsers();
     } catch (error) {
-      this.showErrorMessage("Errore nel caricamento degli utenti");
+      this.toastService.showError("Errore di Caricamento", "Errore nel caricamento degli utenti");
     }
   }
 
@@ -139,15 +142,15 @@ export class UserListComponent implements OnInit, OnDestroy {
       if (this.modalData.user.id_user) {
         // Edit mode
         await this.userManagementService.updateUser(this.modalData.user.id_user!, userData);
-        this.showSuccessMessage("Utente aggiornato con successo");
+        this.toastService.showSuccess("Utente Aggiornato", "Utente aggiornato con successo");
       } else {
         // Create mode
         await this.userManagementService.createUser(userData);
-        this.showSuccessMessage("Utente creato con successo");
+        this.toastService.showSuccess("Utente Creato", "Utente creato con successo");
       }
       this.closeModal();
     } catch (error) {
-      this.showErrorMessage(this.modalData.user.id_user ? "Errore durante l'aggiornamento dell'utente" : "Errore durante la creazione dell'utente");
+      this.toastService.showError("Errore Operazione", this.modalData.user.id_user ? "Errore durante l'aggiornamento dell'utente" : "Errore durante la creazione dell'utente");
     } finally {
       this.isModalLoading = false;
     }
@@ -172,29 +175,11 @@ export class UserListComponent implements OnInit, OnDestroy {
     ) {
       try {
         await this.userManagementService.deleteUser(user.id_user!);
-        this.showSuccessMessage("Utente eliminato con successo");
+        this.toastService.showSuccess("Utente Eliminato", "Utente eliminato con successo");
       } catch (error) {
-        this.showErrorMessage("Errore durante l'eliminazione dell'utente");
+        this.toastService.showError("Errore Eliminazione", "Errore durante l'eliminazione dell'utente");
       }
     }
-  }
-
-  private showSuccessMessage(message: string): void {
-    this.snackBar.open(message, "Chiudi", {
-      duration: 3000,
-      horizontalPosition: "end",
-      verticalPosition: "top",
-      panelClass: ["bg-green-600", "text-white"],
-    });
-  }
-
-  private showErrorMessage(message: string): void {
-    this.snackBar.open(message, "Chiudi", {
-      duration: 5000,
-      horizontalPosition: "end",
-      verticalPosition: "top",
-      panelClass: ["bg-red-600", "text-white"],
-    });
   }
 
   ngOnDestroy(): void {
@@ -300,3 +285,4 @@ export class UserListComponent implements OnInit, OnDestroy {
     return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
   }
 }
+

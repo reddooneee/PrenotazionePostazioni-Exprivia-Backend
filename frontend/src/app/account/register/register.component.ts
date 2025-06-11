@@ -2,17 +2,19 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RegisterService, RegisterUserData } from './register.service';
+import { LoginService } from '../../login/login.service';
 import { authAnimations } from '../../shared/animations/auth.animations';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, finalize, switchMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
+import { ToastModule } from 'primeng/toast';
+import { ToastService } from '../../shared/services/toast.service';
 
 
 @Component({
@@ -22,15 +24,17 @@ import { HeaderComponent } from '../../layout/header/header.component';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatSnackBarModule,
     MatFormFieldModule,
     MatInputModule,
     RouterModule,
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    HeaderComponent
+    HeaderComponent,
+    ToastModule,
   ],
+  providers: [],
+  styleUrls: ['../../shared/styles/toast.styles.css'],
   animations: [
     authAnimations.fadeIn,
     authAnimations.slideUp,
@@ -47,7 +51,8 @@ export class RegisterComponent {
 
   constructor(
     private registerService: RegisterService,
-    private snackBar: MatSnackBar,
+    private loginService: LoginService,
+    private toastService: ToastService,
     private router: Router,
     private fb: FormBuilder
   ) {
@@ -139,34 +144,70 @@ export class RegisterComponent {
         password: formData.password
       };
 
+      // Register the user and then automatically log them in
       this.registerService.register(userData)
         .pipe(
-          catchError(error => {
-            console.error('Registration error:', error);
-            const message = error.response?.data?.message || 'Errore durante la registrazione. Riprova più tardi.';
-            this.snackBar.open(message, 'Chiudi', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['error-snackbar']
+          switchMap(() => {
+            // After successful registration, automatically log the user in
+            return this.loginService.login({
+              email: userData.email,
+              password: userData.password
             });
-            return throwError(() => new Error(message));
+          }),
+          catchError(error => {
+            console.error('Registration or login error:', error);
+            
+            // Check if error is from registration or login phase
+            if (error.originalError) {
+              // This is likely a login error after successful registration
+              this.showWarningToast(
+                'Registrazione Completata',
+                'Si è verificato un errore durante il login automatico. Puoi effettuare il login manualmente.'
+              );
+              // Navigate to login page if auto-login fails
+              this.router.navigate(['/accedi']);
+              return throwError(() => new Error('Auto-login failed'));
+            } else {
+              // This is a registration error
+              const message = error.response?.data?.message || 'Errore durante la registrazione. Riprova più tardi.';
+              this.showErrorToast('Errore Registrazione', message);
+              return throwError(() => new Error(message));
+            }
           }),
           finalize(() => {
             this.isLoading = false;
           })
         )
         .subscribe({
-          next: () => {
-            this.snackBar.open('Registrazione completata con successo! Ora puoi effettuare il login.', 'Chiudi', {
-              duration: 5000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar']
-            });
-            this.router.navigate(['/accedi']);
+          next: (user) => {
+            if (user) {
+              // Navigate to dashboard after successful auto-login
+              this.router.navigate(['/dashboard']);
+            }
           }
         });
     }
+  }
+
+  // Toast utility methods for consistent styling and messaging
+  private showSuccessToast(summary: string, detail: string): void {
+    this.toastService.showSuccess(summary, detail);
+  }
+
+  private showErrorToast(summary: string, detail: string): void {
+    this.toastService.showError(summary, detail);
+  }
+
+  private showInfoToast(summary: string, detail: string): void {
+    this.toastService.showInfo(summary, detail);
+  }
+
+  private showWarningToast(summary: string, detail: string): void {
+    this.toastService.showWarning(summary, detail);
+  }
+
+  // Clear all existing toasts
+  private clearAllToasts(): void {
+    this.toastService.clearAll();
   }
 }

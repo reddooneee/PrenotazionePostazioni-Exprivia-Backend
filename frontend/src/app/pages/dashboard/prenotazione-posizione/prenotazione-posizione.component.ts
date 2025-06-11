@@ -10,206 +10,16 @@ import { CosaDurata } from "@core/models/cosa-durata.model";
 import { PrenotazionePosizioneService } from "./prenotazione-posizione.service";
 import { Postazione } from "@/app/core/models/postazione.model";
 import { Stanza, StanzaWithPostazioni } from "@core/models/stanza.model";
-import { MessageService } from "primeng/api";
 import { ToastModule } from 'primeng/toast';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, CalendarComponent, ToastModule],
-  providers: [MessageService, DatePipe],
+  providers: [DatePipe],
   selector: "app-prenotazione-posizione",
   templateUrl: "./prenotazione-posizione.component.html",
-  styles: [`
-    /* Custom Toast Styles */
-    :host ::ng-deep .p-toast {
-      z-index: 9999;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message {
-      margin: 0 0 0.5rem 0;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      border-radius: 0.75rem;
-      border: none;
-      backdrop-filter: blur(8px);
-      animation: slideInRight 0.3s ease-out;
-      min-width: 320px;
-      max-width: 420px;
-      background: rgba(255, 255, 255, 0.95);
-      transform-origin: right center;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave {
-      animation: slideOutRight 0.25s ease-in forwards !important;
-      overflow: hidden !important;
-    }
-    
-    /* Force all child elements to move with the container */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave,
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *,
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *::before,
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave *::after {
-      transform: none !important;
-      transition: none !important;
-      animation: none !important;
-    }
-    
-    /* Override the leave animation entirely */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-leave {
-      animation: slideOutRight 0.25s ease-in forwards !important;
-    }
-    
-    /* Success Toast */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-success {
-      border-left: 4px solid #10b981;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-success .p-toast-message-icon {
-      color: #10b981;
-      background: #dcfce7;
-      border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* Error Toast */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-error {
-      border-left: 4px solid #ef4444;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon {
-      color: #ef4444;
-      background: #fee2e2;
-      border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* Info Toast */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-info {
-      border-left: 4px solid #3b82f6;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-info .p-toast-message-icon {
-      color: #3b82f6;
-      background: #dbeafe;
-      border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* Warning Toast */
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn {
-      border-left: 4px solid #f59e0b;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
-      color: #f59e0b;
-      background: #fef3c7;
-      border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 0.75rem;
-      flex-shrink: 0;
-    }
-    
-    /* Ensure proper spacing for all toast icons */
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-icon {
-      margin-right: 0.75rem;
-      flex-shrink: 0;
-    }
-    
-    /* Fix content area to not overlap with icons */
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-text {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    @keyframes slideInRight {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes slideOutRight {
-      0% {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-message-content {
-      padding: 1rem;
-      border: none;
-      border-radius: 0.75rem;
-      background: transparent;
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-summary {
-      font-weight: 500;
-      color: #111827;
-      font-size: 0.875rem;
-      margin-bottom: 0.25rem;
-      line-height: 1.4;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-detail {
-      color: #6b7280;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      word-wrap: break-word;
-    }
-    
-    /* Ensure proper stacking and positioning */
-    :host ::ng-deep .p-toast-top-right {
-      top: 1rem;
-      right: 1rem;
-    }
-    
-    /* Hover effects */
-    :host ::ng-deep .p-toast .p-toast-message:hover {
-      transform: translateY(-1px);
-      transition: transform 0.2s ease;
-    }
-    
-    /* Close button styling */
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-icon-close {
-      color: #9ca3af;
-      background: transparent;
-      border: none;
-      padding: 0.375rem;
-      border-radius: 0.5rem;
-      transition: all 0.2s ease;
-    }
-    
-    :host ::ng-deep .p-toast .p-toast-message .p-toast-icon-close:hover {
-      color: #4b5563;
-      background: #f3f4f6;
-    }
-  `]
+  styleUrls: ['../../../shared/styles/toast.styles.css']
 })
 export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   bookingForm: FormGroup;
@@ -250,7 +60,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private authService: AuthService,
     private prenotazionePosizioneService: PrenotazionePosizioneService,
-    private messageService: MessageService,
+    private toastService: ToastService,
     private datePipe: DatePipe
   ) {
     this.bookingForm = this.fb.group({
@@ -885,44 +695,24 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   // Toast utility methods for consistent styling and messaging
   private showSuccessToast(summary: string, detail: string): void {
-    this.messageService.add({
-      severity: 'success',
-      summary,
-      detail,
-      life: 5000 // Auto-dismiss after 5 seconds
-    });
+    this.toastService.showSuccess(summary, detail);
   }
 
   private showErrorToast(summary: string, detail: string): void {
-    this.messageService.add({
-      severity: 'error',
-      summary,
-      detail,
-      life: 8000 // Keep error messages longer
-    });
+    this.toastService.showError(summary, detail);
   }
 
   private showInfoToast(summary: string, detail: string): void {
-    this.messageService.add({
-      severity: 'info',
-      summary,
-      detail,
-      life: 6000
-    });
+    this.toastService.showInfo(summary, detail);
   }
 
   private showWarningToast(summary: string, detail: string): void {
-    this.messageService.add({
-      severity: 'warn',
-      summary,
-      detail,
-      life: 7000
-    });
+    this.toastService.showWarning(summary, detail);
   }
 
   // Clear all existing toasts
   private clearAllToasts(): void {
-    this.messageService.clear();
+    this.toastService.clear();
   }
 
   // Sorting methods
