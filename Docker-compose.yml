@@ -35,14 +35,16 @@ services:
       #prenotazioni-net:
       - prenotazioni-net
 
-#  frontend:
-#    build:
-#      context: ./frontend
-#    container_name: PrenotazioniFrontEnd
-#    ports:
-#      - "4200:80"
+  frontend:
+    build:
+      context: ./frontend
+    container_name: PrenotazioniFrontEnd
+    ports:
+      - "4200:80"
 #    depends_on:
 #      - backend
+    networks:
+      - prenotazioni-net
 
 volumes:
   postgres_data:

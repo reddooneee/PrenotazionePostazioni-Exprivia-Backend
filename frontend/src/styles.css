@@ -1,8 +1,9 @@
-@import "tailwindcss";
-@source "../node_modules/flowbite";
+/*@import "tailwindcss";*/
+/*@source "../node_modules/flowbite";*/
 
-@theme {
-    /* Brand Colors */
+/*@theme {*/
+:root{
+  /* Brand Colors */
     --color-expriviaBlue: #004C6A;
     --color-expriviaOrange: #E9500E;
     --color-expriviaOrange400: #F09151;
