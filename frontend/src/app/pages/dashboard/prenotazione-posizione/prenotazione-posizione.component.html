@@ -133,7 +133,7 @@
               <i class="fas fa-info-circle mr-1"></i>
               Seleziona prima il tipo di stanza
             </div>
-            <select formControlName="id_postazione"
+            <select *ngIf="bookingForm.get('tipo_stanza')?.value" formControlName="id_postazione"
               [disabled]="!bookingForm.get('tipo_stanza')?.value"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
               <option value="">Seleziona postazione</option>
@@ -141,10 +141,6 @@
                 {{ postazione.nomePostazione }} - {{ postazione.stanza_nome }}
               </option>
             </select>
-            <div *ngIf="bookingForm.get('id_postazione')?.value" class="mt-2 text-sm text-gray-600">
-              <i class="fas fa-info-circle mr-1"></i>
-              Postazione selezionata nella stanza: {{ getStanzaName(bookingForm.get('id_stanza')?.value) }}
-            </div>
           </div>
 
           <!-- Time Slot Selection -->
@@ -240,11 +236,11 @@
 
           <!-- Validation Messages -->
           <div *ngIf="!isFormValid()" class="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-            <p *ngIf="!bookingForm.valid">Compila tutti i campi obbligatori</p>
-            <p *ngIf="state.selectedDates.length === 0">Seleziona una data</p>
-            <p *ngIf="!bookingForm.get('tipo_stanza')?.value">Seleziona il tipo di stanza</p>
-            <p *ngIf="!bookingForm.get('id_postazione')?.value">Seleziona una postazione</p>
-            <p *ngIf="!bookingForm.get('timeSlot')?.value">Seleziona una fascia oraria</p>
+            <p *ngIf="!bookingForm.valid">Compila tutti i campi obbligatori:</p>
+            <li *ngIf="state.selectedDates.length === 0">Seleziona una data</li>
+            <li *ngIf="!bookingForm.get('tipo_stanza')?.value">Seleziona il tipo di stanza</li>
+            <li *ngIf="!bookingForm.get('id_postazione')?.value">Seleziona una postazione</li>
+            <li *ngIf="!bookingForm.get('timeSlot')?.value">Seleziona una fascia oraria</li>
           </div>
         </div>
       </div>
