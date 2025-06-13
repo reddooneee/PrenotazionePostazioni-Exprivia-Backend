@@ -35,7 +35,7 @@ export class NavigationService {
       label: "Prenotazioni",
       icon: "calendar",
       route: "/dashboard/bookings",
-      authorities: ["ROLE_USER", "ROLE_ADMIN"],
+      authorities: ["ROLE_ADMIN"],
     },
     {
       label: "Prenota",

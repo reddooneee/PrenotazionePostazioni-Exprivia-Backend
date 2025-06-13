@@ -254,32 +254,30 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     this.bookingForm.get("id_postazione")?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(postazioneId => {
-        console.log('DEBUG: Cambio postazione, nuovo id:', postazioneId);
         if (postazioneId) {
-          console.log('Cercando postazione tra:', this.state.postazioniDisponibili);
-          const postazioneIdNum = Number(postazioneId);
-          const postazione = this.state.postazioniDisponibili.find(p => p.id_postazione === postazioneIdNum);
-          console.log('Postazione trovata:', postazione);
-
-          if (postazione) {
-            console.log('Aggiornamento id_stanza da', this.bookingForm.get('id_stanza')?.value, 'a', postazione.stanza_id);
+          // Find the selected postazione to get its stanza_id
+          const selectedPostazione = this.state.postazioniDisponibili.find(p => p.id_postazione === Number(postazioneId));
+          if (selectedPostazione) {
+            // Set both the postazione and its associated stanza
             this.bookingForm.patchValue({
-              id_stanza: postazione.stanza_id
-            }, { emitEvent: false });
-
-            // Always load available time slots if both postazione and date are selected
-            if (this.state.selectedDates.length > 0) {
-              console.log('DEBUG: Chiamo loadAvailableTimeSlots da valueChanges con', postazioneIdNum);
-              this.loadAvailableTimeSlots(postazioneIdNum);
-            }
-          } else {
-            console.error('Postazione non trovata per id:', postazioneId);
+              id_stanza: selectedPostazione.stanza_id
+            });
           }
-        } else {
-          console.log('Reset id_stanza a null');
+          
+          // Reset both duration and time slot when postazione changes
           this.bookingForm.patchValue({
-            id_stanza: null
+            slotDuration: "",
+            timeSlot: ""
+          }, { emitEvent: false }); // Prevent triggering valueChanges again
+          this.loadAvailableTimeSlots(postazioneId);
+        } else {
+          // When postazione is deselected, reset all related fields
+          this.bookingForm.patchValue({
+            id_stanza: null,
+            slotDuration: "",
+            timeSlot: ""
           }, { emitEvent: false });
+          this.state.availableTimeSlots = [];
         }
       });
 
@@ -335,16 +333,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
             });
           }
 
-          // If we have slots and current duration is not set or invalid, select the first available duration
-          const currentDuration = this.bookingForm.get('slotDuration')?.value;
-          if (slots.length > 0 && (!currentDuration || !currentAvailableDurations.includes(currentDuration))) {
-            const firstAvailableDuration = currentAvailableDurations[0];
-            if (firstAvailableDuration) {
-              console.log('DEBUG: Setting first available duration:', firstAvailableDuration);
-              this.bookingForm.patchValue({ slotDuration: firstAvailableDuration });
-            }
-          }
-
+          // Remove auto-selection of duration
           if (selectedDuration === 'Giornata Intera') {
             const fullDaySlot = slots.find(slot => slot.startTime === '08:00' && slot.endTime === '18:00');
             this.bookingForm.get('timeSlot')?.setValue(fullDaySlot ? '08:00 - 18:00' : '');
@@ -403,35 +392,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
                   timeSlot: "",
                   slotDuration: ""
                 });
-              } else {
-                // Auto-select first available duration (considerando filtri temporali)
-                const availableDurations = this.availableDurations;
-                if (availableDurations.length > 0) {
-                  const currentSlotDuration = this.bookingForm.get('slotDuration')?.value;
-                  // Use current selection if valid, otherwise use first available
-                  const durationToUse = availableDurations.includes(currentSlotDuration) 
-                    ? currentSlotDuration 
-                    : availableDurations[0];
-                    
-                  this.bookingForm.patchValue({
-                    slotDuration: durationToUse
-                  });
-                  
-                  // Auto-select first time slot for the duration
-                  const filteredSlots = this.getFilteredTimeSlots();
-                  if (filteredSlots.length > 0) {
-                    const firstSlot = filteredSlots[0];
-                    this.bookingForm.patchValue({
-                      timeSlot: `${firstSlot.startTime} - ${firstSlot.endTime}`
-                    });
-                  }
-                } else {
-                  // Nessuna durata disponibile, pulisci tutto
-                  this.bookingForm.patchValue({
-                    slotDuration: "",
-                    timeSlot: ""
-                  });
-                }
               }
               
               this.state.isLoading = false;
@@ -439,13 +399,12 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
             error: (err) => {
               console.error('Errore nel controllo della disponibilità:', err);
               this.showErrorToast('Errore', 'Impossibile verificare la disponibilità per questa data');
-              // Keep the date selected even on error
               this.state.selectedDates = selected;
               this.state.availableTimeSlots = [];
               this.bookingForm.patchValue({
                 selectedDate: selected[0],
                 timeSlot: "",
-                slotDuration: "" // Keep it empty for consistency
+                slotDuration: ""
               });
               this.state.isLoading = false;
             }
@@ -620,19 +579,21 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     const hasIdPostazione = !!formControls['id_postazione'].value;
     const hasSelectedDate = !!formControls['selectedDate'].value || this.state.selectedDates.length > 0;
     const hasTimeSlot = !!formControls['timeSlot'].value;
-    const hasSlotDuration = !!formControls['slotDuration'].value;
 
-    // Debug logging only if validation fails
-    /*if (!hasTimeSlot || !hasSlotDuration) {
-      console.log('Form validation issue:', {
-        hasTimeSlot,
-        hasSlotDuration,
-        timeSlotValue: formControls['timeSlot'].value,
-        slotDurationValue: formControls['slotDuration'].value,
-        availableDurations: this.availableDurations,
-        availableTimeSlots: this.state.availableTimeSlots.length
-      });
-    }*/
+    // Debug logging
+    /*console.log('Form Validation State:', {
+      hasTipoStanza,
+      hasIdStanza,
+      hasIdPostazione,
+      hasSelectedDate,
+      hasTimeSlot,
+      formValid: this.bookingForm.valid,
+      formValues: this.bookingForm.value,
+      formErrors: this.bookingForm.errors,
+      timeSlotValue: formControls['timeSlot'].value,
+      selectedDateValue: formControls['selectedDate'].value,
+      selectedDates: this.state.selectedDates
+    });*/
 
     // Check if all required form controls have values
     const hasRequiredFields = 
@@ -640,8 +601,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       hasIdStanza &&
       hasIdPostazione &&
       hasSelectedDate &&
-      hasTimeSlot &&
-      hasSlotDuration;
+      hasTimeSlot;
 
     // Check if the form is valid (this includes required field validation)
     const formValid = this.bookingForm.valid;

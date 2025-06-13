@@ -9,6 +9,7 @@ import { Subject, takeUntil } from "rxjs";
 import { AuthService } from "../../core/auth/auth.service";
 import { LoginService } from "../../login/login.service";
 import { User as UserModel } from "../../core/models";
+import { NavigationService, NavItem } from "@core/services/navigation.service";
 
 @Component({
   selector: "app-header",
@@ -27,11 +28,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: UserModel | null = null;
   isMenuOpen = false;
+  navItems: NavItem[] = [];
   private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
-    private loginService: LoginService
+    private loginService: LoginService,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
@@ -56,6 +59,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.resetAuthState();
         }
       });
+
+    this.navigationService
+      .getNavigationItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((items) => (this.navItems = items));
   }
 
   private loadUserIdentity(): void {
@@ -64,13 +72,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
         this.currentUser = user;
+        if (user?.authorities) {
+          this.navigationService.updateNavigationItems(user.authorities);
+        }
       });
   }
 
   private resetAuthState(): void {
     this.isAuthenticated = false;
     this.currentUser = null;
-    this.isMenuOpen = false;
+    this.navigationService.updateNavigationItems([]);
   }
 
   toggleMenu(): void {
@@ -88,6 +99,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
       return currentRoute === '/dashboard/update-user';
     }
     return currentRoute === route;
+  }
+
+  isNavItemVisible(item: NavItem): boolean {
+    if (!this.currentUser?.authorities) {
+      return false;
+    }
+
+    if (item.adminOnly && !this.currentUser.authorities.includes('ROLE_ADMIN')) {
+      return false;
+    }
+
+    return (
+      !item.authorities ||
+      item.authorities.some((auth) =>
+        this.currentUser?.authorities?.includes(auth)
+      )
+    );
   }
 
   ngOnDestroy(): void {

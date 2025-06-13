@@ -1,4 +1,4 @@
-<header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
+<header class="w-full bg-white fixed md:sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
     <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
         <!-- Logo -->
         <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="isAuthenticated ? ['/dashboard/'] : ['/']" role="link" aria-label="Torna alla home">
@@ -81,18 +81,29 @@
 
             <!-- Mobile Menu Links -->
             <nav class="p-2">
-                <a [routerLink]="['/dashboard/']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                    <lucide-icon name="calendar-plus" class="w-5 h-5" />
-                    <span>Prenota</span>
-                </a>
-                <a [routerLink]="['/dashboard/bookings']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                    <lucide-icon name="calendar" class="w-5 h-5" />
-                    <span>Le mie prenotazioni</span>
-                </a>
-                <a [routerLink]="['/dashboard/profile']" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
-                    <lucide-icon name="user" class="w-5 h-5" />
-                    <span>Profilo</span>
-                </a>
+                <ng-container *ngFor="let navItem of navItems">
+                    <!-- Single level items -->
+                    <ng-container *ngIf="!navItem.children && isNavItemVisible(navItem)">
+                        <a [routerLink]="[navItem.route]" class="flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                            <lucide-icon [name]="navItem.icon" class="w-5 h-5" />
+                            <span>{{ navItem.label }}</span>
+                        </a>
+                    </ng-container>
+
+                    <!-- Items with children -->
+                    <ng-container *ngIf="navItem.children && isNavItemVisible(navItem)">
+                        <div class="px-4 py-2 text-sm font-medium text-gray-500">
+                            {{ navItem.label }}
+                        </div>
+                        <ng-container *ngFor="let childItem of navItem.children">
+                            <a *ngIf="isNavItemVisible(childItem)" [routerLink]="[childItem.route]" class="flex items-center gap-3 px-8 py-3 rounded-[var(--radius-lg)] text-gray-700 hover:bg-[var(--color-expriviaOrange)] hover:text-white transition-[var(--transition-all)]">
+                                <lucide-icon [name]="childItem.icon" class="w-5 h-5" />
+                                <span>{{ childItem.label }}</span>
+                            </a>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+
                 <button (click)="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] text-red-600 hover:bg-red-50 transition-[var(--transition-all)] cursor-pointer">
                     <lucide-icon name="log-out" class="w-5 h-5" />
                     <span>Disconnetti</span>

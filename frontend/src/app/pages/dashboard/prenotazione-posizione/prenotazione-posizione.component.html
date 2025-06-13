@@ -22,11 +22,13 @@
         <div class="md:col-span-2">
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="text-sm font-medium text-gray-700 mb-3">1. Seleziona la data</h4>
-            <app-calendar
-              [selectedDates]="state.selectedDates"
-              (dateSelectionChange)="onDateSelectionChange($event)"
-              (monthChange)="onMonthChange($event)">
-            </app-calendar>
+            <div class="max-w-[100vw] overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <app-calendar
+                [selectedDates]="state.selectedDates"
+                (dateSelectionChange)="onDateSelectionChange($event)"
+                (monthChange)="onMonthChange($event)">
+              </app-calendar>
+            </div>
           </div>
         </div>
 
@@ -76,7 +78,7 @@
             
             <!-- User Dropdown -->
             <div *ngIf="showUserDropdown && filteredUsers.length > 0" 
-                 class="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                 class="absolute z-50 mt-1 w-full sm:w-80 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               <div *ngFor="let user of filteredUsers; trackBy: trackByUser" 
                    (click)="selectUser(user)"
                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0">
@@ -91,7 +93,7 @@
             
             <!-- No results message -->
             <div *ngIf="showUserDropdown && userSearchTerm && filteredUsers.length === 0" 
-                 class="absolute z-50 mt-1 w-80 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+                 class="absolute z-50 mt-1 w-full sm:w-80 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
               <div class="text-sm text-gray-500 text-center">
                 Nessun utente trovato per "{{ userSearchTerm }}"
               </div>
@@ -114,7 +116,7 @@
 
           <!-- Room Type Selection -->
           <div class="p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '2' : '1' }}. Seleziona il tipo di stanza</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">2. Seleziona il tipo di stanza</h4>
             <select formControlName="tipo_stanza"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
               <option value="">Seleziona tipo stanza</option>
@@ -126,7 +128,7 @@
 
           <!-- Postazione Selection -->
           <div class="p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '3' : '2' }}. Seleziona la postazione</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">3. Seleziona la postazione</h4>
             <div *ngIf="!bookingForm.get('tipo_stanza')?.value" class="text-sm text-gray-500 mb-2">
               <i class="fas fa-info-circle mr-1"></i>
               Seleziona prima il tipo di stanza
@@ -147,12 +149,12 @@
 
           <!-- Time Slot Selection -->
           <div class="p-4 bg-gray-50 rounded-lg" *ngIf="bookingForm.get('id_postazione')?.value">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '4' : '3' }}. Seleziona l'orario</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">4. Seleziona l'orario</h4>
             <div class="mb-3" *ngIf="availableDurations.length > 0">
               <label for="slotDuration" class="block text-xs font-medium text-gray-600 mb-1">Tipo di fascia oraria</label>
               <select id="slotDuration" formControlName="slotDuration" 
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
-                <option value="">Seleziona durata</option>
+                <option value="">Selezione durata</option>
                 <option *ngFor="let duration of availableDurations" [value]="duration">
                   {{ duration === 'Giornata Intera' ? 'Giornata Intera' : (duration === '4h' ? '4 ore' : (duration === '2h' ? '2 ore' : (duration === '1h' ? '1 ora' : (duration === '30m' ? '30 minuti' : duration)))) }}
                 </option>
@@ -181,7 +183,7 @@
               </ng-container>
               <ng-template #showSlotButtons>
                 <ng-container *ngIf="state.availableTimeSlots.length > 0; else noSlotsMsg">
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <button type="button"
                       *ngFor="let slot of getFilteredTimeSlots()"
                       (click)="bookingForm.get('timeSlot')?.setValue(slot.startTime + ' - ' + slot.endTime)"
@@ -189,7 +191,7 @@
                         'bg-blue-600 text-white': bookingForm.get('timeSlot')?.value === (slot.startTime + ' - ' + slot.endTime),
                         'bg-white text-gray-700 border border-gray-300': bookingForm.get('timeSlot')?.value !== (slot.startTime + ' - ' + slot.endTime)
                       }"
-                      class="px-2 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap">
+                      class="px-3 py-2 text-sm rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap">
                       {{ slot.startTime + ' - ' + slot.endTime }}
                     </button>
                   </div>
