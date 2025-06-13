@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { authAnimations } from '../../shared/animations/auth.animations';
 import { FeatureCardComponent, FeatureCardConfig } from '../../shared/components/feature-card/feature-card.component';
 import { ButtonComponent } from '../../shared/components/buttons/button.component';
+import { AuthService } from '../../core/auth/auth.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-home',
@@ -23,7 +25,26 @@ import { ButtonComponent } from '../../shared/components/buttons/button.componen
         authAnimations.scaleIn
     ]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
+    isAuthenticated = false;
+    private destroy$ = new Subject<void>();
+
+    constructor(private authService: AuthService) {}
+
+    ngOnInit(): void {
+        this.authService
+            .getAuthenticationState()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((isAuthenticated) => {
+                this.isAuthenticated = isAuthenticated;
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
     featureCards: FeatureCardConfig[] = [
         {
             title: 'Prenotazioni Facili',

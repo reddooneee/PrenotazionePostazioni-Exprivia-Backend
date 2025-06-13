@@ -49,12 +49,10 @@ export interface FeatureCardConfig {
             <div class="relative z-10 w-full">
                 <!-- Icon Container -->
                 <div
-                    class="relative w-16 h-16 flex items-center justify-center rounded-[var(--radius-xl)] mb-6 mx-auto transition-[var(--transition-colors)]"
-                    [class]="getIconContainerClasses()"
+                    class="relative w-14 h-14 rounded-[var(--radius-xl)] mb-6 mx-auto transition-[var(--transition-colors)] bg-expriviaOrange/20 group-hover:bg-expriviaOrange/30 shadow-[inset_0_0_0_1px_rgba(233,80,14,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(233,80,14,0.5)] grid place-items-center"
                 >
                     <mat-icon
-                        [class]="getIconClasses()"
-                        class="transform group-hover:scale-110 transition-[var(--transition-transform)] drop-shadow-md"
+                        class="text-expriviaOrange w-7 h-7 group-hover:text-expriviaOrange600 transform group-hover:scale-110 transition-[var(--transition-transform)] drop-shadow-md"
                         aria-hidden="true"
                     >
                         {{ config.icon }}
@@ -120,11 +118,11 @@ export class FeatureCardComponent {
     }
 
    getIconContainerClasses(): string {
-    return `bg-expriviaOrange/20 group-hover:bg-expriviaOrange/30 shadow-[inset_0_0_0_1px_rgba(233,80,14,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(233,80,14,0.5)]`;
+    return `bg-expriviaOrange/20 group-hover:bg-expriviaOrange/30 shadow-[inset_0_0_0_1px_rgba(233,80,14,0.3)] group-hover:shadow-[inset_0_0_0_1px_rgba(233,80,14,0.5)] flex items-center justify-center`;
 }
 
   getIconClasses(): string {
-    return `text-expriviaOrange w-10 h-10 group-hover:text-expriviaOrange600`;
+    return `text-expriviaOrange w-8 h-8 group-hover:text-expriviaOrange600`;
 }
     getTitleClasses(): string {
         return 'text-white group-hover:text-expriviaOrange';

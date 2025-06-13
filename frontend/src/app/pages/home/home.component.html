@@ -22,25 +22,39 @@
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-3 sm:gap-4" @scaleIn>
+                        <ng-container *ngIf="!isAuthenticated">
+                            <app-button
+                                label="Inizia ora"
+                                type="primary"
+                                size="lg"
+                                icon="fas fa-arrow-right"
+                                iconPosition="right"
+                                routerLink="/registrazione"
+                                class="w-full sm:w-auto"
+                                aria-label="Inizia la registrazione"
+                            ></app-button>
+                            
+                            <app-button
+                                label="Accedi"
+                                type="ghost"
+                                size="lg"
+                                icon="fas fa-sign-in-alt"
+                                routerLink="/accedi"
+                                class="w-full sm:w-auto"
+                                aria-label="Accedi al tuo account"
+                            ></app-button>
+                        </ng-container>
+
                         <app-button
-                            label="Inizia ora"
+                            *ngIf="isAuthenticated"
+                            label="Vai alla Dashboard"
                             type="primary"
                             size="lg"
-                            icon="fas fa-arrow-right"
+                            icon="fas fa-tachometer-alt"
                             iconPosition="right"
-                            routerLink="/registrazione"
+                            routerLink="/dashboard"
                             class="w-full sm:w-auto"
-                            aria-label="Inizia la registrazione"
-                        ></app-button>
-                        
-                        <app-button
-                            label="Accedi"
-                            type="ghost"
-                            size="lg"
-                            icon="fas fa-sign-in-alt"
-                            routerLink="/accedi"
-                            class="w-full sm:w-auto"
-                            aria-label="Accedi al tuo account"
+                            aria-label="Vai alla dashboard"
                         ></app-button>
                     </div>
                 </div>

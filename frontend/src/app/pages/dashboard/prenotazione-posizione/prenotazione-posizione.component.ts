@@ -623,7 +623,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     const hasSlotDuration = !!formControls['slotDuration'].value;
 
     // Debug logging only if validation fails
-    if (!hasTimeSlot || !hasSlotDuration) {
+    /*if (!hasTimeSlot || !hasSlotDuration) {
       console.log('Form validation issue:', {
         hasTimeSlot,
         hasSlotDuration,
@@ -632,7 +632,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         availableDurations: this.availableDurations,
         availableTimeSlots: this.state.availableTimeSlots.length
       });
-    }
+    }*/
 
     // Check if all required form controls have values
     const hasRequiredFields = 

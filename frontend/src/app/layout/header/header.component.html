@@ -1,7 +1,7 @@
 <header class="w-full bg-white sticky top-0 z-[var(--z-50)] border-b border-gray-100 shadow-[var(--shadow-sm)]" role="banner">
     <div class="mx-auto container px-4 md:px-8 flex h-14 sm:h-16 items-center justify-between">
         <!-- Logo -->
-        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="['/dashboard/']" role="link" aria-label="Torna alla home">
+        <div class="cursor-pointer hover:opacity-80 transition-[var(--transition-opacity)]" [routerLink]="isAuthenticated ? ['/dashboard/'] : ['/']" role="link" aria-label="Torna alla home">
             <img class="h-6 sm:h-8 w-auto" src="LogoExprivia.svg" alt="Exprivia Logo" width="120" height="32">
         </div>
 
@@ -27,7 +27,7 @@
                             <!-- Dropdown Menu -->
                             <div class="absolute right-0 mt-1 w-48 bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-[var(--transition-all)] z-50">
                                 <div class="py-1">
-                                    <a [routerLink]="['update-user']" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]">
+                                    <a [routerLink]="['/dashboard/update-user']" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-[var(--transition-colors)]">
                                         <lucide-icon name="user" class="w-4 h-4 mr-3 text-gray-500" />
                                         <span>Profilo</span>
                                     </a>
