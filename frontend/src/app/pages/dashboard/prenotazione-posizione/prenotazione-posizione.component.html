@@ -22,9 +22,10 @@
         <div class="md:col-span-2">
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="text-sm font-medium text-gray-700 mb-3">1. Seleziona la data</h4>
-            <app-calendar 
+            <app-calendar
               [selectedDates]="state.selectedDates"
-              (dateSelectionChange)="onDateSelectionChange($event)">
+              (dateSelectionChange)="onDateSelectionChange($event)"
+              (monthChange)="onMonthChange($event)">
             </app-calendar>
           </div>
         </div>
@@ -32,29 +33,88 @@
         <div class="flex flex-col gap-4">
           <!-- Selected Dates Summary -->
           <div class="p-4 bg-gray-50 rounded-lg">
-            <div class="flex justify-between items-center mb-3">
-              <h4 class="text-sm font-medium text-gray-700">Data selezionata</h4>
-              <span class="text-xs text-gray-500">{{ state.selectedDates.length }}/1 data</span>
-            </div>
-            <div class="flex flex-col gap-2 min-h-[100px] max-h-[200px] overflow-y-auto">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">Data selezionata</h4>
+            <div class="flex flex-col gap-2 min-h-[48px] max-h-[200px]">
               <div *ngIf="state.selectedDates.length === 0"
                 class="flex items-center justify-center h-full text-gray-400 text-sm">
                 Seleziona una data dal calendario
               </div>
-              <div *ngFor="let date of state.selectedDates"
-                class="flex justify-between items-center text-sm text-gray-600 py-2 px-3 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <span>{{ date | date:'EEEE d MMMM yyyy':'':'it' }}</span>
-                <button type="button" (click)="removeDateFromSelection(date)"
-                  class="text-gray-400 hover:text-red-500 focus:outline-none transition-colors duration-200">
-                  <i class="fas fa-times"></i>
-                </button>
+              <div *ngIf="state.selectedDates.length === 1"
+                class="flex items-center text-sm text-gray-600 py-2 px-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                <span>{{ state.selectedDates[0] | date:'EEEE d MMMM yyyy':'':'it' }}</span>
               </div>
+            </div>
+          </div>
+
+          <!-- User Selection (only for admins) -->
+          <div *ngIf="isAdmin" class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">
+              <i class="fas fa-user-cog text-blue-600 mr-2"></i>
+              Seleziona utente (opzionale)
+            </h4>
+            <div class="relative">
+              <input type="text" 
+                     [(ngModel)]="userSearchTerm"
+                     (ngModelChange)="filterUsers()"
+                     (focus)="showUserDropdown = true"
+                     (blur)="onUserInputBlur()"
+                     placeholder="Cerca utente per nome, cognome o email... (lascia vuoto per prenotare per te stesso)"
+                     class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     [ngModelOptions]="{standalone: true}">
+              <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+                <button 
+                  *ngIf="userSearchTerm" 
+                  type="button"
+                  (click)="clearUserSearch()"
+                  class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                  title="Cancella ricerca">
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+            </div>
+            
+            <!-- User Dropdown -->
+            <div *ngIf="showUserDropdown && filteredUsers.length > 0" 
+                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div *ngFor="let user of filteredUsers; trackBy: trackByUser" 
+                   (click)="selectUser(user)"
+                   class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                <div class="font-medium text-gray-900">
+                  {{ user.nome }} {{ user.cognome }}
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ user.email }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- No results message -->
+            <div *ngIf="showUserDropdown && userSearchTerm && filteredUsers.length === 0" 
+                 class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+              <div class="text-sm text-gray-500 text-center">
+                Nessun utente trovato per "{{ userSearchTerm }}"
+              </div>
+            </div>
+            
+            <!-- Selected user info -->
+            <div *ngIf="selectedUser" class="mt-2 p-2 bg-white rounded border border-blue-200">
+              <div class="text-sm">
+                <span class="text-gray-600">Prenotazione per:</span>
+                <span class="font-medium text-blue-800 ml-1">{{ selectedUser.nome }} {{ selectedUser.cognome }}</span>
+              </div>
+            </div>
+            
+            <!-- Help text -->
+            <div class="mt-2 text-xs text-gray-600">
+              <i class="fas fa-info-circle mr-1"></i>
+              Se non selezioni un utente, la prenotazione sarà effettuata a tuo nome
             </div>
           </div>
 
           <!-- Room Type Selection -->
           <div class="p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">2. Seleziona il tipo di stanza</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '2' : '1' }}. Seleziona il tipo di stanza</h4>
             <select formControlName="tipo_stanza"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
               <option value="">Seleziona tipo stanza</option>
@@ -66,7 +126,7 @@
 
           <!-- Postazione Selection -->
           <div class="p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">3. Seleziona la postazione</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '3' : '2' }}. Seleziona la postazione</h4>
             <div *ngIf="!bookingForm.get('tipo_stanza')?.value" class="text-sm text-gray-500 mb-2">
               <i class="fas fa-info-circle mr-1"></i>
               Seleziona prima il tipo di stanza
@@ -86,24 +146,75 @@
           </div>
 
           <!-- Time Slot Selection -->
-          <div class="p-4 bg-gray-50 rounded-lg">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">4. Seleziona l'orario</h4>
-            <div *ngIf="!bookingForm.get('id_postazione')?.value" class="text-sm text-gray-500 mb-2">
-              <i class="fas fa-info-circle mr-1"></i>
-              Seleziona prima una postazione
+          <div class="p-4 bg-gray-50 rounded-lg" *ngIf="bookingForm.get('id_postazione')?.value">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">{{ isAdmin ? '4' : '3' }}. Seleziona l'orario</h4>
+            <div class="mb-3" *ngIf="availableDurations.length > 0">
+              <label for="slotDuration" class="block text-xs font-medium text-gray-600 mb-1">Tipo di fascia oraria</label>
+              <select id="slotDuration" formControlName="slotDuration" 
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                <option value="">Seleziona durata</option>
+                <option *ngFor="let duration of availableDurations" [value]="duration">
+                  {{ duration === 'Giornata Intera' ? 'Giornata Intera' : (duration === '4h' ? '4 ore' : (duration === '2h' ? '2 ore' : (duration === '1h' ? '1 ora' : (duration === '30m' ? '30 minuti' : duration)))) }}
+                </option>
+              </select>
             </div>
-            <div *ngIf="bookingForm.get('id_postazione')?.value && state.availableTimeSlots.length === 0" class="text-sm text-gray-500 mb-2">
+            <div *ngIf="availableDurations.length === 0 && state.selectedDates.length > 0" class="text-sm text-red-600 mb-2">
+              Nessuna fascia oraria disponibile per questa postazione e data.
+            </div>
+            <div *ngIf="bookingForm.get('id_postazione')?.value && state.availableTimeSlots.length === 0 && state.selectedDates.length === 0" class="text-sm text-gray-500 mb-2">
               <i class="fas fa-info-circle mr-1"></i>
               Seleziona una data dal calendario per vedere gli orari disponibili
             </div>
-            <select formControlName="timeSlot"
-              [disabled]="!bookingForm.get('id_postazione')?.value || state.availableTimeSlots.length === 0"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed">
-              <option value="">Seleziona fascia oraria</option>
-              <option *ngFor="let slot of state.availableTimeSlots" [value]="slot.startTime + ' - ' + slot.endTime">
-                {{ slot.startTime }} - {{ slot.endTime }}
-              </option>
-            </select>
+            <div *ngIf="bookingForm.get('id_postazione')?.value && state.availableTimeSlots.length > 0 && availableDurations.length > 0">
+              <ng-container *ngIf="bookingForm.get('slotDuration')?.value === 'Giornata Intera' && availableDurations.includes('Giornata Intera'); else showSlotButtons">
+                <div *ngIf="isFullDayAvailable()" class="text-green-700 font-semibold">
+                  Giornata Intera disponibile.
+                </div>
+                <div *ngIf="!isFullDayAvailable()" class="text-red-600">
+                  <ng-container *ngIf="isTodaySelected()">
+                    Giornata intera non disponibile. È troppo tardi per prenotare l'intera giornata.
+                  </ng-container>
+                  <ng-container *ngIf="!isTodaySelected()">
+                    Nessuna giornata intera disponibile per questa postazione e data.
+                  </ng-container>
+                </div>
+              </ng-container>
+              <ng-template #showSlotButtons>
+                <ng-container *ngIf="state.availableTimeSlots.length > 0; else noSlotsMsg">
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button"
+                      *ngFor="let slot of getFilteredTimeSlots()"
+                      (click)="bookingForm.get('timeSlot')?.setValue(slot.startTime + ' - ' + slot.endTime)"
+                      [ngClass]="{
+                        'bg-blue-600 text-white': bookingForm.get('timeSlot')?.value === (slot.startTime + ' - ' + slot.endTime),
+                        'bg-white text-gray-700 border border-gray-300': bookingForm.get('timeSlot')?.value !== (slot.startTime + ' - ' + slot.endTime)
+                      }"
+                      class="px-2 py-1.5 text-xs rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap">
+                      {{ slot.startTime + ' - ' + slot.endTime }}
+                    </button>
+                  </div>
+                </ng-container>
+                <ng-template #noSlotsMsg>
+                  <div class="text-sm text-red-600 mt-2">
+                    <ng-container *ngIf="isTodaySelected()">
+                      Nessuna fascia oraria disponibile per questa durata. Gli orari passati non sono prenotabili.
+                    </ng-container>
+                    <ng-container *ngIf="!isTodaySelected()">
+                      Nessuna fascia oraria disponibile per questa durata.
+                    </ng-container>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+          </div>
+
+          <!-- Show message if no postazione is selected -->
+          <div class="p-4 bg-gray-50 rounded-lg" *ngIf="!bookingForm.get('id_postazione')?.value">
+            <h4 class="text-sm font-medium text-gray-700 mb-3">4. Seleziona l'orario</h4>
+            <div class="text-sm text-gray-500 mb-2">
+              <i class="fas fa-info-circle mr-1"></i>
+              Seleziona prima una postazione
+            </div>
           </div>
 
           <!-- Submit Button -->
@@ -142,7 +253,47 @@
   <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="text-lg font-semibold text-gray-800">Le tue prenotazioni</h3>
-      <span class="text-sm text-gray-500">{{ sortedPrenotazioni.length || 0 }} prenotazioni</span>
+      <div class="flex items-center space-x-4">
+        <!-- Status Filter Buttons -->
+        <div class="flex items-center space-x-2">
+          <button
+            (click)="setStatusFilter('tutti')"
+            [class.bg-blue-600]="statusFilter === 'tutti'"
+            [class.text-white]="statusFilter === 'tutti'"
+            [class.bg-gray-100]="statusFilter !== 'tutti'"
+            [class.text-gray-700]="statusFilter !== 'tutti'"
+            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-blue-500 hover:text-white">
+            Tutti ({{ getStatusFilterCount('tutti') }})
+          </button>
+          <button
+            (click)="setStatusFilter('attive')"
+            [class.bg-green-600]="statusFilter === 'attive'"
+            [class.text-white]="statusFilter === 'attive'"
+            [class.bg-gray-100]="statusFilter !== 'attive'"
+            [class.text-gray-700]="statusFilter !== 'attive'"
+            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-green-500 hover:text-white">
+            Attive ({{ getStatusFilterCount('attive') }})
+          </button>
+          <button
+            (click)="setStatusFilter('scadute')"
+            [class.bg-orange-600]="statusFilter === 'scadute'"
+            [class.text-white]="statusFilter === 'scadute'"
+            [class.bg-gray-100]="statusFilter !== 'scadute'"
+            [class.text-gray-700]="statusFilter !== 'scadute'"
+            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-orange-500 hover:text-white">
+            Scadute ({{ getStatusFilterCount('scadute') }})
+          </button>
+          <button
+            (click)="setStatusFilter('annullate')"
+            [class.bg-red-600]="statusFilter === 'annullate'"
+            [class.text-white]="statusFilter === 'annullate'"
+            [class.bg-gray-100]="statusFilter !== 'annullate'"
+            [class.text-gray-700]="statusFilter !== 'annullate'"
+            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-red-500 hover:text-white">
+            Annullate ({{ getStatusFilterCount('annullate') }})
+          </button>
+        </div>
+      </div>
     </div>
     
     <!-- Loading State -->
@@ -246,11 +397,18 @@
             <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button 
                 type="button"
-                (click)="deletePrenotazione(prenotazione)"
-                [disabled]="state.isLoading"
-                class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
-                <i class="fas fa-trash mr-1"></i>
-                Elimina
+                (click)="cancelPrenotazione(prenotazione)"
+                [disabled]="state.isLoading || !canCancelPrenotazione(prenotazione)"
+                [ngClass]="{
+                  'text-red-700 bg-red-100 hover:bg-red-200 focus:ring-red-500': canCancelPrenotazione(prenotazione),
+                  'text-gray-500 bg-gray-100 cursor-not-allowed': !canCancelPrenotazione(prenotazione)
+                }"
+                class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                [title]="!canCancelPrenotazione(prenotazione) ? 
+                  (prenotazione.stato_prenotazione === 'Annullata' ? 'Prenotazione già annullata' : 'Prenotazione scaduta') : 
+                  'Annulla prenotazione'">
+                <i class="fas fa-times mr-1"></i>
+                Annulla
               </button>
             </td>
           </tr>

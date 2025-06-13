@@ -59,6 +59,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   onResize() {
+    this.handleResponsiveSidebar();
     this.sidebarService.updateForWindowResize();
   }
 
@@ -93,6 +94,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Check initial window width and collapse if needed
+    this.handleResponsiveSidebar();
+
     // Subscribe to sidebar state changes
     this.sidebarService.isCollapsed$
       .pipe(takeUntil(this.destroy$))
@@ -182,6 +186,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.currentUser?.authorities?.includes(auth)
       )
     );
+  }
+
+  // Collapse sidebar on small screens
+  private handleResponsiveSidebar(): void {
+    if (window.innerWidth < this.COLLAPSE_WIDTH && !this.isCollapsed) {
+      this.sidebarService.setCollapsed(true);
+    } else if (window.innerWidth >= this.COLLAPSE_WIDTH && this.isCollapsed) {
+      this.sidebarService.setCollapsed(false);
+    }
   }
 
   ngOnDestroy(): void {

@@ -58,15 +58,151 @@ export class PrenotazionePosizioneService {
     }
 
     getAvailableTimeSlots(date: Date, postazioneId: number): Observable<TimeSlot[]> {
-        return this.prenotazioneService.getPrenotazioniByDay(date.toISOString().split('T')[0]).pipe(
-            map((prenotazioni: Prenotazione[]) => {
-                const occupiedSlots = prenotazioni
-                    .filter((p: Prenotazione) => p.postazione?.id_postazione === postazioneId)
-                    .map((p: Prenotazione) => ({
-                        start: new Date(p.data_inizio!).getHours(),
-                        end: new Date(p.data_fine!).getHours()
-                    }));
+        // Format date in local timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
 
+        console.log('DEBUG: Request parameters:', {
+            formattedDate,
+            postazioneId,
+            originalDate: date,
+            dateISOString: date.toISOString(),
+            dateLocaleString: date.toLocaleString(),
+            year,
+            month,
+            day
+        });
+
+        return this.prenotazioneService.getPrenotazioniByDayAndPostazione(formattedDate, postazioneId).pipe(
+            map((prenotazioni: Prenotazione[]) => {
+                console.log('Raw prenotazioni from backend:', JSON.stringify(prenotazioni, null, 2));
+                
+                if (!prenotazioni || prenotazioni.length === 0) {
+                    console.log('No prenotazioni found, returning all available slots');
+                    return this.generateTimeSlots([]);
+                }
+
+                // Filtra le prenotazioni escludendo quelle annullate
+                const activePrenotazioni = prenotazioni.filter((p: Prenotazione) => 
+                    p.stato_prenotazione !== 'Annullata'
+                );
+                
+                console.log('Active prenotazioni (excluding cancelled):', {
+                    total: prenotazioni.length,
+                    active: activePrenotazioni.length,
+                    cancelled: prenotazioni.length - activePrenotazioni.length
+                });
+
+                if (activePrenotazioni.length === 0) {
+                    console.log('No active prenotazioni found, returning all available slots');
+                    return this.generateTimeSlots([]);
+                }
+
+                const occupiedSlots = activePrenotazioni.map((p: Prenotazione) => {
+                    console.log('Processing prenotazione:', {
+                        id: p.id_prenotazioni,
+                        raw_data_inizio: p.data_inizio,
+                        raw_data_fine: p.data_fine
+                    });
+
+                    // Parse start date
+                    let startDate;
+                    if (typeof p.data_inizio === 'string') {
+                        // Try different date formats
+                        const dateStr = p.data_inizio.replace(' ', 'T');
+                        startDate = new Date(dateStr);
+                        
+                        // If invalid, try parsing as array
+                        if (isNaN(startDate.getTime())) {
+                            const parts = dateStr.split(/[-T:]/);
+                            if (parts.length >= 5) {
+                                startDate = new Date(
+                                    parseInt(parts[0]), // year
+                                    parseInt(parts[1]) - 1, // month (0-based)
+                                    parseInt(parts[2]), // day
+                                    parseInt(parts[3]), // hours
+                                    parseInt(parts[4]) // minutes
+                                );
+                            }
+                        }
+                    } else if (Array.isArray(p.data_inizio)) {
+                        // Handle array format [year, month, day, hours, minutes]
+                        startDate = new Date(
+                            p.data_inizio[0],
+                            p.data_inizio[1] - 1,
+                            p.data_inizio[2],
+                            p.data_inizio[3] || 0,
+                            p.data_inizio[4] || 0
+                        );
+                    } else {
+                        startDate = new Date(p.data_inizio);
+                    }
+
+                    // Parse end date
+                    let endDate;
+                    if (typeof p.data_fine === 'string') {
+                        // Try different date formats
+                        const dateStr = p.data_fine.replace(' ', 'T');
+                        endDate = new Date(dateStr);
+                        
+                        // If invalid, try parsing as array
+                        if (isNaN(endDate.getTime())) {
+                            const parts = dateStr.split(/[-T:]/);
+                            if (parts.length >= 5) {
+                                endDate = new Date(
+                                    parseInt(parts[0]), // year
+                                    parseInt(parts[1]) - 1, // month (0-based)
+                                    parseInt(parts[2]), // day
+                                    parseInt(parts[3]), // hours
+                                    parseInt(parts[4]) // minutes
+                                );
+                            }
+                        }
+                    } else if (Array.isArray(p.data_fine)) {
+                        // Handle array format [year, month, day, hours, minutes]
+                        endDate = new Date(
+                            p.data_fine[0],
+                            p.data_fine[1] - 1,
+                            p.data_fine[2],
+                            p.data_fine[3] || 0,
+                            p.data_fine[4] || 0
+                        );
+                    } else {
+                        endDate = new Date(p.data_fine);
+                    }
+
+                    console.log('Parsed dates:', {
+                        startDate,
+                        endDate,
+                        startDateValid: !isNaN(startDate.getTime()),
+                        endDateValid: !isNaN(endDate.getTime())
+                    });
+
+                    const startHour = startDate.getHours();
+                    const endHour = endDate.getHours();
+
+                    console.log('Extracted hours:', {
+                        startHour,
+                        endHour,
+                        isValidStart: !isNaN(startHour),
+                        isValidEnd: !isNaN(endHour)
+                    });
+
+                    // Validate hours before returning
+                    if (isNaN(startHour) || isNaN(endHour)) {
+                        console.warn('Invalid hours detected, skipping slot');
+                        return null;
+                    }
+
+                    return {
+                        start: startHour,
+                        end: endHour
+                    };
+                }).filter(slot => slot !== null); // Remove any null slots
+
+                console.log('Processed occupied slots:', occupiedSlots);
                 return this.generateTimeSlots(occupiedSlots);
             })
         );
@@ -85,21 +221,85 @@ export class PrenotazionePosizioneService {
         );
     }
 
+    createPrenotazioneAdmin(request: PrenotazioneRequest & { id_user: number }): Observable<void> {
+        return this.prenotazioneService.createPrenotazioneAdmin(request).pipe(
+            map(() => void 0)
+        );
+    }
+
     private generateTimeSlots(occupiedSlots: { start: number; end: number }[]): TimeSlot[] {
         const slots: TimeSlot[] = [];
-        
-        for (let hour = this.ORARI_LAVORATIVI.INIZIO; hour < this.ORARI_LAVORATIVI.FINE; hour++) {
-            const isOccupied = occupiedSlots.some(slot => 
-                hour >= slot.start && hour < slot.end
-            );
+        const startHour = this.ORARI_LAVORATIVI.INIZIO;
+        const endHour = this.ORARI_LAVORATIVI.FINE;
+        const slotDurations = [600, 240, 120, 60, 30]; // minutes: 600=10h (full day), 240=4h, 120=2h, 60=1h, 30=30min
 
-            if (!isOccupied) {
-                slots.push({
-                    startTime: `${hour.toString().padStart(2, '0')}:00`,
-                    endTime: `${(hour + 1).toString().padStart(2, '0')}:00`
-                });
+        // Helper to check overlap
+        function overlaps(startA: number, endA: number, startB: number, endB: number) {
+            return startA < endB && endA > startB;
+        }
+
+        // Helper to convert hours to minutes for easier comparison
+        function toMinutes(hour: number): number {
+            return Math.floor(hour) * 60 + (hour % 1 === 0.5 ? 30 : 0);
+        }
+
+        // Helper to check if a slot is available
+        function isSlotAvailable(slotStart: number, slotEnd: number): boolean {
+            const slotStartMinutes = toMinutes(slotStart);
+            const slotEndMinutes = toMinutes(slotEnd);
+            
+            return !occupiedSlots.some(occupied => {
+                const occStart = toMinutes(occupied.start);
+                const occEnd = toMinutes(occupied.end);
+                return overlaps(slotStartMinutes, slotEndMinutes, occStart, occEnd);
+            });
+        }
+
+        // Generate all possible slots
+        for (const duration of slotDurations) {
+            const step = duration >= 60 ? 60 : 30; // step by 1h or 30min
+            for (let hour = startHour; hour < endHour; hour += step / 60) {
+                const start = hour;
+                const end = hour + duration / 60;
+                if (end > endHour) continue;
+
+                // Check if this slot is available
+                if (isSlotAvailable(start, end)) {
+                    const startTime = `${Math.floor(start).toString().padStart(2, '0')}:${(start % 1 === 0.5 ? '30' : '00')}`;
+                    const endTime = `${Math.floor(end).toString().padStart(2, '0')}:${(end % 1 === 0.5 ? '30' : '00')}`;
+                    
+                    // Only add if not already present
+                    if (!slots.some(s => s.startTime === startTime && s.endTime === endTime)) {
+                        slots.push({ startTime, endTime });
+                    }
+                }
             }
         }
+
+        // Special handling for full day slot
+        const fullDayAvailable = isSlotAvailable(startHour, endHour);
+        if (fullDayAvailable) {
+            const fullDaySlot = { startTime: '08:00', endTime: '18:00' };
+            if (!slots.some(s => s.startTime === fullDaySlot.startTime && s.endTime === fullDaySlot.endTime)) {
+                slots.push(fullDaySlot);
+            }
+        }
+
+        // Sort slots by duration (longest first) and then by start time
+        slots.sort((a, b) => {
+            const durA = toMinutes(parseInt(b.endTime.split(':')[0]) + parseInt(b.endTime.split(':')[1]) / 60) - 
+                        toMinutes(parseInt(a.startTime.split(':')[0]) + parseInt(a.startTime.split(':')[1]) / 60);
+            const durB = toMinutes(parseInt(b.endTime.split(':')[0]) + parseInt(b.endTime.split(':')[1]) / 60) - 
+                        toMinutes(parseInt(b.startTime.split(':')[0]) + parseInt(b.startTime.split(':')[1]) / 60);
+            if (durA !== durB) return durB - durA;
+            return a.startTime.localeCompare(b.startTime);
+        });
+
+        console.log('Generated slots:', {
+            total: slots.length,
+            slots,
+            occupiedSlots
+        });
 
         return slots;
     }
@@ -131,5 +331,9 @@ export class PrenotazionePosizioneService {
 
     deletePrenotazione(id: number): Observable<void> {
         return this.prenotazioneService.deletePrenotazione(id);
+    }
+
+    updatePrenotazione(id: number, updates: Partial<Prenotazione>): Observable<Prenotazione> {
+        return this.prenotazioneService.updatePrenotazione(id, updates);
     }
 } 

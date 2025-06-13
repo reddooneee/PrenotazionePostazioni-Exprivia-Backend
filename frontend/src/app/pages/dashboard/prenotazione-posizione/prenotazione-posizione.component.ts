@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule, DatePipe } from "@angular/common";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from "@angular/forms";
 import { AuthService } from "@core/auth/auth.service";
 import { CalendarComponent } from "@shared/components/calendar/calendar.component";
 import { BookingState } from "./prenotazione-posizione.model";
@@ -12,10 +12,12 @@ import { Postazione } from "@/app/core/models/postazione.model";
 import { Stanza, StanzaWithPostazioni } from "@core/models/stanza.model";
 import { ToastModule } from 'primeng/toast';
 import { ToastService } from '../../../shared/services/toast.service';
+import { User } from '@core/models';
+import { AdminService } from '@core/services/admin.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CalendarComponent, ToastModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, CalendarComponent, ToastModule],
   providers: [DatePipe],
   selector: "app-prenotazione-posizione",
   templateUrl: "./prenotazione-posizione.component.html",
@@ -42,31 +44,100 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   sortColumn: string = 'data_inizio'; // Default sort by date
   sortDirection: 'asc' | 'desc' = 'desc'; // Default to descending (latest first)
 
-  // Predefined time slots
-  timeSlots = [
-    { label: '08:00 - 09:00', start: '08:00', end: '09:00' },
-    { label: '09:00 - 10:00', start: '09:00', end: '10:00' },
-    { label: '10:00 - 11:00', start: '10:00', end: '11:00' },
-    { label: '11:00 - 12:00', start: '11:00', end: '12:00' },
-    { label: '12:00 - 13:00', start: '12:00', end: '13:00' },
-    { label: '13:00 - 14:00', start: '13:00', end: '14:00' },
-    { label: '14:00 - 15:00', start: '14:00', end: '15:00' },
-    { label: '15:00 - 16:00', start: '15:00', end: '16:00' },
-    { label: '16:00 - 17:00', start: '16:00', end: '17:00' },
-    { label: '17:00 - 18:00', start: '17:00', end: '18:00' }
-  ];
+  // Filter properties
+  statusFilter: 'tutti' | 'attive' | 'scadute' | 'annullate' = 'attive'; // Default to active
+
+  // Admin and user selection properties
+  isAdmin = false;
+  users: User[] = [];
+  userSearchTerm: string = '';
+  filteredUsers: User[] = [];
+  showUserDropdown: boolean = false;
+  selectedUser: User | null = null;
+
+  // Map duration label to minutes
+  readonly durationMap: { [key: string]: number } = {
+    'Giornata Intera': 600,
+    '4h': 240,
+    '2h': 120,
+    '1h': 60,
+    '30m': 30
+  };
+
+  get availableDurations(): string[] {
+    if (!this.state.availableTimeSlots || this.state.availableTimeSlots.length === 0) {
+      return [];
+    }
+
+    const durations = new Set<string>();
+    
+    // Controlla se la data selezionata è oggi per applicare filtri temporali
+    const selectedDate = this.state.selectedDates[0];
+    const today = new Date();
+    const isToday = selectedDate && this.isSameDay(selectedDate, today);
+    
+    let availableSlots = this.state.availableTimeSlots;
+    
+    // Se è oggi, filtra gli slot che sono già passati
+    if (isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      availableSlots = this.state.availableTimeSlots.filter(slot => {
+        const slotStartHour = parseInt(slot.startTime.split(':')[0]);
+        const slotStartMinute = parseInt(slot.startTime.split(':')[1]);
+        const slotStartInMinutes = slotStartHour * 60 + slotStartMinute;
+        
+        // Applica margine di 30 minuti
+        return slotStartInMinutes > (currentTimeInMinutes + 30);
+      });
+    }
+
+    // Check for full day slot (08:00 - 18:00) - solo se ancora disponibile
+    if (availableSlots.some(slot => slot.startTime === '08:00' && slot.endTime === '18:00')) {
+      durations.add('Giornata Intera');
+    }
+
+    // Check for other durations usando solo slot disponibili
+    availableSlots.forEach(slot => {
+      const start = parseInt(slot.startTime.split(':')[0]) * 60 + parseInt(slot.startTime.split(':')[1]);
+      const end = parseInt(slot.endTime.split(':')[0]) * 60 + parseInt(slot.endTime.split(':')[1]);
+      const duration = end - start;
+
+      switch (duration) {
+        case 240:
+          durations.add('4h');
+          break;
+        case 120:
+          durations.add('2h');
+          break;
+        case 60:
+          durations.add('1h');
+          break;
+        case 30:
+          durations.add('30m');
+          break;
+      }
+    });
+
+    return Array.from(durations);
+  }
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private prenotazionePosizioneService: PrenotazionePosizioneService,
     private toastService: ToastService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private adminService: AdminService
   ) {
     this.bookingForm = this.fb.group({
+      userId: [''], // Campo opzionale per la selezione utente (solo admin)
       tipo_stanza: ["", Validators.required],
       id_stanza: [null, Validators.required],
-      id_postazione: [null, Validators.required],
+      id_postazione: ["", Validators.required],
+      slotDuration: ["", Validators.required],
       timeSlot: ["", Validators.required],
       selectedDate: [null, Validators.required],
       note: [""]
@@ -74,6 +145,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.checkUserRole();
     this.loadPrenotazioneInfo();
     this.setupFormSubscriptions();
     this.loadMiePrenotazioni(); // Carica tutte le prenotazioni all'avvio
@@ -151,7 +223,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         console.log('Tipo stanza cambiato:', tipo);
         this.bookingForm.patchValue({
           id_stanza: null,
-          id_postazione: null,
+          id_postazione: "",
           timeSlot: ""
         });
 
@@ -182,7 +254,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     this.bookingForm.get("id_postazione")?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(postazioneId => {
-        console.log('Postazione cambiata:', postazioneId);
+        console.log('DEBUG: Cambio postazione, nuovo id:', postazioneId);
         if (postazioneId) {
           console.log('Cercando postazione tra:', this.state.postazioniDisponibili);
           const postazioneIdNum = Number(postazioneId);
@@ -195,8 +267,9 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
               id_stanza: postazione.stanza_id
             }, { emitEvent: false });
 
+            // Always load available time slots if both postazione and date are selected
             if (this.state.selectedDates.length > 0) {
-              console.log('Caricamento slot per nuova postazione selezionata');
+              console.log('DEBUG: Chiamo loadAvailableTimeSlots da valueChanges con', postazioneIdNum);
               this.loadAvailableTimeSlots(postazioneIdNum);
             }
           } else {
@@ -209,35 +282,81 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
           }, { emitEvent: false });
         }
       });
+
+    this.bookingForm.get("slotDuration")?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.bookingForm.patchValue({ timeSlot: "" });
+        const postazioneId = this.bookingForm.get("id_postazione")?.value;
+        // Always reload available time slots for the selected postazione and date
+        if (postazioneId && this.state.selectedDates.length > 0) {
+          console.log('DEBUG: Chiamo loadAvailableTimeSlots da slotDuration con', postazioneId);
+          this.loadAvailableTimeSlots(Number(postazioneId));
+        }
+      });
   }
 
-  private loadAvailableTimeSlots(postazioneId: number): void {
-    if (this.state.selectedDates.length === 0) return;
+  private loadAvailableTimeSlots(postazioneId: any): void {
+    const postazioneIdNum = Number(postazioneId);
+    if (isNaN(postazioneIdNum) || this.state.selectedDates.length === 0) {
+      console.warn('ID postazione non valido o nessuna data selezionata:', postazioneId);
+      this.state.isLoading = false;
+      return;
+    }
 
-    this.state.isLoading = true;
     const selectedDate = this.state.selectedDates[0];
-    console.log('Data selezionata per il caricamento degli slot:', selectedDate);
+    const selectedDuration = this.bookingForm.get('slotDuration')?.value;
 
-    this.prenotazionePosizioneService.getAvailableTimeSlots(selectedDate, postazioneId)
+    console.log('DEBUG: loadAvailableTimeSlots details:', {
+      postazioneId: postazioneIdNum,
+      selectedDate,
+      selectedDuration,
+      formValues: this.bookingForm.value,
+      availableDurations: this.availableDurations
+    });
+
+    this.prenotazionePosizioneService.getAvailableTimeSlots(selectedDate, postazioneIdNum)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (slots) => {
-          console.log('Slot disponibili ricevuti:', slots);
-          this.state.availableTimeSlots = slots.map(slot => ({
-            startTime: (slot as any).start || slot.startTime,
-            endTime: (slot as any).end || slot.endTime
-          }));
-          console.log('Stato dopo aggiornamento:', {
-            availableSlots: this.state.availableTimeSlots.length,
-            hasPostazione: !!this.bookingForm.get('id_postazione')?.value
-          });
+          this.state.availableTimeSlots = slots;
+          console.log('Available time slots:', slots);
+
+          // Aggiorna availableDurations dopo aver impostato gli slot
+          const currentAvailableDurations = this.availableDurations;
+          console.log('DEBUG: Updated available durations:', currentAvailableDurations);
+
+          // Reset duration if current selection is not available
+          if (selectedDuration && !currentAvailableDurations.includes(selectedDuration)) {
+            console.log('DEBUG: Selected duration not in available durations, resetting form');
+            this.bookingForm.patchValue({ 
+              slotDuration: '',
+              timeSlot: ''
+            });
+          }
+
+          // If we have slots and current duration is not set or invalid, select the first available duration
+          const currentDuration = this.bookingForm.get('slotDuration')?.value;
+          if (slots.length > 0 && (!currentDuration || !currentAvailableDurations.includes(currentDuration))) {
+            const firstAvailableDuration = currentAvailableDurations[0];
+            if (firstAvailableDuration) {
+              console.log('DEBUG: Setting first available duration:', firstAvailableDuration);
+              this.bookingForm.patchValue({ slotDuration: firstAvailableDuration });
+            }
+          }
+
+          if (selectedDuration === 'Giornata Intera') {
+            const fullDaySlot = slots.find(slot => slot.startTime === '08:00' && slot.endTime === '18:00');
+            this.bookingForm.get('timeSlot')?.setValue(fullDaySlot ? '08:00 - 18:00' : '');
+          }
+
           this.state.isLoading = false;
         },
         error: (err: Error) => {
           console.error('Errore nel caricamento degli orari:', err);
           this.state.errorMessage = "Errore nel caricamento degli orari disponibili";
           this.showErrorToast(
-            'Orari Non Disponibili', 
+            'Orari Non Disponibili',
             'Impossibile caricare gli orari disponibili per questa postazione. Prova a selezionare un\'altra postazione.'
           );
           this.state.isLoading = false;
@@ -247,49 +366,99 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   onDateSelectionChange(dates: Date[]): void {
     console.log('Date selezionate:', dates);
-    this.state.selectedDates = dates;
-
-    if (dates.length > 0) {
-      // Update the form control with the selected date
-      this.bookingForm.patchValue({
-        selectedDate: dates[0]
-      });
-    } else {
-      this.bookingForm.patchValue({
-        selectedDate: null
-      });
-    }
-
-    // Reset time slots when dates change
-    this.state.availableTimeSlots = [];
+    // Only allow one date
+    const selected = dates && dates.length > 0 ? [dates[0]] : [];
+    
+    // Update the selected dates immediately for visual feedback
+    this.state.selectedDates = [...selected];
+    
+    // Update the selectedDate form control immediately
     this.bookingForm.patchValue({
-      timeSlot: ""
+      selectedDate: selected.length > 0 ? selected[0] : null,
+      timeSlot: "",
+      slotDuration: ""
     });
-
-    const postazioneId = this.bookingForm.get("id_postazione")?.value;
-    console.log('Stato attuale:', {
-      postazioneId,
-      hasPostazione: !!postazioneId,
-      hasDates: dates.length > 0,
-      availableSlots: this.state.availableTimeSlots.length
-    });
-
-    if (postazioneId && dates.length > 0) {
-      console.log('Caricamento slot disponibili per postazione:', postazioneId);
-      this.loadAvailableTimeSlots(postazioneId);
-    }
-  }
-
-  removeDateFromSelection(dateToRemove: Date): void {
-    this.state.selectedDates = this.state.selectedDates.filter(
-      date => date.getTime() !== dateToRemove.getTime()
-    );
-
-    const postazioneId = this.bookingForm.get("id_postazione")?.value;
-    if (postazioneId && this.state.selectedDates.length > 0) {
-      this.loadAvailableTimeSlots(postazioneId);
-    } else if (this.state.selectedDates.length === 0) {
-      this.state.availableTimeSlots = [];
+    this.state.availableTimeSlots = [];
+    
+    // Check if the selected date has any available slots
+    if (selected.length > 0) {
+      const postazioneId = this.bookingForm.get("id_postazione")?.value;
+      if (postazioneId) {
+        this.state.isLoading = true;
+        this.prenotazionePosizioneService.getAvailableTimeSlots(selected[0], Number(postazioneId))
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (slots) => {
+              this.state.availableTimeSlots = slots;
+              
+              // Update form with selected date
+              this.bookingForm.patchValue({
+                selectedDate: selected[0]
+              });
+              
+              if (slots.length === 0) {
+                this.showWarningToast('Data Non Disponibile', 'Nessun orario disponibile per questa data');
+                // Keep the date selected but clear time slots
+                this.bookingForm.patchValue({
+                  timeSlot: "",
+                  slotDuration: ""
+                });
+              } else {
+                // Auto-select first available duration (considerando filtri temporali)
+                const availableDurations = this.availableDurations;
+                if (availableDurations.length > 0) {
+                  const currentSlotDuration = this.bookingForm.get('slotDuration')?.value;
+                  // Use current selection if valid, otherwise use first available
+                  const durationToUse = availableDurations.includes(currentSlotDuration) 
+                    ? currentSlotDuration 
+                    : availableDurations[0];
+                    
+                  this.bookingForm.patchValue({
+                    slotDuration: durationToUse
+                  });
+                  
+                  // Auto-select first time slot for the duration
+                  const filteredSlots = this.getFilteredTimeSlots();
+                  if (filteredSlots.length > 0) {
+                    const firstSlot = filteredSlots[0];
+                    this.bookingForm.patchValue({
+                      timeSlot: `${firstSlot.startTime} - ${firstSlot.endTime}`
+                    });
+                  }
+                } else {
+                  // Nessuna durata disponibile, pulisci tutto
+                  this.bookingForm.patchValue({
+                    slotDuration: "",
+                    timeSlot: ""
+                  });
+                }
+              }
+              
+              this.state.isLoading = false;
+            },
+            error: (err) => {
+              console.error('Errore nel controllo della disponibilità:', err);
+              this.showErrorToast('Errore', 'Impossibile verificare la disponibilità per questa data');
+              // Keep the date selected even on error
+              this.state.selectedDates = selected;
+              this.state.availableTimeSlots = [];
+              this.bookingForm.patchValue({
+                selectedDate: selected[0],
+                timeSlot: "",
+                slotDuration: "" // Keep it empty for consistency
+              });
+              this.state.isLoading = false;
+            }
+          });
+      }
+    } else {
+      // Reset state when no date is selected
+      this.state.selectedDates = [];
+      this.bookingForm.patchValue({
+        selectedDate: null,
+        timeSlot: "",
+        slotDuration: ""
+      });
     }
   }
 
@@ -313,9 +482,15 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         // Create start and end dates
         const startDateTime = new Date(selectedDate);
         const endDateTime = new Date(selectedDate);
-        
-        const [startHour, startMinute] = selectedTimeSlot.split(' - ')[0].split(':');
-        const [endHour, endMinute] = selectedTimeSlot.split(' - ')[1].split(':');
+
+        // Support both '08:00 - 18:00' and 'Giornata Intera' as input
+        let startHour, startMinute, endHour, endMinute;
+        if (selectedTimeSlot === '08:00 - 18:00' || selectedTimeSlot === 'Giornata Intera') {
+          startHour = '08'; startMinute = '00'; endHour = '18'; endMinute = '00';
+        } else {
+          [startHour, startMinute] = selectedTimeSlot.split(' - ')[0].split(':');
+          [endHour, endMinute] = selectedTimeSlot.split(' - ')[1].split(':');
+        }
 
         startDateTime.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
         endDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
@@ -337,7 +512,9 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
           selectedDate,
           selectedTimeSlot,
           startDateTime,
-          endDateTime
+          endDateTime,
+          formattedStart: formatDate(startDateTime),
+          formattedEnd: formatDate(endDateTime)
         });
 
         const prenotazione = {
@@ -358,37 +535,41 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
         console.log('Sending reservation request:', prenotazione);
 
-        this.prenotazionePosizioneService.createPrenotazione(prenotazione)
-          .subscribe({
+        // Determine which service method to use based on admin status and user selection
+        const userId = this.bookingForm.get('userId')?.value;
+        const serviceCall = this.isAdmin && userId 
+          ? this.prenotazionePosizioneService.createPrenotazioneAdmin({ ...prenotazione, id_user: parseInt(userId) })
+          : this.prenotazionePosizioneService.createPrenotazione(prenotazione);
+
+        serviceCall.subscribe({
             next: (response) => {
               console.log('Prenotazione creata:', response);
               this.clearAllToasts(); // Clear any existing toasts
               this.showSuccessToast(
                 'Prenotazione Confermata!', 
-                `La tua postazione è stata prenotata per ${this.formatDate(selectedDate, 'dd/MM/yyyy')} dalle ${selectedTimeSlot}`
+                `La postazione è stata prenotata per ${this.formatDate(selectedDate, 'dd/MM/yyyy')} dalle ${selectedTimeSlot === '08:00 - 18:00' ? 'Giornata Intera' : selectedTimeSlot}`
               );
+              
+              // Reset form and reload data
               this.resetForm();
-              this.loadMiePrenotazioni(); // This will call applySorting internally
+              this.loadMiePrenotazioni();
+              
+              // Force reload of available time slots for the current date and postazione
+              const currentPostazioneId = this.bookingForm.get('id_postazione')?.value;
+              if (currentPostazioneId && this.state.selectedDates.length > 0) {
+                console.log('DEBUG: Reloading time slots after booking');
+                this.loadAvailableTimeSlots(currentPostazioneId);
+              }
+              
               this.state.isLoading = false;
             },
             error: (error) => {
               console.error('Errore completo nella creazione della prenotazione:', error);
-              this.clearAllToasts(); // Clear any existing toasts
-              
-              let errorMessage = 'Si è verificato un errore durante la creazione della prenotazione';
-              let errorSummary = 'Errore nella Prenotazione';
-              
-              if (error.response?.data?.message) {
-                errorMessage = error.response.data.message;
-              } else if (error.message) {
-                errorMessage = error.message;
-                if (error.message.includes('già prenotata')) {
-                  errorSummary = 'Postazione Non Disponibile';
-                  errorMessage = 'La postazione selezionata è già prenotata per questo orario. Seleziona un altro orario o postazione.';
-                }
-              }
-
-              this.showErrorToast(errorSummary, errorMessage);
+              this.clearAllToasts();
+              this.showErrorToast(
+                'Errore di Validazione', 
+                error instanceof Error ? error.message : 'I dati inseriti non sono validi. Controlla i campi e riprova.'
+              );
               this.state.isLoading = false;
             }
           });
@@ -417,6 +598,11 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
     this.state.selectedDates = [];
     this.state.availableTimeSlots = [];
     this.state.errorMessage = "";
+    
+    // Reset user selection for admin
+    if (this.isAdmin) {
+      this.clearUserSearch();
+    }
   }
 
   getStanzaName(stanzaId: number | undefined): string {
@@ -428,30 +614,37 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   isFormValid(): boolean {
     const formControls = this.bookingForm.controls;
     
+    // Check individual required fields
+    const hasTipoStanza = !!formControls['tipo_stanza'].value;
+    const hasIdStanza = !!formControls['id_stanza'].value;
+    const hasIdPostazione = !!formControls['id_postazione'].value;
+    const hasSelectedDate = !!formControls['selectedDate'].value || this.state.selectedDates.length > 0;
+    const hasTimeSlot = !!formControls['timeSlot'].value;
+    const hasSlotDuration = !!formControls['slotDuration'].value;
+
+    // Debug logging only if validation fails
+    if (!hasTimeSlot || !hasSlotDuration) {
+      console.log('Form validation issue:', {
+        hasTimeSlot,
+        hasSlotDuration,
+        timeSlotValue: formControls['timeSlot'].value,
+        slotDurationValue: formControls['slotDuration'].value,
+        availableDurations: this.availableDurations,
+        availableTimeSlots: this.state.availableTimeSlots.length
+      });
+    }
+
     // Check if all required form controls have values
     const hasRequiredFields = 
-      !!formControls['tipo_stanza'].value &&
-      !!formControls['id_stanza'].value &&
-      !!formControls['id_postazione'].value &&
-      !!formControls['selectedDate'].value &&
-      !!formControls['timeSlot'].value;
+      hasTipoStanza &&
+      hasIdStanza &&
+      hasIdPostazione &&
+      hasSelectedDate &&
+      hasTimeSlot &&
+      hasSlotDuration;
 
     // Check if the form is valid (this includes required field validation)
     const formValid = this.bookingForm.valid;
-
-    /*console.log('Form validation state:', {
-      hasRequiredFields,
-      formValid,
-      formValues: this.bookingForm.value,
-      formErrors: this.bookingForm.errors,
-      controlStates: {
-        tipo_stanza: formControls['tipo_stanza'].value,
-        id_stanza: formControls['id_stanza'].value,
-        id_postazione: formControls['id_postazione'].value,
-        selectedDate: formControls['selectedDate'].value,
-        timeSlot: formControls['timeSlot'].value
-      }
-    });*/
 
     return hasRequiredFields && formValid;
   }
@@ -558,8 +751,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   }
 
   private parseDate(dateValue: any): Date {
-    //console.log('Parsing date value:', dateValue);
-    
     if (dateValue instanceof Date) {
       console.log('Value is already a Date');
       return dateValue;
@@ -570,7 +761,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         // Array format: [year, month, day, hours, minutes, seconds, nanoseconds]
         const [year, month, day, hours, minutes] = dateValue;
         const date = new Date(year, month - 1, day, hours, minutes);
-        //console.log('Parsed array date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing array date:', error);
@@ -584,7 +774,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
         try {
           const [year, month, day, hours, minutes] = dateValue.split(',').map(Number);
           const date = new Date(year, month - 1, day, hours, minutes);
-          //console.log('Parsed comma-separated date:', date);
           return date;
         } catch (error) {
           console.error('Error parsing comma-separated date:', error);
@@ -595,7 +784,6 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
       // Prova a parsare la stringa ISO
       try {
         const date = new Date(dateValue);
-        //console.log('Parsed ISO date:', date);
         return date;
       } catch (error) {
         console.error('Error parsing ISO date:', error);
@@ -729,7 +917,7 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   }
 
   private applySorting(): void {
-    this.sortedPrenotazioni = [...this.prenotazioni].sort((a, b) => {
+    this.sortedPrenotazioni = this.filteredPrenotazioni.sort((a, b) => {
       let valueA: any;
       let valueB: any;
 
@@ -738,15 +926,21 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
           valueA = new Date(a.data_inizio);
           valueB = new Date(b.data_inizio);
           break;
-        case 'orario':
-          // For time sorting, we'll use the start time
-          valueA = new Date(a.data_inizio);
-          valueB = new Date(b.data_inizio);
-          break;
         case 'utente':
-          // Sort by full name (nome + cognome)
           valueA = `${a.users?.nome || ''} ${a.users?.cognome || ''}`.trim().toLowerCase();
           valueB = `${b.users?.nome || ''} ${b.users?.cognome || ''}`.trim().toLowerCase();
+          break;
+        case 'stanza':
+          valueA = (a.stanze?.nome || '').toLowerCase();
+          valueB = (b.stanze?.nome || '').toLowerCase();
+          break;
+        case 'postazione':
+          valueA = (a.postazione?.nomePostazione || '').toLowerCase();
+          valueB = (b.postazione?.nomePostazione || '').toLowerCase();
+          break;
+        case 'stato':
+          valueA = a.stato_prenotazione?.toLowerCase() || '';
+          valueB = b.stato_prenotazione?.toLowerCase() || '';
           break;
         default:
           return 0;
@@ -771,5 +965,334 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
 
   isSortedColumn(column: string): boolean {
     return this.sortColumn === column;
+  }
+
+  setStatusFilter(status: 'tutti' | 'attive' | 'scadute' | 'annullate'): void {
+    this.statusFilter = status;
+    this.applySorting();
+  }
+
+  getStatusFilterCount(status: 'tutti' | 'attive' | 'scadute' | 'annullate'): number {
+    if (status === 'tutti') {
+      return this.prenotazioni.length;
+    }
+    
+    const now = new Date();
+    return this.prenotazioni.filter(prenotazione => {
+      switch (status) {
+        case 'attive':
+          return prenotazione.stato_prenotazione === 'Confermata' && 
+                 prenotazione.data_fine > now;
+        case 'scadute':
+          return prenotazione.data_fine <= now;
+        case 'annullate':
+          return prenotazione.stato_prenotazione === 'Annullata';
+        default:
+          return true;
+      }
+    }).length;
+  }
+
+  get filteredPrenotazioni(): Prenotazione[] {
+    if (this.statusFilter === 'tutti') {
+      return this.prenotazioni;
+    }
+    
+    const now = new Date();
+    return this.prenotazioni.filter(prenotazione => {
+      switch (this.statusFilter) {
+        case 'attive':
+          return prenotazione.stato_prenotazione === 'Confermata' && 
+                 prenotazione.data_fine > now;
+        case 'scadute':
+          return prenotazione.data_fine <= now;
+        case 'annullate':
+          return prenotazione.stato_prenotazione === 'Annullata';
+        default:
+          return true;
+      }
+    });
+  }
+
+  isFullDayAvailable(): boolean {
+    // Controlla se la giornata intera è disponibile negli slot
+    const fullDaySlotExists = !!this.state.availableTimeSlots.find(
+      slot => slot.startTime === '08:00' && slot.endTime === '18:00'
+    );
+    
+    if (!fullDaySlotExists) {
+      return false;
+    }
+    
+    // Se la data selezionata è oggi, controlla se è ancora possibile prenotare la giornata intera
+    const selectedDate = this.state.selectedDates[0];
+    const today = new Date();
+    const isToday = selectedDate && this.isSameDay(selectedDate, today);
+    
+    if (isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      // La giornata intera inizia alle 08:00, aggiungi margine di 30 minuti
+      const fullDayStartInMinutes = 8 * 60; // 08:00 in minuti
+      const canBookFullDay = fullDayStartInMinutes > (currentTimeInMinutes + 30);
+      return canBookFullDay;
+    }
+    
+    // Per le date future, la giornata intera è disponibile se presente negli slot
+    return true;
+  }
+
+  getFilteredTimeSlots(): { startTime: string; endTime: string }[] {
+    const selectedDuration = this.bookingForm.get('slotDuration')?.value;
+    if (!selectedDuration || !this.state.availableTimeSlots.length) {
+      return [];
+    }
+
+    // Controlla se la data selezionata è oggi
+    const selectedDate = this.state.selectedDates[0];
+    const today = new Date();
+    const isToday = selectedDate && this.isSameDay(selectedDate, today);
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+
+    let filteredSlots = [];
+
+    // Se è selezionata la giornata intera, restituisci solo quello slot
+    if (selectedDuration === 'Giornata Intera') {
+      filteredSlots = this.state.availableTimeSlots.filter(slot => 
+        slot.startTime === '08:00' && slot.endTime === '18:00'
+      );
+    } else {
+      // Per le altre durate, filtra gli slot in base alla durata
+      const durationMinutes = this.durationMap[selectedDuration];
+      filteredSlots = this.state.availableTimeSlots.filter(slot => {
+        const start = parseInt(slot.startTime.split(':')[0]) * 60 + parseInt(slot.startTime.split(':')[1]);
+        const end = parseInt(slot.endTime.split(':')[0]) * 60 + parseInt(slot.endTime.split(':')[1]);
+        return (end - start) === durationMinutes;
+      });
+    }
+
+    // Se è oggi, filtra gli slot che sono già passati
+    if (isToday) {
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      filteredSlots = filteredSlots.filter(slot => {
+        const slotStartHour = parseInt(slot.startTime.split(':')[0]);
+        const slotStartMinute = parseInt(slot.startTime.split(':')[1]);
+        const slotStartInMinutes = slotStartHour * 60 + slotStartMinute;
+        
+        // Aggiungi un margine di sicurezza di 30 minuti per permettere la prenotazione
+        const isSlotInFuture = slotStartInMinutes > (currentTimeInMinutes + 30);
+        return isSlotInFuture;
+      });
+    }
+
+    return filteredSlots;
+  }
+
+  // Add this new method to handle month changes
+  onMonthChange(date: Date): void {
+    console.log('Month changed to:', date);
+    // No need to check availability anymore since we removed that functionality
+  }
+
+  private checkMonthAvailability(date: Date): void {
+    // Removed date availability checking
+  }
+
+  private checkCurrentMonthAvailability(): void {
+    // Removed date availability checking
+  }
+
+  private checkDateAvailability(date: Date): void {
+    // Removed date availability checking
+  }
+
+  private checkSinglePostazioneAvailability(date: Date, postazioneId: number, callback?: (isAvailable: boolean) => void): void {
+    // Removed date availability checking
+  }
+
+  private isSameDay(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  }
+
+  isTodaySelected(): boolean {
+    if (this.state.selectedDates.length === 0) return false;
+    const selectedDate = this.state.selectedDates[0];
+    const today = new Date();
+    return this.isSameDay(selectedDate, today);
+  }
+
+  // Admin and user management methods
+  private checkUserRole(): void {
+    this.authService.getIdentity()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.isAdmin = user?.authorities?.includes('ROLE_ADMIN') || false;
+        
+        if (this.isAdmin) {
+          this.loadUsers();
+          // For admin, userId is optional (if empty, defaults to themselves)
+          this.bookingForm.get('userId')?.clearValidators();
+        } else {
+          // For regular users, userId is not needed and should be hidden
+          this.bookingForm.get('userId')?.clearValidators();
+        }
+        this.bookingForm.get('userId')?.updateValueAndValidity();
+      });
+  }
+
+  private loadUsers(): void {
+    if (!this.isAdmin) return;
+    
+    this.adminService.getAllUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (users: User[]) => {
+          this.users = users;
+          this.filteredUsers = users;
+        },
+        error: (error: Error) => {
+          console.error('Errore nel caricamento degli utenti:', error);
+          this.showErrorToast('Errore', 'Impossibile caricare la lista degli utenti');
+        }
+      });
+  }
+
+  filterUsers(): void {
+    if (!this.userSearchTerm) {
+      this.filteredUsers = this.users;
+      return;
+    }
+
+    const searchTerm = this.userSearchTerm.toLowerCase();
+    this.filteredUsers = this.users.filter(user =>
+      user.nome?.toLowerCase().includes(searchTerm) ||
+      user.cognome?.toLowerCase().includes(searchTerm) ||
+      user.email?.toLowerCase().includes(searchTerm) ||
+      `${user.nome} ${user.cognome}`.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  selectUser(user: User): void {
+    this.selectedUser = user;
+    this.userSearchTerm = `${user.nome} ${user.cognome}`;
+    this.bookingForm.patchValue({ userId: user.id_user });
+    this.showUserDropdown = false;
+  }
+
+  clearUserSearch(): void {
+    this.userSearchTerm = '';
+    this.selectedUser = null;
+    this.bookingForm.patchValue({ userId: '' });
+    this.filteredUsers = this.users;
+    this.showUserDropdown = false;
+  }
+
+  onUserInputBlur(): void {
+    // Delay hiding dropdown to allow click events
+    setTimeout(() => {
+      this.showUserDropdown = false;
+    }, 200);
+  }
+
+  trackByUser(index: number, user: User): any {
+    return user.id_user;
+  }
+
+  // Helper methods for cancel functionality
+  canCancelPrenotazione(prenotazione: Prenotazione): boolean {
+    // Cannot cancel if already canceled
+    if (prenotazione.stato_prenotazione === StatoPrenotazione.Annullata) {
+      return false;
+    }
+    
+    // Cannot cancel if the booking has already passed
+    const now = new Date();
+    const bookingDate = new Date(prenotazione.data_fine);
+    if (bookingDate <= now) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  cancelPrenotazione(prenotazione: Prenotazione): void {
+    if (!prenotazione.id_prenotazioni) {
+      this.showErrorToast('Errore di Sistema', 'Impossibile identificare la prenotazione da annullare');
+      return;
+    }
+
+    if (!this.canCancelPrenotazione(prenotazione)) {
+      this.showWarningToast('Azione non consentita', 'Questa prenotazione non può essere annullata');
+      return;
+    }
+
+    // Conferma annullamento
+    const dataFormatted = this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy');
+    const orarioFormatted = this.getFormattedTimeRange(prenotazione.data_inizio, prenotazione.data_fine);
+    const postazioneNome = prenotazione.postazione?.nomePostazione || 'N/A';
+    
+    const conferma = confirm(
+      `Sei sicuro di voler annullare la prenotazione?\n\n` +
+      `📅 Data: ${dataFormatted}\n` +
+      `⏰ Orario: ${orarioFormatted}\n` +
+      `💺 Postazione: ${postazioneNome}\n\n` +
+      `La prenotazione verrà contrassegnata come annullata.`
+    );
+
+    if (!conferma) {
+      return;
+    }
+
+    this.state.isLoading = true;
+    
+    // Show info toast while processing
+    this.showInfoToast('Annullamento in corso', 'Stiamo annullando la tua prenotazione...');
+
+    // Update the booking status to 'Annullata'
+    this.prenotazionePosizioneService.updatePrenotazione(prenotazione.id_prenotazioni, { 
+      stato_prenotazione: StatoPrenotazione.Annullata 
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedPrenotazione: Prenotazione) => {
+          this.clearAllToasts(); // Clear any existing toasts
+          this.showSuccessToast(
+            'Prenotazione Annullata', 
+            `La prenotazione del ${dataFormatted} è stata annullata con successo`
+          );
+          
+          // Update the local booking list
+          const index = this.prenotazioni.findIndex(p => p.id_prenotazioni === prenotazione.id_prenotazioni);
+          if (index !== -1) {
+            this.prenotazioni[index] = {
+              ...this.prenotazioni[index],
+              stato_prenotazione: StatoPrenotazione.Annullata
+            };
+          }
+          
+          // Update sorted array as well
+          this.applySorting();
+          this.state.isLoading = false;
+        },
+        error: (error: Error) => {
+          console.error('Errore nell\'annullamento della prenotazione:', error);
+          this.clearAllToasts();
+          
+          let errorMessage = 'Si è verificato un errore durante l\'annullamento della prenotazione';
+          if (error.message?.includes('non trovata')) {
+            errorMessage = 'La prenotazione non è più disponibile';
+          } else if (error.message?.includes('non autorizzato')) {
+            errorMessage = 'Non hai i permessi per annullare questa prenotazione';
+          }
+          
+          this.showErrorToast('Errore nell\'Annullamento', errorMessage);
+          this.state.isLoading = false;
+        }
+      });
   }
 }

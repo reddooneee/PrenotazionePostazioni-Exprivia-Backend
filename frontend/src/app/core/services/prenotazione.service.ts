@@ -159,5 +159,17 @@ export class PrenotazioneService {
         ));
         
     }
+
+    /**
+     * Recupera le prenotazioni di una data specifica e postazione
+     */
+    getPrenotazioniByDayAndPostazione(date: string, postazioneId: number): Observable<Prenotazione[]> {
+        return from(this.axiosService.get<Prenotazione[]>(`${this.BASE_URL}/prenotazioni-del-giorno-e-postazione?data=${date}&postazioneId=${postazioneId}`)).pipe(
+            catchError(error => {
+                console.error('Errore nel recupero delle prenotazioni del giorno e postazione:', error);
+                return throwError(() => new Error('Impossibile recuperare le prenotazioni del giorno e postazione'));
+            })
+        );
+    }
    
 }

@@ -13,9 +13,11 @@
     <app-sidebar *ngIf="isAdmin"></app-sidebar>
     
     <!-- Main Content with margin for fixed sidebar -->
-    <main class="flex-1 flex flex-col bg-white transition-all duration-200" 
-          [class.ml-64]="isAdmin && !isSidebarCollapsed" 
-          [class.ml-18]="isAdmin && isSidebarCollapsed">
+    <main class="flex-1 flex flex-col bg-white transition-all duration-200"
+          [ngClass]="{
+            'ml-sidebar-expanded': isAdmin && !isSidebarCollapsed,
+            'ml-sidebar-collapsed': isAdmin && isSidebarCollapsed
+          }">
       <!-- Header Section per admin -->
       <div
         *ngIf="isAdmin"

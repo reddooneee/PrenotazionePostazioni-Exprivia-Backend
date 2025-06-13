@@ -1,6 +1,7 @@
 package com.prenotazioni.exprivia.exprv.repository;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,12 +29,16 @@ public interface PrenotazioniRepository extends JpaRepository<Prenotazioni, Inte
             @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT p FROM Prenotazioni p WHERE p.postazione.id_postazione = :postazioneId " +
-           "AND ((p.dataInizio BETWEEN :startTime AND :endTime) " +
-           "OR (p.dataFine BETWEEN :startTime AND :endTime) " +
-           "OR (:startTime BETWEEN p.dataInizio AND p.dataFine) " +
-           "OR (:endTime BETWEEN p.dataInizio AND p.dataFine))")
+           "AND p.stato_prenotazione != 'Annullata' " +
+           "AND (p.dataInizio < :endTime AND p.dataFine > :startTime)")
     List<Prenotazioni> findOverlappingBookings(
             @Param("startTime") LocalDateTime startTime,
             @Param("endTime") LocalDateTime endTime,
             @Param("postazioneId") Integer postazioneId);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE DATE(p.dataInizio) = DATE(:giorno)")
+    List<Prenotazioni> findByDataInizioOnDay(@Param("giorno") LocalDate giorno);
+
+    @Query("SELECT p FROM Prenotazioni p WHERE DATE(p.dataInizio) = DATE(:giorno) AND p.postazione.id_postazione = :postazioneId AND p.stato_prenotazione != 'Annullata'")
+    List<Prenotazioni> findByDataInizioOnDayAndPostazione(@Param("giorno") LocalDate giorno, @Param("postazioneId") Integer postazioneId);
 }

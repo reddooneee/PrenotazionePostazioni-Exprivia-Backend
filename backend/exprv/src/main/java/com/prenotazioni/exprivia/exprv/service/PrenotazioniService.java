@@ -5,6 +5,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +60,9 @@ public class PrenotazioniService {
 
     @Autowired
     private PrenotazioniMapper prenotazioniMapper;
+    
+    @Autowired
+    private EmailService emailService;
 
     public PrenotazioniService() {
     }
@@ -69,12 +74,14 @@ public class PrenotazioniService {
             PostazioniRepository postazioniRepository,
             StanzeRepository stanzeRepository,
             UserRepository userRepository,
-            PrenotazioniMapper prenotazioniMapper) {
+            PrenotazioniMapper prenotazioniMapper,
+            EmailService emailService) {
         this.prenotazioniRepository = prenotazioniRepository;
         this.postazioniRepository = postazioniRepository;
         this.stanzeRepository = stanzeRepository;
         this.userRepository = userRepository;
         this.prenotazioniMapper = prenotazioniMapper;
+        this.emailService = emailService;
     }
 
     /**
@@ -177,30 +184,78 @@ public class PrenotazioniService {
                     existingPrenotazioni.setStato_prenotazione(stato_prenotazione.valueOf(value.toString()));
                     break;
                 case "data_inizio":
-                    existingPrenotazioni.setDataInizio(LocalDateTime.parse(value.toString()));
+                    if (value != null) {
+                        try {
+                            LocalDateTime dateTime = parseDateTime(value.toString());
+                            existingPrenotazioni.setDataInizio(dateTime);
+                        } catch (Exception e) {
+                            throw new IllegalArgumentException("Formato data_inizio non valido: " + value.toString() + " - " + e.getMessage());
+                        }
+                    }
                     break;
                 case "data_fine":
-                    existingPrenotazioni.setDataFine(LocalDateTime.parse(value.toString()));
+                    if (value != null) {
+                        try {
+                            LocalDateTime dateTime = parseDateTime(value.toString());
+                            existingPrenotazioni.setDataFine(dateTime);
+                        } catch (Exception e) {
+                            throw new IllegalArgumentException("Formato data_fine non valido: " + value.toString() + " - " + e.getMessage());
+                        }
+                    }
                     break;
                 case "postazione":
-                    Integer idPostazione = (Integer) value;
+                    Integer idPostazione;
+                    if (value instanceof Integer) {
+                        idPostazione = (Integer) value;
+                    } else if (value instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> postazioneMap = (Map<String, Object>) value;
+                        idPostazione = (Integer) postazioneMap.get("id_postazione");
+                    } else {
+                        throw new IllegalArgumentException("Formato postazione non valido");
+                    }
                     Postazioni postazione = postazioniRepository.findById(idPostazione)
                             .orElseThrow(() -> new EntityNotFoundException(
                                     "Postazione con ID " + idPostazione + " non trovata"));
                     existingPrenotazioni.setPostazione(postazione);
                     break;
+                case "users":
                 case "user":
-                    Integer idUser = (Integer) value;
+                    Integer idUser;
+                    if (value instanceof Integer) {
+                        idUser = (Integer) value;
+                    } else if (value instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> userMap = (Map<String, Object>) value;
+                        idUser = (Integer) userMap.get("id_user");
+                    } else {
+                        throw new IllegalArgumentException("Formato user non valido");
+                    }
                     Users user = userRepository.findById(idUser)
                             .orElseThrow(() -> new EntityNotFoundException("User con ID " + idUser + " non trovato"));
                     existingPrenotazioni.setUsers(user);
                     break;
+                case "stanze":
                 case "stanza":
-                    Integer idStanza = (Integer) value;
+                    Integer idStanza;
+                    if (value instanceof Integer) {
+                        idStanza = (Integer) value;
+                    } else if (value instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> stanzaMap = (Map<String, Object>) value;
+                        idStanza = (Integer) stanzaMap.get("id_stanza");
+                    } else {
+                        throw new IllegalArgumentException("Formato stanza non valido");
+                    }
                     Stanze stanza = stanzeRepository.findById(idStanza)
                             .orElseThrow(
                                     () -> new EntityNotFoundException("Stanza con ID " + idStanza + " non trovata"));
                     existingPrenotazioni.setStanze(stanza);
+                    break;
+                // Skip these fields as they contain nested objects we don't want to process
+                case "id_prenotazioni":
+                case "coseDurata":
+                    // Ignore these fields
                     break;
             }
         });
@@ -315,6 +370,30 @@ public class PrenotazioniService {
         }
     }
 
+    /**
+     * Parses a date string in various formats to LocalDateTime
+     * Handles ISO 8601 format with timezone (e.g. 2025-06-27T06:00:00.000Z)
+     * and standard LocalDateTime format
+     */
+    private LocalDateTime parseDateTime(String dateString) {
+        try {
+            // First try standard LocalDateTime format
+            return LocalDateTime.parse(dateString);
+        } catch (Exception e1) {
+            try {
+                // Try ISO 8601 format with timezone
+                if (dateString.endsWith("Z")) {
+                    return ZonedDateTime.parse(dateString).toLocalDateTime();
+                } else {
+                    // Try parsing as Instant and convert to LocalDateTime
+                    return LocalDateTime.ofInstant(Instant.parse(dateString), java.time.ZoneId.systemDefault());
+                }
+            } catch (Exception e2) {
+                throw new IllegalArgumentException("Unable to parse date format: " + dateString);
+            }
+        }
+    }
+
     /*
      * 
      * Metodo per restituire le prenotazioni giornaliere
@@ -326,16 +405,9 @@ public class PrenotazioniService {
      * 
      */
     public List<PrenotazioniDTO> getPrenotazioniByDay(LocalDateTime data) {
-
-        // Data inizio e fine Giorno
-        LocalDateTime inizioGiornata = data.withHour(0).withMinute(0).withSecond(0);
-        LocalDateTime fineGiornata = data.withHour(23).withMinute(59).withSecond(59);
-
-        List<Prenotazioni> prenotazioniGiornaliere = prenotazioniRepository.findByDataInizioBetween(inizioGiornata,
-                fineGiornata);
-
+        // Usa la nuova query per trovare solo le prenotazioni che iniziano in quel giorno
+        List<Prenotazioni> prenotazioniGiornaliere = prenotazioniRepository.findByDataInizioOnDay(data.toLocalDate());
         return prenotazioniMapper.toDtoList(prenotazioniGiornaliere);
-
     }
 
     public byte[] FileExcDaily(LocalDateTime data) {
@@ -485,6 +557,21 @@ public class PrenotazioniService {
         Prenotazioni savedPrenotazione = prenotazioniRepository.save(prenotazione);
         System.out.println("DEBUG - Prenotazione salvata con ID: " + savedPrenotazione.getId_prenotazioni());
 
+        // Invia email di conferma asincrona
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String startDateTime = savedPrenotazione.getDataInizio().format(formatter);
+        String endDateTime = savedPrenotazione.getDataFine().format(formatter);
+        
+        emailService.sendBookingConfirmationEmail(
+            user.getEmail(),
+            user.getNome() + " " + user.getCognome(),
+            stanza.getNome(),
+            postazione.getNomePostazione(),
+            startDateTime,
+            endDateTime
+        );
+        System.out.println("DEBUG - Richiesta email di conferma inoltrata per: " + user.getEmail());
+
         // Converti e restituisci il DTO
         PrenotazioniDTO dto = prenotazioniMapper.toDto(savedPrenotazione);
         System.out.println("DEBUG - DTO creato e pronto per essere restituito");
@@ -529,6 +616,21 @@ public class PrenotazioniService {
 
         // Salva la prenotazione
         Prenotazioni savedPrenotazione = prenotazioniRepository.save(prenotazione);
+
+        // Invia email di conferma asincrona
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String startDateTime = savedPrenotazione.getDataInizio().format(formatter);
+        String endDateTime = savedPrenotazione.getDataFine().format(formatter);
+        
+        emailService.sendBookingConfirmationEmail(
+            user.getEmail(),
+            user.getNome() + " " + user.getCognome(),
+            stanza.getNome(),
+            postazione.getNomePostazione(),
+            startDateTime,
+            endDateTime
+        );
+        System.out.println("DEBUG - Richiesta email di conferma inoltrata per: " + user.getEmail());
 
         // Converti e restituisci il DTO
         return prenotazioniMapper.toDto(savedPrenotazione);
@@ -644,6 +746,11 @@ public class PrenotazioniService {
         
         result.put("stanze", stanzeList);
         return result;
+    }
+
+    public List<PrenotazioniDTO> getPrenotazioniByDayAndPostazione(LocalDate giorno, Integer postazioneId) {
+        List<Prenotazioni> prenotazioni = prenotazioniRepository.findByDataInizioOnDayAndPostazione(giorno, postazioneId);
+        return prenotazioniMapper.toDtoList(prenotazioni);
     }
 
 }

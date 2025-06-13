@@ -13,7 +13,7 @@
       <button (click)="toggleSidebar()"
         class="bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 ml-2 cursor-pointer"
         aria-label="Comprimi sidebar">
-        <lucide-icon name="panel-left-open" class="w-4 h-4 text-gray-600" />
+        <lucide-icon name="panel-left-close" class="w-4 h-4 text-gray-600" />
       </button>
     </div>
     
@@ -21,7 +21,7 @@
     <button *ngIf="isCollapsed" (click)="toggleSidebar()"
       class="bg-white border border-slate-200 rounded-full p-2 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer"
       [matTooltip]="'Espandi sidebar'" [matTooltipPosition]="'right'" aria-label="Espandi sidebar">
-      <lucide-icon name="panel-left-close" class="w-5 h-5 text-gray-600" />
+      <lucide-icon name="panel-left-open" class="w-5 h-5 text-gray-600" />
     </button>
   </div>
 

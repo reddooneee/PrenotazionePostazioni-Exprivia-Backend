@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -39,6 +39,9 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
   // Search properties
   searchTerm: string = '';
 
+  // Filter properties
+  statusFilter: 'tutti' | 'attive' | 'scadute' | 'annullate' = 'attive'; // Default to active
+
   // Pagination properties
   currentPage = 1;
   itemsPerPage = 25;
@@ -54,6 +57,14 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
   isModalLoading = false;
   modalErrorMessage = '';
   bookingForm: FormGroup;
+
+  // Edit modal properties
+  showEditModal = false;
+  isEditLoading = false;
+  editErrorMessage = '';
+  editForm: FormGroup;
+  editingPrenotazione: Prenotazione | null = null;
+  openDropdownId: number | null = null;
 
   // Data for dropdowns
   users: User[] = [];
@@ -90,7 +101,8 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private adminService: AdminService,
     private stanzaService: StanzaService,
-    private postazioneService: PostazioneService
+    private postazioneService: PostazioneService,
+    private router: Router
   ) {
     this.bookingForm = this.fb.group({
       userId: [''],
@@ -100,6 +112,10 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
       stanzaId: ['', Validators.required],
       postazioneId: ['', Validators.required]
     });
+
+    this.editForm = this.fb.group({
+      stato_prenotazione: ['', Validators.required]
+    });
   }
 
   ngOnInit(): void {
@@ -107,11 +123,21 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
     this.loadPrenotazioni();
     this.loadModalData();
     this.setupFormSubscriptions();
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+      if (!event.target || !(event.target as Element).closest('.relative')) {
+        this.openDropdownId = null;
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Remove event listener
+    document.removeEventListener('click', () => {});
   }
 
   private checkUserRole(): void {
@@ -184,34 +210,21 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
   }
 
   deletePrenotazione(prenotazione: Prenotazione): void {
-    if (!prenotazione.id_prenotazioni) {
-      this.showErrorToast('Errore di Sistema', 'Impossibile identificare la prenotazione da eliminare');
+    this.openDropdownId = null; // Close dropdown
+    
+    if (!prenotazione || !prenotazione.id_prenotazioni) {
+      console.error('Prenotazione non valida');
+      this.showErrorToast('Errore', 'Prenotazione non valida');
       return;
     }
 
-    // Conferma eliminazione
     const dataFormatted = this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy');
-    const orarioFormatted = this.getFormattedTimeRange(prenotazione.data_inizio, prenotazione.data_fine);
-    const postazioneNome = prenotazione.postazione?.nomePostazione || 'N/A';
-    const stanzaNome = prenotazione.stanze?.nome || 'N/A';
     
-    const conferma = confirm(
-      `Sei sicuro di voler eliminare la prenotazione?\n\n` +
-      `📅 Data: ${dataFormatted}\n` +
-      `⏰ Orario: ${orarioFormatted}\n` +
-      `🏢 Stanza: ${stanzaNome}\n` +
-      `💺 Postazione: ${postazioneNome}\n\n` +
-      `Questa azione non può essere annullata.`
-    );
-
-    if (!conferma) {
+    if (!confirm(`Sei sicuro di voler eliminare la prenotazione del ${dataFormatted}?`)) {
       return;
     }
 
     this.isLoading = true;
-    
-    // Show info toast while processing
-    this.showInfoToast('Eliminazione in corso', 'Stiamo cancellando la prenotazione...');
 
     this.prenotazioneService.deletePrenotazione(prenotazione.id_prenotazioni)
       .pipe(takeUntil(this.destroy$))
@@ -313,21 +326,10 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
     return prenotazione.id_prenotazioni || index;
   }
 
-  // Modal methods
+  // Navigation method (replaces modal)
   openNewBookingModal(): void {
-    this.showModal = true;
-    this.modalErrorMessage = '';
-    this.bookingForm.reset();
-    this.clearUserSearch();
-    
-    // Set minimum date to today
-    const today = new Date().toISOString().split('T')[0];
-    this.bookingForm.patchValue({ date: today });
-    
-    // Initialize filtered users
-    if (this.isAdmin && this.users.length > 0) {
-      this.filteredUsers = this.users;
-    }
+    // Navigate to the prenota-posizione page which has a better interface
+    this.router.navigate(['/dashboard/prenota-posizione']);
   }
 
   closeModal(): void {
@@ -624,69 +626,131 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
 
   // Search method
   applySearchFilter(): void {
-    this.applySorting(); // Apply sorting which will include search filtering
+    this.applyFilters();
+  }
+
+  applyStatusFilter(): void {
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    let filtered = [...this.prenotazioni];
+    
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(prenotazione => {
+        const userName = `${prenotazione.users?.nome || ''} ${prenotazione.users?.cognome || ''}`.toLowerCase();
+        const userEmail = (prenotazione.users?.email || '').toLowerCase();
+        const stanzaNome = (prenotazione.stanze?.nome || '').toLowerCase();
+        const stanzaTipo = (prenotazione.stanze?.tipo_stanza || '').toLowerCase();
+        const postazioneName = (prenotazione.postazione?.nomePostazione || '').toLowerCase();
+        const dataFormatted = this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy').toLowerCase();
+        
+        return userName.includes(searchLower) ||
+               userEmail.includes(searchLower) ||
+               stanzaNome.includes(searchLower) ||
+               stanzaTipo.includes(searchLower) ||
+               postazioneName.includes(searchLower) ||
+               dataFormatted.includes(searchLower);
+      });
+    }
+
+    // Apply status filter
+    if (this.statusFilter !== 'tutti') {
+      const now = new Date();
+      filtered = filtered.filter(prenotazione => {
+        switch (this.statusFilter) {
+          case 'attive':
+            return prenotazione.stato_prenotazione === 'Confermata' && 
+                   prenotazione.data_fine > now;
+          case 'scadute':
+            return prenotazione.data_fine <= now;
+          case 'annullate':
+            return prenotazione.stato_prenotazione === 'Annullata';
+          default:
+            return true;
+        }
+      });
+    }
+
+    this.filteredPrenotazioni = filtered;
+    this.totalItems = filtered.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    this.currentPage = 1; // Reset to first page when filtering
+    this.updatePagination();
+  }
+
+  setStatusFilter(status: 'tutti' | 'attive' | 'scadute' | 'annullate'): void {
+    this.statusFilter = status;
+    this.applyStatusFilter();
+  }
+
+  getStatusFilterCount(status: 'tutti' | 'attive' | 'scadute' | 'annullate'): number {
+    if (status === 'tutti') {
+      return this.prenotazioni.length;
+    }
+    
+    const now = new Date();
+    return this.prenotazioni.filter(prenotazione => {
+      switch (status) {
+        case 'attive':
+          return prenotazione.stato_prenotazione === 'Confermata' && 
+                 prenotazione.data_fine > now;
+        case 'scadute':
+          return prenotazione.data_fine <= now;
+        case 'annullate':
+          return prenotazione.stato_prenotazione === 'Annullata';
+        default:
+          return true;
+      }
+    }).length;
   }
 
   private applySorting(): void {
-    let filtered = [...this.prenotazioni];
-
-    // Apply search filter first
-    if (this.searchTerm.trim()) {
-      const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(prenotazione =>
-        // Search in user name
-        `${prenotazione.users?.nome || ''} ${prenotazione.users?.cognome || ''}`.toLowerCase().includes(searchLower) ||
-        // Search in user email
-        (prenotazione.users?.email || '').toLowerCase().includes(searchLower) ||
-        // Search in room name
-        (prenotazione.stanze?.nome || '').toLowerCase().includes(searchLower) ||
-        // Search in room type
-        (prenotazione.stanze?.tipo_stanza || '').toLowerCase().includes(searchLower) ||
-        // Search in workstation name
-        (prenotazione.postazione?.nomePostazione || '').toLowerCase().includes(searchLower) ||
-        // Search in formatted date
-        this.formatDate(prenotazione.data_inizio, 'dd/MM/yyyy').includes(searchLower) ||
-        // Search in status
-        (prenotazione.stato_prenotazione || '').toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Then apply sorting
-    this.filteredPrenotazioni = filtered.sort((a, b) => {
-      let valueA: any;
-      let valueB: any;
+    // Apply filters first
+    this.applyFilters();
+    
+    // Then apply sorting to filtered data
+    this.filteredPrenotazioni.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
 
       switch (this.sortColumn) {
         case 'data_inizio':
-          valueA = new Date(a.data_inizio);
-          valueB = new Date(b.data_inizio);
-          break;
-        case 'orario':
-          // For time sorting, we'll use the start time
-          valueA = new Date(a.data_inizio);
-          valueB = new Date(b.data_inizio);
+          aValue = new Date(a.data_inizio).getTime();
+          bValue = new Date(b.data_inizio).getTime();
           break;
         case 'utente':
-          // Sort by full name (nome + cognome)
-          valueA = `${a.users?.nome || ''} ${a.users?.cognome || ''}`.trim().toLowerCase();
-          valueB = `${b.users?.nome || ''} ${b.users?.cognome || ''}`.trim().toLowerCase();
+          aValue = `${a.users?.nome || ''} ${a.users?.cognome || ''}`.toLowerCase();
+          bValue = `${b.users?.nome || ''} ${b.users?.cognome || ''}`.toLowerCase();
+          break;
+        case 'stanza':
+          aValue = (a.stanze?.nome || '').toLowerCase();
+          bValue = (b.stanze?.nome || '').toLowerCase();
+          break;
+        case 'postazione':
+          aValue = (a.postazione?.nomePostazione || '').toLowerCase();
+          bValue = (b.postazione?.nomePostazione || '').toLowerCase();
+          break;
+        case 'stato':
+          aValue = a.stato_prenotazione?.toLowerCase() || '';
+          bValue = b.stato_prenotazione?.toLowerCase() || '';
           break;
         default:
           return 0;
       }
 
-      if (valueA < valueB) {
+      if (aValue < bValue) {
         return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (valueA > valueB) {
+      } else if (aValue > bValue) {
         return this.sortDirection === 'asc' ? 1 : -1;
+      } else {
+        return 0;
       }
-      return 0;
     });
 
-    // Reset to first page after sorting/filtering
-    this.currentPage = 1;
-    this.updatePagination();
+    this.updatePaginatedData();
   }
 
   getSortIcon(column: string): string {
@@ -720,5 +784,137 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
   // Clear all existing toasts
   private clearAllToasts(): void {
     this.toastService.clear();
+  }
+
+  private updatePaginatedData(): void {
+    this.totalItems = this.filteredPrenotazioni.length;
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    
+    // Ensure current page is valid
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
+    }
+    
+    // Calculate start and end indices
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    
+    // Get paginated items
+    this.paginatedPrenotazioni = this.filteredPrenotazioni.slice(startIndex, endIndex);
+    
+    // Generate page numbers for pagination controls
+    this.generatePageNumbers();
+  }
+
+  toggleDropdown(prenotazioneId: number): void {
+    if (!prenotazioneId) {
+      return;
+    }
+    this.openDropdownId = this.openDropdownId === prenotazioneId ? null : prenotazioneId;
+  }
+
+  shouldOpenUpward(prenotazioneId: number): boolean {
+    // Use a simple heuristic: check if we're in the last few rows of the table
+    const index = this.paginatedPrenotazioni.findIndex(p => p.id_prenotazioni === prenotazioneId);
+    const totalItems = this.paginatedPrenotazioni.length;
+    
+    // If we're in the last 2 items of the current page, open upward
+    if (index >= totalItems - 2) {
+      return true;
+    }
+
+    // Also check viewport position as backup
+    try {
+      const buttonElement = document.querySelector(`[data-prenotazione-id="${prenotazioneId}"]`) as HTMLElement;
+      if (buttonElement) {
+        const rect = buttonElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        return rect.bottom > viewportHeight - 120; // 120px buffer for dropdown
+      }
+    } catch (error) {
+      // Fallback to index-based logic
+    }
+    
+    return false;
+  }
+
+  editPrenotazione(prenotazione: Prenotazione): void {
+    this.editingPrenotazione = prenotazione;
+    this.editForm.patchValue({
+      stato_prenotazione: prenotazione.stato_prenotazione
+    });
+    this.editErrorMessage = '';
+    this.showEditModal = true;
+    this.openDropdownId = null; // Close dropdown
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editingPrenotazione = null;
+    this.editErrorMessage = '';
+    this.editForm.reset();
+  }
+
+  onSubmitEdit(): void {
+    if (this.editForm.invalid || !this.editingPrenotazione) {
+      return;
+    }
+
+    this.isEditLoading = true;
+    this.editErrorMessage = '';
+
+    const updatedStatus = this.editForm.get('stato_prenotazione')?.value;
+    const prenotazioneId = this.editingPrenotazione.id_prenotazioni;
+
+    if (!prenotazioneId) {
+      this.editErrorMessage = 'ID prenotazione non valido';
+      this.isEditLoading = false;
+      return;
+    }
+
+    // Create updated prenotazione object
+    const updatedPrenotazione = {
+      ...this.editingPrenotazione,
+      stato_prenotazione: updatedStatus
+    };
+
+    this.prenotazioneService.updatePrenotazione(prenotazioneId, updatedPrenotazione)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.clearAllToasts();
+          this.showSuccessToast(
+            'Prenotazione Aggiornata',
+            `Lo stato della prenotazione è stato cambiato in "${updatedStatus}"`
+          );
+          
+          // Update the prenotazione in the local array
+          const index = this.prenotazioni.findIndex(p => p.id_prenotazioni === this.editingPrenotazione!.id_prenotazioni);
+          if (index !== -1) {
+            this.prenotazioni[index].stato_prenotazione = updatedStatus as StatoPrenotazione;
+          }
+          
+          this.applySorting();
+          this.closeEditModal();
+          this.isEditLoading = false;
+        },
+        error: (error) => {
+          console.error('Error updating prenotazione:', error);
+          this.clearAllToasts();
+          
+          let errorMessage = 'Si è verificato un errore durante l\'aggiornamento della prenotazione';
+          if (error.message?.includes('non trovata')) {
+            errorMessage = 'La prenotazione non è più disponibile';
+          } else if (error.message?.includes('non autorizzato')) {
+            errorMessage = 'Non hai i permessi per modificare questa prenotazione';
+          } else if (error.message?.includes('timeout')) {
+            errorMessage = 'L\'operazione sta richiedendo troppo tempo. Riprova tra poco';
+          }
+          
+          this.editErrorMessage = errorMessage;
+          this.showErrorToast('Errore nell\'Aggiornamento', errorMessage);
+          this.isEditLoading = false;
+        }
+      });
   }
 } 

@@ -1,0 +1,1 @@
+import{a}from"./chunk-GM3XAOD2.js";import"./chunk-BYXBJQAS.js";import"./chunk-FZYR36Q4.js";import"./chunk-HYC2QBNA.js";import"./chunk-MUYZMUET.js";import"./chunk-SI2F5UYO.js";import"./chunk-FM2UL4ME.js";import"./chunk-CEITJAHH.js";export{a as PrenotazionePosizioneComponent};

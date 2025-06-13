@@ -162,3 +162,10 @@ body {
     --mdc-snackbar-supporting-text-color: white;
   }
 }
+
+.ml-sidebar-expanded {
+  margin-left: 256px !important;
+}
+.ml-sidebar-collapsed {
+  margin-left: 72px !important;
+}

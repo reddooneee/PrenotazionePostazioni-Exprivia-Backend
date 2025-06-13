@@ -56,13 +56,13 @@ public class PrenotazioniController {
             
             List<PrenotazioniDTO> prenotazioni = PrenotazioniService.cercaPrenotazioniUtente(userEmail);
             
-            System.out.println("CONTROLLER DEBUG - Returning " + prenotazioni.size() + " prenotazioni");
+            /*System.out.println("CONTROLLER DEBUG - Returning " + prenotazioni.size() + " prenotazioni");
             prenotazioni.forEach(p -> {
                 System.out.println("CONTROLLER DEBUG - Prenotazione ID: " + p.getId_prenotazioni());
                 System.out.println("CONTROLLER DEBUG - User: " + (p.getUsers() != null ? p.getUsers().getEmail() : "null"));
                 System.out.println("CONTROLLER DEBUG - Postazione: " + (p.getPostazione() != null ? p.getPostazione().getNomePostazione() : "null"));
                 System.out.println("CONTROLLER DEBUG - Stanza: " + (p.getStanze() != null ? p.getStanze().getNome() : "null"));
-            });
+            });*/
             
             return ResponseEntity.ok(prenotazioni);
         } catch (Exception e) {
@@ -191,6 +191,17 @@ public class PrenotazioniController {
         try {
             LocalDate localDate = LocalDate.parse(data);
             List<PrenotazioniDTO> prenotazioni = PrenotazioniService.getPrenotazioniByDay(localDate.atStartOfDay());
+            return ResponseEntity.ok(prenotazioni);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/prenotazioni-del-giorno-e-postazione")
+    public ResponseEntity<?> getPrenotazioniByDayAndPostazione(@RequestParam String data, @RequestParam Integer postazioneId) {
+        try {
+            LocalDate localDate = LocalDate.parse(data);
+            List<PrenotazioniDTO> prenotazioni = PrenotazioniService.getPrenotazioniByDayAndPostazione(localDate, postazioneId);
             return ResponseEntity.ok(prenotazioni);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
