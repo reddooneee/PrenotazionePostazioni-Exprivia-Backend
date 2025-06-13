@@ -92,6 +92,16 @@ public class PrenotazioniController {
         }
     }
 
+    @PutMapping("/admin/aggiornaPrenotazione/{id}")
+    public ResponseEntity<?> aggiornaPrenotazioniAdmin(@PathVariable Integer id, @RequestBody Map<String, Object> updates) {
+        try {
+            PrenotazioniDTO prenotazioniAggiornata = PrenotazioniService.updatePrenotazioni(id, updates, true);
+            return ResponseEntity.ok(prenotazioniAggiornata);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/eliminaPrenotazione/{id}")
     public ResponseEntity<String> eliminaPrenotazioni(@PathVariable Integer id) {
         try {

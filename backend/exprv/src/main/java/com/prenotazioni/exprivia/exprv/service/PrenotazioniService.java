@@ -163,12 +163,17 @@ public class PrenotazioniService {
      *
      * @param id      ID dell'utente da aggiornare
      * @param updates mappa dei campi da aggiornare
+     * @param isAdminAction indica se l'azione è stata effettuata dall'admin
      * @return UserDTO dell'utente aggiornato
      * @throws EntityNotFoundException se l'utente non esiste
      */
-    public PrenotazioniDTO updatePrenotazioni(Integer id, Map<String, Object> updates) {
+    public PrenotazioniDTO updatePrenotazioni(Integer id, Map<String, Object> updates, boolean isAdminAction) {
         Prenotazioni existingPrenotazioni = prenotazioniRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Prenotazione con ID " + id + " non trovata"));
+
+        // Store original state for email notification
+        stato_prenotazione originalState = existingPrenotazioni.getStato_prenotazione();
+        boolean wasChanged = false;
 
         if (updates.containsKey("id_prenotazioni")) {
             Integer newId = (Integer) updates.get("id_prenotazioni");
@@ -181,7 +186,8 @@ public class PrenotazioniService {
         updates.forEach((key, value) -> {
             switch (key) {
                 case "stato_prenotazione":
-                    existingPrenotazioni.setStato_prenotazione(stato_prenotazione.valueOf(value.toString()));
+                    stato_prenotazione newState = stato_prenotazione.valueOf(value.toString());
+                    existingPrenotazioni.setStato_prenotazione(newState);
                     break;
                 case "data_inizio":
                     if (value != null) {
@@ -261,16 +267,81 @@ public class PrenotazioniService {
         });
 
         Prenotazioni updatedPrenotazioni = prenotazioniRepository.save(existingPrenotazioni);
+        
+        // Send cancellation email if status changed to Annullata
+        if (originalState != stato_prenotazione.Annullata && 
+            updatedPrenotazioni.getStato_prenotazione() == stato_prenotazione.Annullata) {
+            
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String startDateTime = updatedPrenotazioni.getDataInizio().format(formatter);
+            String endDateTime = updatedPrenotazioni.getDataFine().format(formatter);
+            
+            if (isAdminAction) {
+                // Admin cancelled the booking
+                emailService.sendBookingCancelledByAdminEmail(
+                    updatedPrenotazioni.getUsers().getEmail(),
+                    updatedPrenotazioni.getUsers().getNome() + " " + updatedPrenotazioni.getUsers().getCognome(),
+                    updatedPrenotazioni.getStanze().getNome(),
+                    updatedPrenotazioni.getPostazione().getNomePostazione(),
+                    startDateTime,
+                    endDateTime
+                );
+                System.out.println("DEBUG - Email di annullamento admin inoltrata per: " + updatedPrenotazioni.getUsers().getEmail());
+            } else {
+                // User cancelled their own booking
+                emailService.sendBookingCancellationEmail(
+                    updatedPrenotazioni.getUsers().getEmail(),
+                    updatedPrenotazioni.getUsers().getNome() + " " + updatedPrenotazioni.getUsers().getCognome(),
+                    updatedPrenotazioni.getStanze().getNome(),
+                    updatedPrenotazioni.getPostazione().getNomePostazione(),
+                    startDateTime,
+                    endDateTime
+                );
+                System.out.println("DEBUG - Email di annullamento utente inoltrata per: " + updatedPrenotazioni.getUsers().getEmail());
+            }
+        }
+        
         return prenotazioniMapper.toDto(updatedPrenotazioni);
+    }
+
+    /**
+     * Overload del metodo updatePrenotazioni per backward compatibility
+     * Assume che l'azione non sia effettuata dall'admin
+     */
+    public PrenotazioniDTO updatePrenotazioni(Integer id, Map<String, Object> updates) {
+        return updatePrenotazioni(id, updates, false);
     }
 
     // Metodo Per Eliminare le prenotazioni
     public void eliminaPrenotazioni(Integer id) {
-        if (!prenotazioniRepository.existsById(id)) {
-            throw new EntityNotFoundException("Prenotazioni con ID " + id + " non trovata.");
-        } else {
-            prenotazioniRepository.deleteById(id);
-        }
+        // Retrieve booking details before deletion for email notification
+        Prenotazioni prenotazione = prenotazioniRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Prenotazioni con ID " + id + " non trovata."));
+
+        // Store details for email
+        String userEmail = prenotazione.getUsers().getEmail();
+        String userName = prenotazione.getUsers().getNome() + " " + prenotazione.getUsers().getCognome();
+        String roomName = prenotazione.getStanze().getNome();
+        String positionName = prenotazione.getPostazione().getNomePostazione();
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String startDateTime = prenotazione.getDataInizio().format(formatter);
+        String endDateTime = prenotazione.getDataFine().format(formatter);
+
+        // Delete the booking
+        prenotazioniRepository.deleteById(id);
+
+        // Send deletion email notification
+        emailService.sendBookingDeletedByAdminEmail(
+            userEmail,
+            userName,
+            roomName,
+            positionName,
+            startDateTime,
+            endDateTime
+        );
+        
+        System.out.println("DEBUG - Email di eliminazione admin inoltrata per: " + userEmail);
     }
 
     @Transactional(readOnly = true)

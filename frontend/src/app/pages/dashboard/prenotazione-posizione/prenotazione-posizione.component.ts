@@ -1165,6 +1165,9 @@ export class PrenotazionePosizioneComponent implements OnInit, OnDestroy {
   filterUsers(): void {
     if (!this.userSearchTerm) {
       this.filteredUsers = this.users;
+      // Clear selected user when search is empty
+      this.selectedUser = null;
+      this.bookingForm.patchValue({ userId: '' });
       return;
     }
 

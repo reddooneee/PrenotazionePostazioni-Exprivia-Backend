@@ -878,7 +878,12 @@ export class UserBookingsComponent implements OnInit, OnDestroy {
       stato_prenotazione: updatedStatus
     };
 
-    this.prenotazioneService.updatePrenotazione(prenotazioneId, updatedPrenotazione)
+    // Use admin endpoint if user is admin, otherwise use regular endpoint
+    const updateObservable = this.isAdmin 
+      ? this.prenotazioneService.updatePrenotazioneAdmin(prenotazioneId, updatedPrenotazione)
+      : this.prenotazioneService.updatePrenotazione(prenotazioneId, updatedPrenotazione);
+
+    updateObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

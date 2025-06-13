@@ -128,6 +128,19 @@ export class PrenotazioneService {
     }
 
     /**
+     * Aggiorna una prenotazione come admin
+     */
+    updatePrenotazioneAdmin(id: number, updates: Partial<Prenotazione>): Observable<Prenotazione> {
+        return from(this.axiosService.put<Prenotazione>(`${this.BASE_URL}/admin/aggiornaPrenotazione/${id}`, updates)).pipe(
+            catchError(error => {
+                console.error('Errore nell\'aggiornamento della prenotazione (admin):', error);
+                const message = error.response?.data?.message || 'Impossibile aggiornare la prenotazione';
+                return throwError(() => new Error(message));
+            })
+        );
+    }
+
+    /**
      * Elimina una prenotazione
      */
     deletePrenotazione(id: number): Observable<void> {
