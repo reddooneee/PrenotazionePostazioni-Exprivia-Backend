@@ -12,51 +12,15 @@
         </p>
       </div>
       <div class="flex items-center space-x-4">
-        <!-- Status Filter Buttons -->
-        <div class="flex items-center space-x-2">
-          <button
-            (click)="setStatusFilter('tutti')"
-            [class.bg-blue-600]="statusFilter === 'tutti'"
-            [class.text-white]="statusFilter === 'tutti'"
-            [class.bg-gray-100]="statusFilter !== 'tutti'"
-            [class.text-gray-700]="statusFilter !== 'tutti'"
-            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-blue-500 hover:text-white">
-            Tutti ({{ getStatusFilterCount('tutti') }})
-          </button>
-          <button
-            (click)="setStatusFilter('attive')"
-            [class.bg-green-600]="statusFilter === 'attive'"
-            [class.text-white]="statusFilter === 'attive'"
-            [class.bg-gray-100]="statusFilter !== 'attive'"
-            [class.text-gray-700]="statusFilter !== 'attive'"
-            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-green-500 hover:text-white">
-            Attive ({{ getStatusFilterCount('attive') }})
-          </button>
-          <button
-            (click)="setStatusFilter('scadute')"
-            [class.bg-orange-600]="statusFilter === 'scadute'"
-            [class.text-white]="statusFilter === 'scadute'"
-            [class.bg-gray-100]="statusFilter !== 'scadute'"
-            [class.text-gray-700]="statusFilter !== 'scadute'"
-            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-orange-500 hover:text-white">
-            Scadute ({{ getStatusFilterCount('scadute') }})
-          </button>
-          <button
-            (click)="setStatusFilter('annullate')"
-            [class.bg-red-600]="statusFilter === 'annullate'"
-            [class.text-white]="statusFilter === 'annullate'"
-            [class.bg-gray-100]="statusFilter !== 'annullate'"
-            [class.text-gray-700]="statusFilter !== 'annullate'"
-            class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-red-500 hover:text-white">
-            Annullate ({{ getStatusFilterCount('annullate') }})
-          </button>
-        </div>
         <button 
           (click)="loadPrenotazioni()"
           [disabled]="isLoading"
-          class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
-          <i class="fas fa-refresh mr-2" [class.fa-spin]="isLoading"></i>
-          Aggiorna
+          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200">
+          <svg *ngIf="!isLoading" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <div *ngIf="isLoading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          {{ isLoading ? 'Aggiornamento...' : 'Aggiorna' }}
         </button>
       </div>
     </div>
@@ -95,6 +59,46 @@
               </button>
               <i class="fas fa-search text-gray-400"></i>
             </div>
+          </div>
+
+          <!-- Status Filter Buttons -->
+          <div class="flex items-center space-x-2">
+            <button
+              (click)="setStatusFilter('tutti')"
+              [class.bg-blue-600]="statusFilter === 'tutti'"
+              [class.text-white]="statusFilter === 'tutti'"
+              [class.bg-gray-100]="statusFilter !== 'tutti'"
+              [class.text-gray-700]="statusFilter !== 'tutti'"
+              class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-blue-500 hover:text-white">
+              Tutti ({{ getStatusFilterCount('tutti') }})
+            </button>
+            <button
+              (click)="setStatusFilter('attive')"
+              [class.bg-green-600]="statusFilter === 'attive'"
+              [class.text-white]="statusFilter === 'attive'"
+              [class.bg-gray-100]="statusFilter !== 'attive'"
+              [class.text-gray-700]="statusFilter !== 'attive'"
+              class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-green-500 hover:text-white">
+              Attive ({{ getStatusFilterCount('attive') }})
+            </button>
+            <button
+              (click)="setStatusFilter('scadute')"
+              [class.bg-orange-600]="statusFilter === 'scadute'"
+              [class.text-white]="statusFilter === 'scadute'"
+              [class.bg-gray-100]="statusFilter !== 'scadute'"
+              [class.text-gray-700]="statusFilter !== 'scadute'"
+              class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-orange-500 hover:text-white">
+              Scadute ({{ getStatusFilterCount('scadute') }})
+            </button>
+            <button
+              (click)="setStatusFilter('annullate')"
+              [class.bg-red-600]="statusFilter === 'annullate'"
+              [class.text-white]="statusFilter === 'annullate'"
+              [class.bg-gray-100]="statusFilter !== 'annullate'"
+              [class.text-gray-700]="statusFilter !== 'annullate'"
+              class="px-3 py-1 text-sm font-medium rounded-full transition-colors duration-200 hover:bg-red-500 hover:text-white">
+              Annullate ({{ getStatusFilterCount('annullate') }})
+            </button>
           </div>
         </div>
         
@@ -186,11 +190,11 @@
         </div>
       </div>
 
-              <!-- Mobile Cards (visible on small screens) -->
-        <div class="block sm:hidden space-y-4" id="bookings-mobile">
-                  <div *ngFor="let prenotazione of paginatedPrenotazioni; trackBy: trackByPrenotazione" 
-             class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                     <div class="flex justify-between items-start mb-2">
+      <!-- Mobile Cards (visible on small screens) -->
+      <div class="block sm:hidden space-y-4" id="bookings-mobile">
+        <div *ngFor="let prenotazione of paginatedPrenotazioni; trackBy: trackByPrenotazione" 
+           class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+           <div class="flex justify-between items-start mb-2">
              <div class="flex-1">
                <div class="font-medium text-gray-900">
                  {{ formatDate(prenotazione.data_inizio, 'dd/MM/yyyy') }}
