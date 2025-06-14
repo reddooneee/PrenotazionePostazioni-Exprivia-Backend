@@ -163,18 +163,42 @@
 
               <!-- Azioni -->
               <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button 
-                  type="button"
-                  (click)="editUser(user)"
-                  class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 mr-2 cursor-pointer">
-                  Modifica
-                </button>
-                <button 
-                  type="button"
-                  (click)="deleteUser(user)"
-                  class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 cursor-pointer">
-                  Elimina
-                </button>
+                <div class="relative">
+                  <button 
+                    type="button"
+                    (click)="toggleDropdown(user.id_user!)"
+                    class="inline-flex items-center p-2 border border-transparent text-sm font-medium rounded text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-500 transition-colors duration-200"
+                    title="Azioni"
+                    [disabled]="!user.id_user"
+                    [attr.data-user-id]="user.id_user">
+                    <i class="fas fa-ellipsis-v text-sm"></i>
+                  </button>
+                  
+                  <!-- Dropdown Menu -->
+                  <div 
+                    *ngIf="openDropdownId === user.id_user && user.id_user"
+                    class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-10"
+                    style="top: 100%; transform: translateY(0); max-height: calc(100vh - 100%); overflow: visible;"
+                    [style.transform]="'translateY(' + (shouldOpenUpward(user.id_user) ? '-100%' : '0') + ')'">
+                    <div class="py-1">
+                      <button
+                        type="button"
+                        (click)="editUser(user)"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-edit mr-2"></i>
+                        Modifica
+                      </button>
+                      <button
+                        type="button"
+                        (click)="deleteUser(user)"
+                        [disabled]="loading$ | async"
+                        class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-trash mr-2"></i>
+                        Elimina
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </td>
             </tr>
 

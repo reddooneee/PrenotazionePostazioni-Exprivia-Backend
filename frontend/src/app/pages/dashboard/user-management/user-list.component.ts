@@ -2,6 +2,7 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  HostListener
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { LucideAngularModule } from "lucide-angular";
@@ -47,6 +48,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   searchTerm = "";
   private destroy$ = new Subject<void>();
   currentFilter: 'all' | 'admin' | 'user' = 'all';
+  openDropdownId: number | null = null;
 
   // Pagination properties
   currentPage = 1;
@@ -283,6 +285,44 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   getEndIndex(): number {
     return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
+  }
+
+  toggleDropdown(userId: number): void {
+    this.openDropdownId = this.openDropdownId === userId ? null : userId;
+  }
+
+  // Add click outside listener to close dropdown
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('[data-user-id]')) {
+      this.openDropdownId = null;
+    }
+  }
+
+  shouldOpenUpward(userId: number): boolean {
+    // Use a simple heuristic: check if we're in the last few rows of the table
+    const index = this.paginatedUsers.findIndex(u => u.id_user === userId);
+    const totalItems = this.paginatedUsers.length;
+    
+    // If we're in the last 2 items of the current page, open upward
+    if (index >= totalItems - 2) {
+      return true;
+    }
+
+    // Also check viewport position as backup
+    try {
+      const buttonElement = document.querySelector(`[data-user-id="${userId}"]`) as HTMLElement;
+      if (buttonElement) {
+        const rect = buttonElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        return rect.bottom > viewportHeight - 120; // 120px buffer for dropdown
+      }
+    } catch (error) {
+      // Fallback to index-based logic
+    }
+    
+    return false;
   }
 }
 
