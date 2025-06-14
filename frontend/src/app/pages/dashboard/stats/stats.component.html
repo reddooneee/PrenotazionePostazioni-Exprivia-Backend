@@ -206,10 +206,13 @@
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Trend Settimanale</h3>
       <div class="flex items-end justify-between h-40 space-x-2">
-        <div *ngFor="let day of stats.weeklyTrend" class="flex flex-col items-center flex-1" [ngClass]="{'hidden': isLoading}">
-          <div 
-            class="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-md transition-all duration-300 min-h-[4px]"
-            [style.height.%]="getWeeklyTrendHeight(day.count)">
+        <div *ngFor="let day of stats.weeklyTrend" class="flex flex-col items-center flex-1 h-full" [ngClass]="{'hidden': isLoading}">
+          <div class="flex flex-col justify-end h-full w-full">
+            <div
+              class="w-full"
+              [style.height]="getWeeklyTrendHeight(day.count) + '%'"
+              style="background: linear-gradient(to top, #3b82f6, #60a5fa);"
+            ></div>
           </div>
           <span class="text-xs text-gray-500 mt-2">{{ day.day }}</span>
           <span class="text-xs font-medium text-gray-700">{{ day.count }}</span>
@@ -227,10 +230,13 @@
     <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
       <h3 class="text-lg font-semibold text-gray-900 mb-4">Trend Mensile</h3>
       <div class="flex items-end justify-between h-40 space-x-2">
-        <div *ngFor="let month of stats.monthlyTrend" class="flex flex-col items-center flex-1" [ngClass]="{'hidden': isLoading}">
-          <div 
-            class="w-full bg-gradient-to-t from-purple-500 to-purple-400 rounded-t-md transition-all duration-300 min-h-[4px]"
-            [style.height.%]="getMonthlyTrendHeight(month.count)">
+        <div *ngFor="let month of stats.monthlyTrend" class="flex flex-col items-center flex-1 h-full" [ngClass]="{'hidden': isLoading}">
+          <div class="flex flex-col justify-end h-full w-full">
+            <div
+              class="w-full"
+              [style.height]="getMonthlyTrendHeight(month.count) + '%'"
+              style="background: linear-gradient(to top, #a78bfa, #c4b5fd);"
+            ></div>
           </div>
           <span class="text-xs text-gray-500 mt-2">{{ month.month }}</span>
           <span class="text-xs font-medium text-gray-700">{{ month.count }}</span>

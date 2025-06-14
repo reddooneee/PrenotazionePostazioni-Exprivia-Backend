@@ -224,13 +224,13 @@ export class StatsComponent implements OnInit, OnDestroy {
   }
 
   private calculateWeeklyTrend(prenotazioni: Prenotazione[]): { day: string; count: number }[] {
-    const days = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+    const days = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
     const trend = days.map(day => ({ day, count: 0 }));
     
     const today = new Date();
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-      const dayIndex = (date.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
+      const dayIndex = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
       
@@ -241,7 +241,13 @@ export class StatsComponent implements OnInit, OnDestroy {
       trend[dayIndex].count = count;
     }
     
-    return trend;
+    // Reorder the array to start from Monday
+    const reorderedTrend = [
+      ...trend.slice(1), // Monday to Saturday
+      trend[0] // Sunday
+    ];
+    
+    return reorderedTrend;
   }
 
   private calculateMonthlyTrend(prenotazioni: Prenotazione[]): { month: string; count: number }[] {
@@ -252,11 +258,12 @@ export class StatsComponent implements OnInit, OnDestroy {
     for (let i = 5; i >= 0; i--) {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59); // End of the month
       
-      const count = prenotazioni.filter(p => 
-        p.data_inizio >= monthStart && p.data_inizio < monthEnd
-      ).length;
+      const count = prenotazioni.filter(p => {
+        const bookingDate = this.parseDate(p.data_inizio);
+        return bookingDate >= monthStart && bookingDate <= monthEnd;
+      }).length;
       
       trend.push({
         month: months[date.getMonth()],
@@ -273,15 +280,23 @@ export class StatsComponent implements OnInit, OnDestroy {
 
   // Helper methods for template calculations
   getWeeklyTrendHeight(count: number): number {
-    if (this.stats.weeklyTrend.length === 0) return 0;
+    if (!this.stats.weeklyTrend || this.stats.weeklyTrend.length === 0) return 0;
     const maxCount = Math.max(...this.stats.weeklyTrend.map(d => d.count));
-    return maxCount > 0 ? (count / maxCount) * 100 : 0;
+    if (maxCount === 0) return 0;
+    if (count === 0) return 0;
+    const perc = Math.max((count / maxCount) * 100, 20);
+    console.log('[DEBUG] Weekly bar height for count', count, 'is', perc);
+    return perc;
   }
 
   getMonthlyTrendHeight(count: number): number {
-    if (this.stats.monthlyTrend.length === 0) return 0;
+    if (!this.stats.monthlyTrend || this.stats.monthlyTrend.length === 0) return 0;
     const maxCount = Math.max(...this.stats.monthlyTrend.map(m => m.count));
-    return maxCount > 0 ? (count / maxCount) * 100 : 0;
+    if (maxCount === 0) return 0;
+    if (count === 0) return 0;
+    const perc = Math.max((count / maxCount) * 100, 20);
+    console.log('[DEBUG] Monthly bar height for count', count, 'is', perc);
+    return perc;
   }
 
   getTodayPercentage(): number {
